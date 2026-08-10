@@ -1,13 +1,20 @@
-import React from 'react';
-import { ShieldCheck, Activity, Database, FileSpreadsheet, BarChart, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ShieldCheck, Activity, UploadCloud, Cpu, Layers, ArrowRight } from 'lucide-react';
+import '../../landing.css';
 
 export default function LandingPage({ onLogin, onRegister }) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   return (
     <div className="landing-page">
       {/* Navegación Superior */}
       <nav className="landing-nav">
         <div className="landing-logo">
-          <ShieldCheck size={28} color="#2563eb" />
+          <ShieldCheck size={28} color="#0ea5e9" />
           <span>BlisterCheck</span>
         </div>
         <div className="landing-nav-actions">
@@ -17,7 +24,7 @@ export default function LandingPage({ onLogin, onRegister }) {
       </nav>
 
       {/* Hero Section */}
-      <header className="landing-hero">
+      <header className="landing-hero" style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.8s ease' }}>
         <div className="hero-pill">
           <Activity size={16} />
           <span>Gestión Clínica Avanzada</span>
@@ -33,40 +40,45 @@ export default function LandingPage({ onLogin, onRegister }) {
           <button className="btn-solid-pro btn-large-pro" onClick={onRegister} style={{ display: 'flex', alignItems: 'center' }}>
             Comenzar a optimizar <ArrowRight size={18} style={{ marginLeft: '8px' }} />
           </button>
+          <button className="btn-ghost-pro btn-large-pro" onClick={onLogin}>
+            Ya tengo cuenta
+          </button>
         </div>
       </header>
 
-      {/* Características / Beneficios */}
+      {/* Características / Beneficios Interactivo */}
       <section className="landing-features">
-        <div className="features-grid">
+        <div className="features-header">
+          <h2>¿Cómo funciona BlisterCheck?</h2>
+          <p>Un flujo de trabajo diseñado para ahorrar horas de gestión en su farmacia o centro médico.</p>
+        </div>
+        
+        <div className="steps-grid">
           
-          <div className="feature-card-pro">
-            <div className="feature-icon-wrapper-pro">
-              <Database size={24} />
-            </div>
-            <h3>Catálogo Oficial AEMPS</h3>
+          <div className="step-card" style={{ animationDelay: '0.1s', animation: 'fadeUp 0.8s ease-out backwards' }}>
+            <div className="step-number">1</div>
+            <UploadCloud size={32} className="step-icon" />
+            <h3>Sube tu Guía</h3>
             <p>
-              Acceso indexado a miles de presentaciones farmacológicas. Consulte dosis, principios activos y verifique instantáneamente la aptitud de un medicamento para el envasado en SPD.
+              Importa directamente tu Guía Farmacoterapéutica en formato Excel. Sin plantillas estrictas, nuestro sistema escanea y localiza automáticamente los Códigos Nacionales (CN).
             </p>
           </div>
 
-          <div className="feature-card-pro">
-            <div className="feature-icon-wrapper-pro">
-              <FileSpreadsheet size={24} />
-            </div>
-            <h3>Optimizador de Guía Farmacoterapéutica</h3>
+          <div className="step-card" style={{ animationDelay: '0.3s', animation: 'fadeUp 0.8s ease-out backwards' }}>
+            <div className="step-number">2</div>
+            <Cpu size={32} className="step-icon" />
+            <h3>Análisis Inteligente</h3>
             <p>
-              Procese su guía en formato Excel. BlisterCheck evaluará los Códigos Nacionales (CN) y generará un informe de idoneidad, sugiriendo alternativas clínicas que eliminen la necesidad de reenvasado.
+              El motor de BlisterCheck cruza tus medicamentos con los datos oficiales de la AEMPS en tiempo real, identificando al instante cuáles requieren costosos procesos de reenvasado.
             </p>
           </div>
 
-          <div className="feature-card-pro">
-            <div className="feature-icon-wrapper-pro">
-              <BarChart size={24} />
-            </div>
-            <h3>Métricas y Trazabilidad</h3>
+          <div className="step-card" style={{ animationDelay: '0.5s', animation: 'fadeUp 0.8s ease-out backwards' }}>
+            <div className="step-number">3</div>
+            <Layers size={32} className="step-icon" />
+            <h3>Alternativas Listas</h3>
             <p>
-              Audite su inventario mediante paneles estadísticos rigurosos. Cuantifique la eficiencia de sus procesos de preparación y exporte los datos para el control de calidad interno.
+              Obtén un informe con alternativas clínicamente idénticas (mismo principio activo y dosis) que ya vienen preparadas de fábrica en formato blíster apto para SPD directo.
             </p>
           </div>
 
@@ -77,7 +89,7 @@ export default function LandingPage({ onLogin, onRegister }) {
       <footer className="landing-footer">
         <h2>Eficiencia y rigor clínico para su centro</h2>
         <p>
-          Una solución diseñada para el rigor de la gestión farmacéutica moderna.
+          Únase a los profesionales que ya han optimizado su flujo de trabajo.
         </p>
         <button className="btn-solid-pro btn-large-pro" onClick={onRegister}>
           Crear cuenta institucional

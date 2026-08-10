@@ -1,0 +1,262 @@
+/* =======================================================================
+   LANDING PAGE (V3 - PROFESIONAL E INTERACTIVA)
+   ======================================================================= */
+
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+.landing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.landing-nav-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.btn-ghost-pro {
+  background: transparent;
+  color: #475569;
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ghost-pro:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-solid-pro {
+  background-color: #0ea5e9;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2);
+}
+
+.btn-solid-pro:hover {
+  background-color: #0284c7;
+  box-shadow: 0 6px 12px -2px rgba(14, 165, 233, 0.3);
+  transform: translateY(-1px);
+}
+
+.landing-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 100px 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.hero-pill {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: fadeUp 0.6s ease-out;
+}
+
+.landing-hero h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 24px;
+  max-width: 900px;
+  color: #0f172a;
+  animation: fadeUp 0.7s ease-out;
+}
+
+.text-primary-pro {
+  color: #0ea5e9;
+}
+
+.landing-hero p {
+  font-size: 1.25rem;
+  color: #475569;
+  max-width: 700px;
+  margin-bottom: 48px;
+  line-height: 1.6;
+  animation: fadeUp 0.8s ease-out;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 20px;
+  animation: fadeUp 0.9s ease-out;
+}
+
+.btn-large-pro {
+  padding: 16px 36px;
+  font-size: 1.1rem;
+}
+
+/* Interactive Features Section */
+.landing-features {
+  padding: 100px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.features-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.features-header h2 {
+  font-size: 2.5rem;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.features-header p {
+  font-size: 1.1rem;
+  color: #64748b;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+}
+
+.step-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 40px;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.step-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  transform: translateY(-5px);
+  border-color: #bae6fd;
+}
+
+.step-number {
+  position: absolute;
+  top: -20px;
+  left: 40px;
+  width: 40px;
+  height: 40px;
+  background-color: #0ea5e9;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 6px rgba(14, 165, 233, 0.3);
+}
+
+.step-icon {
+  color: #0ea5e9;
+  margin-bottom: 24px;
+  margin-top: 10px;
+}
+
+.step-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.step-card p {
+  color: #475569;
+  line-height: 1.6;
+}
+
+.landing-footer {
+  text-align: center;
+  padding: 80px 20px;
+  background-color: #0f172a;
+  color: #ffffff;
+  margin-top: auto;
+}
+
+.landing-footer h2 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+}
+
+.landing-footer p {
+  color: #94a3b8;
+  margin-bottom: 40px;
+  font-size: 1.2rem;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-hero h1 {
+    font-size: 2.5rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  .landing-nav {
+    padding: 16px 20px;
+  }
+}
