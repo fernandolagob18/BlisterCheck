@@ -90,6 +90,14 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
   last_sync              TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Asegurarse de que el constraint UNIQUE existe aunque la tabla ya estuviera creada
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'blistercheck_catalogo_cn_key') THEN
+    ALTER TABLE blistercheck_catalogo ADD CONSTRAINT blistercheck_catalogo_cn_key UNIQUE (cn);
+  END IF;
+END $$;
+
 -- Tabla 2: Clasificaciones SDMDU del usuario (NUNCA tocada por el cron)
 DROP TABLE IF EXISTS blistercheck_clasificacion CASCADE;
 CREATE TABLE IF NOT EXISTS blistercheck_clasificacion (
