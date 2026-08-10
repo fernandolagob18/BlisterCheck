@@ -197,13 +197,16 @@ export async function getClasificacion(cn) {
  * Devuelve el registro guardado (incluyendo updated_at) para refrescar la UI.
  */
 export async function saveClasificacion(cn, clasificacion) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesión para guardar clasificaciones.");
+
   // Pick explícito de columnas conocidas para evitar errores si el form tiene campos extra
   const payload = {
     cn,
+    user_id:               user.id,
     requiere_reenvasado:   clasificacion.requiere_reenvasado   ?? null,
     requiere_reetiquetado: clasificacion.requiere_reetiquetado ?? null,
     apto_sdmdu_blister:    clasificacion.apto_sdmdu_blister    ?? null,
-    solo_envase_clinico:   clasificacion.solo_envase_clinico   ?? false,
     en_mi_farmacia:        clasificacion.en_mi_farmacia        ?? false,
     notas:                 clasificacion.notas                 ?? null,
     updated_at:            new Date().toISOString(),
@@ -211,7 +214,7 @@ export async function saveClasificacion(cn, clasificacion) {
 
   const { data, error } = await supabase
     .from(CLASIFICACION_TABLE)
-    .upsert(payload, { onConflict: 'cn' })
+    .upsert(payload, { onConflict: 'cn,user_id' })
     .select('*')
     .single();
 
@@ -359,7 +362,6 @@ export async function getExportData(modo = 'clasificados') {
     requiere_reenvasado,
     requiere_reetiquetado,
     apto_sdmdu_blister,
-    solo_envase_clinico,
     en_mi_farmacia,
     notas,
     fecha_clasificacion,

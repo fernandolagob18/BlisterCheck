@@ -74,7 +74,7 @@ $$;
 -- Tabla 1: Catálogo completo de medicamentos comercializados (sincronizado regularmente)
 CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
   nregistro              TEXT PRIMARY KEY,
-  cn                     TEXT,
+  cn                     TEXT UNIQUE,
   nombre                 TEXT NOT NULL,
   laboratorio            TEXT,
   dosis                  TEXT,
@@ -91,16 +91,18 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
 );
 
 -- Tabla 2: Clasificaciones SDMDU del usuario (NUNCA tocada por el cron)
+DROP TABLE IF EXISTS blistercheck_clasificacion CASCADE;
 CREATE TABLE IF NOT EXISTS blistercheck_clasificacion (
-  nregistro                TEXT PRIMARY KEY
-                           REFERENCES blistercheck_catalogo(nregistro) ON DELETE CASCADE,
+  cn                       TEXT REFERENCES blistercheck_catalogo(cn) ON DELETE CASCADE,
+  user_id                  UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   requiere_reenvasado      BOOLEAN DEFAULT NULL,
   requiere_reetiquetado    BOOLEAN DEFAULT NULL,
   apto_sdmdu_blister       BOOLEAN DEFAULT NULL,
   en_mi_farmacia           BOOLEAN DEFAULT FALSE,
   notas                    TEXT,
   fecha_clasificacion      TIMESTAMPTZ DEFAULT NOW(),
-  updated_at               TIMESTAMPTZ DEFAULT NOW()
+  updated_at               TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (cn, user_id)
 );
 
 -- Índices para búsqueda eficiente
@@ -127,7 +129,7 @@ CREATE POLICY "Auth read catalogo" ON blistercheck_catalogo
 
 DROP POLICY IF EXISTS "Auth all clasificacion" ON blistercheck_clasificacion;
 CREATE POLICY "Auth all clasificacion" ON blistercheck_clasificacion
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+  FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- Función para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_blistercheck_updated_at()
