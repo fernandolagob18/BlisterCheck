@@ -72,16 +72,11 @@ export default function Profile({ onVolver }) {
       {/* Encabezado Superior */}
       <header className="bc-header-bar">
         <div className="bc-header-bar__left">
-          <button className="bc-menu-btn" style={{ display: 'flex' }} onClick={onVolver} title="Volver a la aplicación">
+          <button className="bc-profile-back-btn" onClick={onVolver} title="Volver a BlisterCheck">
             <ArrowLeft size={18} />
-          </button>
-          <h1 className="bc-header-title">Perfil Profesional de Usuario</h1>
-        </div>
-        <div className="bc-header-bar__right">
-          <button className="bc-nav-btn" onClick={onVolver}>
-            <ArrowLeft size={16} />
             <span>Volver a BlisterCheck</span>
           </button>
+          <h1 className="bc-header-title">Perfil de usuario</h1>
         </div>
       </header>
 

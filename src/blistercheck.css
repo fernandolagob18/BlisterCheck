@@ -334,9 +334,28 @@
   transition: opacity 0.15s ease;
 }
 
+.bc-sidebar.collapsed .bc-sidebar__user {
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .bc-sidebar.collapsed .bc-user-card {
   justify-content: center;
-  padding: 0.5rem;
+  align-items: center;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  border-radius: var(--radius-full);
+}
+
+.bc-sidebar.collapsed .bc-user-avatar {
+  margin: 0;
+  width: 34px;
+  height: 34px;
+  font-size: 0.9rem;
 }
 
 .bc-sidebar.collapsed .bc-nav-item {
@@ -1675,6 +1694,30 @@
 .bc-profile-page {
   background-color: var(--color-bg);
   min-height: 100vh;
+}
+
+.bc-profile-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.bc-profile-back-btn:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-pastel);
+  transform: translateX(-3px);
+  box-shadow: var(--shadow-md);
 }
 
 .bc-profile-content {
