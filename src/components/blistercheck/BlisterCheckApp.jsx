@@ -1,5 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ShieldCheck, BarChart2, Download, User } from 'lucide-react';
+import { 
+  ShieldCheck, 
+  BarChart2, 
+  Download, 
+  User, 
+  Search, 
+  BookOpen, 
+  Menu, 
+  X, 
+  ChevronLeft, 
+  ChevronRight,
+  Sparkles
+} from 'lucide-react';
 import MedicamentoBuscador from './MedicamentoBuscador';
 import MedicamentoDetalle from './MedicamentoDetalle';
 import BlisterCheckStats from './BlisterCheckStats';
@@ -10,12 +22,16 @@ import { useAuth } from '../../contexts/AuthContext';
 
 function BlisterCheckApp({ onGoToProfile }) {
   const { profile } = useAuth();
-  const [vistaActiva, setVistaActiva] = useState('search'); // 'search' | 'detail' | 'stats'
+  const [vistaActiva, setVistaActiva] = useState('search'); // 'search' | 'detail' | 'stats' | 'optimizer'
   const [medicamentoSeleccionado, setMedicamentoSeleccionado] = useState(null);
   const [clasificacionActual, setClasificacionActual] = useState(null);
   const [desabastecimientoActual, setDesabastecimientoActual] = useState(null);
   const [catalogInfo, setCatalogInfo] = useState({ totalCatalogo: 0, totalClasificados: 0, enMiFarmacia: 0, ultimaSync: null });
   const [showExport, setShowExport] = useState(false);
+  
+  // Estado para el menú lateral (colapsado en desktop / abierto en móvil)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Cargar info del catálogo al montar
   useEffect(() => {
@@ -30,8 +46,6 @@ function BlisterCheckApp({ onGoToProfile }) {
     setDesabastecimientoActual(null);
     setVistaActiva('detail');
 
-    // Guard contra race condition: si el usuario cambia de medicamento rápido,
-    // solo aplicamos la respuesta de la última selección.
     let isCurrent = true;
     try {
       const [clas, desab] = await Promise.all([
@@ -84,102 +98,176 @@ function BlisterCheckApp({ onGoToProfile }) {
     setDesabastecimientoActual(null);
   }, []);
 
+  const handleNavClick = (vista) => {
+    setVistaActiva(vista);
+    if (vista !== 'detail') setMedicamentoSeleccionado(null);
+    setMobileSidebarOpen(false); // Cerrar menú en móvil tras navegar
+  };
+
+  // Obtener el título dinámico del encabezado
+  const getHeaderTitle = () => {
+    switch (vistaActiva) {
+      case 'search': return 'Catálogo de Medicamentos';
+      case 'optimizer': return 'Optimizador de Guía Terapéutica';
+      case 'stats': return 'Panel de Estadísticas';
+      case 'detail': return medicamentoSeleccionado?.nombre || 'Detalle del Medicamento';
+      default: return 'BlisterCheck';
+    }
+  };
+
   return (
     <div className="bc-app">
-      {/* Barra superior */}
-      <div className="bc-topbar glass-panel">
-        <div className="bc-topbar__left">
-          <div className="bc-logo">
-            <ShieldCheck size={22} className="bc-logo__icon" />
+      {/* Backdrop overlay para dispositivos móviles */}
+      <div 
+        className={`bc-sidebar-backdrop ${mobileSidebarOpen ? 'active' : ''}`} 
+        onClick={() => setMobileSidebarOpen(false)}
+      />
+
+      {/* Menú Lateral Desplegable (Sidebar) */}
+      <aside className={`bc-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
+        {/* Header del Sidebar */}
+        <div className="bc-sidebar__header">
+          <div className="bc-logo" onClick={() => handleNavClick('search')}>
+            <div className="bc-logo__badge">
+              <ShieldCheck size={20} />
+            </div>
             <span className="bc-logo__text">BlisterCheck</span>
           </div>
-          {/* Profile / Saludo */}
-          <button className="bc-back-btn" onClick={onGoToProfile} title="Ver Perfil" style={{ marginLeft: '15px' }}>
-            <User size={18} />
-            <span>Hola, {profile?.nombre || 'Usuario'}</span>
+          
+          <button 
+            className="bc-sidebar__toggle" 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? 'Expandir Menú' : 'Colapsar Menú'}
+          >
+            {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
         </div>
 
-        {/* Info del catálogo */}
-        <div className="bc-topbar__stats">
-          {catalogInfo.totalCatalogo > 0 && (
-            <>
-              <span className="bc-stat-pill">
-                <span className="bc-stat-num">{catalogInfo.totalCatalogo.toLocaleString('es-ES')}</span>
-                <span className="bc-stat-label">en catálogo</span>
+        {/* Perfil de Usuario */}
+        <div className="bc-sidebar__user">
+          <div className="bc-user-card" onClick={onGoToProfile} title="Ver Perfil de Usuario">
+            <div className="bc-user-avatar">
+              {(profile?.nombre || profile?.email || 'U')[0].toUpperCase()}
+            </div>
+            <div className="bc-user-info">
+              <span className="bc-user-name">{profile?.nombre || 'Farmacéutico'}</span>
+              <span className="bc-user-role">Ver perfil</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Links de Navegación Principal */}
+        <nav className="bc-sidebar__nav">
+          <div className="bc-sidebar__group-title">Módulos Clínicos</div>
+          
+          <button
+            className={`bc-nav-item ${vistaActiva === 'search' || vistaActiva === 'detail' ? 'active' : ''}`}
+            onClick={() => handleNavClick('search')}
+          >
+            <span className="bc-nav-item__icon"><Search size={18} /></span>
+            <span className="bc-nav-item__label">Catálogo CIMA</span>
+          </button>
+
+          <button
+            className={`bc-nav-item ${vistaActiva === 'optimizer' ? 'active' : ''}`}
+            onClick={() => handleNavClick('optimizer')}
+          >
+            <span className="bc-nav-item__icon"><BookOpen size={18} /></span>
+            <span className="bc-nav-item__label">Optimizador Guía</span>
+          </button>
+
+          <button
+            className={`bc-nav-item ${vistaActiva === 'stats' ? 'active' : ''}`}
+            onClick={() => handleNavClick('stats')}
+          >
+            <span className="bc-nav-item__icon"><BarChart2 size={18} /></span>
+            <span className="bc-nav-item__label">Estadísticas</span>
+          </button>
+
+          <div className="bc-sidebar__group-title" style={{ marginTop: '0.75rem' }}>Herramientas</div>
+
+          <button
+            className="bc-nav-item"
+            onClick={() => { setShowExport(true); setMobileSidebarOpen(false); }}
+          >
+            <span className="bc-nav-item__icon"><Download size={18} /></span>
+            <span className="bc-nav-item__label">Exportar Registro</span>
+          </button>
+        </nav>
+
+        {/* Resumen del Catálogo en Pastel */}
+        {!sidebarCollapsed && catalogInfo.totalCatalogo > 0 && (
+          <div className="bc-sidebar__stats">
+            <div className="bc-sidebar-stat">
+              <span className="bc-sidebar-stat__label">Catálogo CIMA</span>
+              <span className="bc-sidebar-stat__pill bc-sidebar-stat__pill--blue">
+                {catalogInfo.totalCatalogo.toLocaleString('es-ES')}
               </span>
-              <span className="bc-stat-pill bc-stat-pill--green">
-                <span className="bc-stat-num">{catalogInfo.totalClasificados}</span>
-                <span className="bc-stat-label">clasificados</span>
+            </div>
+            <div className="bc-sidebar-stat">
+              <span className="bc-sidebar-stat__label">Clasificados</span>
+              <span className="bc-sidebar-stat__pill bc-sidebar-stat__pill--mint">
+                {catalogInfo.totalClasificados}
               </span>
-              <span className="bc-stat-pill bc-stat-pill--blue">
-                <span className="bc-stat-num">{catalogInfo.enMiFarmacia}</span>
-                <span className="bc-stat-label">en mi farmacia</span>
-              </span>
-            </>
+            </div>
+          </div>
+        )}
+
+        {/* Pie del Sidebar */}
+        <div className="bc-sidebar__footer">
+          <span>BlisterCheck v2.4 • SDMDU</span>
+        </div>
+      </aside>
+
+      {/* Área Principal de la Aplicación */}
+      <div className="bc-main-wrapper">
+        {/* Header Superior Compacto */}
+        <header className="bc-header-bar">
+          <div className="bc-header-bar__left">
+            <button 
+              className="bc-menu-btn" 
+              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+              title="Abrir Menú"
+            >
+              {mobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <h1 className="bc-header-title">{getHeaderTitle()}</h1>
+          </div>
+
+          <div className="bc-header-bar__right">
+            <button className="bc-header-profile-btn" onClick={onGoToProfile}>
+              <User size={16} />
+              <span>{profile?.nombre || 'Perfil'}</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Contenido Dinámico de la Vista */}
+        <main className="bc-content">
+          {vistaActiva === 'search' && (
+            <MedicamentoBuscador onSelectMedicamento={handleSelectMedicamento} />
           )}
-          {catalogInfo.totalCatalogo === 0 && (
-            <span className="bc-empty-hint">Catálogo vacío — ejecuta la sincronización manual</span>
+          
+          {vistaActiva === 'optimizer' && (
+            <GuiaOptimizer />
           )}
-        </div>
 
-        {/* Acciones */}
-        <div className="bc-topbar__actions">
-          <button
-            className={`bc-nav-btn ${vistaActiva === 'search' ? 'active' : ''}`}
-            onClick={() => { setVistaActiva('search'); setMedicamentoSeleccionado(null); }}
-          >
-            Catálogo
-          </button>
-          <button
-            className={`bc-nav-btn ${vistaActiva === 'stats' ? 'active' : ''}`}
-            onClick={() => setVistaActiva('stats')}
-          >
-            <BarChart2 size={15} />
-            Estadísticas
-          </button>
-          <button
-            className="bc-nav-btn bc-nav-btn--export"
-            onClick={() => setShowExport(true)}
-          >
-            <Download size={15} />
-            Exportar
-          </button>
-          <button
-            className={`bc-nav-btn ${vistaActiva === 'optimizer' ? 'active' : ''}`}
-            onClick={() => setVistaActiva('optimizer')}
-          >
-            <BarChart2 size={15} />
-            Optimizador
-          </button>
-        </div>
-      </div>
+          {vistaActiva === 'detail' && medicamentoSeleccionado && (
+            <MedicamentoDetalle
+              key={medicamentoSeleccionado.cn}
+              medicamento={medicamentoSeleccionado}
+              clasificacion={clasificacionActual}
+              desabastecimiento={desabastecimientoActual}
+              onClasificacionGuardada={handleClasificacionGuardada}
+              onVolver={handleVolverABusqueda}
+              onSelectAlternativa={handleSelectMedicamento}
+            />
+          )}
 
-      {/* Contenido principal */}
-      <div className="bc-content">
-        {vistaActiva === 'search' && (
-          <MedicamentoBuscador onSelectMedicamento={handleSelectMedicamento} />
-        )}
-        
-        {vistaActiva === 'optimizer' && (
-          <GuiaOptimizer />
-        )}
-
-        {vistaActiva === 'detail' && medicamentoSeleccionado && (
-          <MedicamentoDetalle
-            key={medicamentoSeleccionado.cn}
-            medicamento={medicamentoSeleccionado}
-            clasificacion={clasificacionActual}
-            desabastecimiento={desabastecimientoActual}
-            onClasificacionGuardada={handleClasificacionGuardada}
-            onVolver={handleVolverABusqueda}
-            onSelectAlternativa={handleSelectMedicamento}
-          />
-        )}
-
-        {vistaActiva === 'stats' && (
-          <BlisterCheckStats />
-        )}
+          {vistaActiva === 'stats' && (
+            <BlisterCheckStats />
+          )}
+        </main>
       </div>
 
       {/* Modal de exportación */}
@@ -191,3 +279,4 @@ function BlisterCheckApp({ onGoToProfile }) {
 }
 
 export default BlisterCheckApp;
+
