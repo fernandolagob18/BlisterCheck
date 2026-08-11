@@ -223,23 +223,6 @@ function BlisterCheckApp({ onGoToProfile }) {
           </button>
         </nav>
 
-        {/* Resumen del Catálogo en Pastel */}
-        {!sidebarCollapsed && catalogInfo.totalCatalogo > 0 && (
-          <div className="bc-sidebar__stats">
-            <div className="bc-sidebar-stat">
-              <span className="bc-sidebar-stat__label">Catálogo CIMA</span>
-              <span className="bc-sidebar-stat__pill bc-sidebar-stat__pill--blue">
-                {catalogInfo.totalCatalogo.toLocaleString('es-ES')}
-              </span>
-            </div>
-            <div className="bc-sidebar-stat">
-              <span className="bc-sidebar-stat__label">Clasificados</span>
-              <span className="bc-sidebar-stat__pill bc-sidebar-stat__pill--mint">
-                {catalogInfo.totalClasificados}
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Pie del Sidebar */}
         <div className="bc-sidebar__footer">
@@ -292,14 +275,6 @@ function BlisterCheckApp({ onGoToProfile }) {
           </div>
 
           <div className="bc-header-bar__right">
-            <button 
-              className="bc-nav-btn bc-nav-btn--export"
-              onClick={() => setShowExport(true)}
-              title="Exportar Registro BlisterCheck"
-            >
-              <Download size={15} />
-              <span>Exportar</span>
-            </button>
           </div>
         </header>
 

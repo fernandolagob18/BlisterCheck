@@ -69,20 +69,17 @@ export default function Profile({ onVolver }) {
 
   return (
     <div className="bc-app bc-profile-page">
-      {/* Encabezado Superior */}
-      <header className="bc-header-bar">
-        <div className="bc-header-bar__left">
-          <button className="bc-profile-back-btn" onClick={onVolver} title="Volver a BlisterCheck">
-            <ArrowLeft size={18} />
-            <span>Volver a BlisterCheck</span>
-          </button>
-          <h1 className="bc-header-title">Perfil de usuario</h1>
-        </div>
-      </header>
-
       {/* Contenido Principal del Perfil */}
       <main className="bc-content bc-profile-content">
         <div className="bc-profile-wrapper">
+          {/* Encabezado Superior (ahora integrado en el contenedor central) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+            <button className="bc-profile-back-btn" onClick={onVolver} title="Volver a BlisterCheck">
+              <ArrowLeft size={18} />
+              <span>Volver a BlisterCheck</span>
+            </button>
+            <h1 className="bc-header-title" style={{ margin: 0 }}>Perfil de usuario</h1>
+          </div>
           
           {/* Banner / Tarjeta de Presentación */}
           <div className="bc-profile-hero-card glass-panel">
@@ -96,10 +93,6 @@ export default function Profile({ onVolver }) {
 
               <div className="bc-profile-hero__info">
                 <h2 className="bc-profile-hero__name">{profile?.nombre || 'Usuario Farmacéutico'}</h2>
-                <p className="bc-profile-hero__role">
-                  <Award size={14} />
-                  <span>Especialista SDMDU • Farmacia Clínica</span>
-                </p>
                 <div className="bc-profile-hero__tags">
                   <span className="bc-profile-tag bc-profile-tag--mint">
                     <CheckCircle size={12} /> Cuenta Verificada
