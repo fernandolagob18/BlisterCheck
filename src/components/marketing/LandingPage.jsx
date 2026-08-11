@@ -335,18 +335,18 @@ export default function LandingPage({ onLogin, onRegister }) {
             {activeSimTab === 'stats' && (
               <div className="demo-card-container">
                 <h3 style={{ margin: '0 0 16px', fontSize: '1.2rem', color: '#0b192c' }}>Cuadro de Mando de Idoneidad en Stock</h3>
-                <div style={{ display: 'grid', grid-template-columns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                   <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                     <span style={{ fontSize: '2rem', fontWeight: 900, color: '#059669' }}>78.4%</span>
                     <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>Apto Blíster de Fábrica</p>
                   </div>
                   <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2rem', fontWeight 900, color: '#d97706' }}>18.2%</span>
+                    <span style={{ fontSize: '2rem', fontWeight: 900, color: '#d97706' }}>18.2%</span>
                     <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>Reenvasado Interno</p>
                   </div>
                   <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2rem', fontWeight 900, color: '#0284c7' }}>3.4%</span>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight 700 }}>Reetiquetado Unidosis</p>
+                    <span style={{ fontSize: '2rem', fontWeight: 900, color: '#0284c7' }}>3.4%</span>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>Reetiquetado Unidosis</p>
                   </div>
                 </div>
               </div>
