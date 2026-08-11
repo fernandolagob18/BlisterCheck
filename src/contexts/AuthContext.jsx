@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authNotification, setAuthNotification] = useState(null);
 
   useEffect(() => {
     let subscription = null;
@@ -22,6 +23,16 @@ export function AuthProvider({ children }) {
           return;
         }
 
+        // Comprobar si hay errores en el hash de la URL (ej: token de confirmación caducado)
+        if (typeof window !== 'undefined' && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const errorDesc = hashParams.get('error_description');
+          if (errorDesc) {
+            setAuthNotification({ type: 'error', message: decodeURIComponent(errorDesc.replace(/\+/g, ' ')) });
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+        }
+
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Error fetching session:', error);
@@ -32,12 +43,18 @@ export function AuthProvider({ children }) {
         }
 
         const { data: listenerData } = supabase.auth.onAuthStateChange(
-          async (_event, session) => {
+          async (event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
             
             if (session?.user) {
               await loadProfile(session.user.id);
+              if (event === 'SIGNED_IN') {
+                setAuthNotification({ type: 'success', message: '¡Sesión iniciada correctamente!' });
+                if (typeof window !== 'undefined' && window.location.hash) {
+                  window.history.replaceState(null, '', window.location.pathname);
+                }
+              }
             } else {
               setProfile(null);
             }
@@ -68,11 +85,15 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const clearAuthNotification = () => setAuthNotification(null);
+
   const value = {
     user,
     session,
     profile,
     loading,
+    authNotification,
+    clearAuthNotification,
     setProfile
   };
 

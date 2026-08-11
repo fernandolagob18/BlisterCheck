@@ -13,10 +13,12 @@ export const authService = {
 
   // Register a new user
   async register(email, password, nombre, hospital) {
+    const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: redirectTo,
         data: {
           nombre,
           hospital

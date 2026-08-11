@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { authService } from '../../services/authService';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, LogIn } from 'lucide-react';
 
-export default function Register({ onSwitchToLogin }) {
+export default function Register({ onSwitchToLogin, onGoToHome }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,12 +42,19 @@ export default function Register({ onSwitchToLogin }) {
     return (
       <div className="bc-auth-container">
         <div className="bc-auth-card glass-panel text-center">
-          <ShieldCheck size={48} className="bc-auth-icon bc-success-color mx-auto" />
+          <ShieldCheck size={48} className="bc-auth-icon bc-success-color mx-auto" style={{ color: '#10b981' }} />
           <h2>¡Registro Completado!</h2>
-          <p>Revisa tu correo para confirmar la cuenta (si es necesario) o inicia sesión.</p>
-          <button className="bc-btn-primary mt-4" onClick={onSwitchToLogin}>
-            Ir a Iniciar Sesión
-          </button>
+          <p style={{ marginTop: '10px', color: '#64748b' }}>Revisa tu correo para confirmar la cuenta (si es necesario) o inicia sesión directamente.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '24px' }}>
+            <button className="bc-btn-primary" onClick={onSwitchToLogin} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <LogIn size={16} /> Ir a Iniciar Sesión
+            </button>
+            {onGoToHome && (
+              <button className="bc-btn-secondary" onClick={onGoToHome} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', padding: '10px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+                <ArrowLeft size={16} /> Volver al Inicio
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -128,13 +135,18 @@ export default function Register({ onSwitchToLogin }) {
           </button>
         </form>
 
-        <div className="bc-auth-footer">
-          <p>
+        <div className="bc-auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+          <p style={{ margin: 0 }}>
             ¿Ya tienes cuenta?{' '}
             <button className="bc-btn-link" onClick={onSwitchToLogin}>
               Inicia sesión
             </button>
           </p>
+          {onGoToHome && (
+            <button className="bc-btn-link" onClick={onGoToHome} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: '#64748b' }}>
+              <ArrowLeft size={14} /> Volver al Inicio
+            </button>
+          )}
         </div>
       </div>
     </div>

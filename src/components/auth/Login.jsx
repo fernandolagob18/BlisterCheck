@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { authService } from '../../services/authService';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, ArrowLeft } from 'lucide-react';
 
-export default function Login({ onSwitchToRegister }) {
+export default function Login({ onSwitchToRegister, onGoToHome }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -63,13 +63,18 @@ export default function Login({ onSwitchToRegister }) {
           </button>
         </form>
 
-        <div className="bc-auth-footer">
-          <p>
+        <div className="bc-auth-footer" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+          <p style={{ margin: 0 }}>
             ¿No tienes cuenta?{' '}
             <button className="bc-btn-link" onClick={onSwitchToRegister}>
               Regístrate aquí
             </button>
           </p>
+          {onGoToHome && (
+            <button className="bc-btn-link" onClick={onGoToHome} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', color: '#64748b' }}>
+              <ArrowLeft size={14} /> Volver al Inicio
+            </button>
+          )}
         </div>
       </div>
     </div>

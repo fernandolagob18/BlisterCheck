@@ -35,9 +35,9 @@ function AppContent() {
     case 'landing':
       return <LandingPage onLogin={() => setCurrentView('login')} onRegister={() => setCurrentView('register')} />;
     case 'login':
-      return <Login onSwitchToRegister={() => setCurrentView('register')} />;
+      return <Login onSwitchToRegister={() => setCurrentView('register')} onGoToHome={() => setCurrentView('landing')} />;
     case 'register':
-      return <Register onSwitchToLogin={() => setCurrentView('login')} />;
+      return <Register onSwitchToLogin={() => setCurrentView('login')} onGoToHome={() => setCurrentView('landing')} />;
     case 'profile':
       return <Profile onVolver={() => setCurrentView('app')} />;
     case 'app':
