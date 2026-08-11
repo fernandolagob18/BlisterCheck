@@ -607,7 +607,7 @@
 }
 
 .bc-menu-btn {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   background: var(--color-surface-hover);
@@ -2490,5 +2490,167 @@
   }
   .hero-actions {
     flex-direction: column;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OPTIMIZACIÓN MOBILE & SMARTPHONE UX (iOS / Android / Tabletas)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* --- Contenedor de Tablas con Desplazamiento Táctil --- */
+.bc-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+}
+
+@media (max-width: 768px) {
+  /* 1. Prevención de Zoom Automático en iOS Safari (Font-size >= 16px) */
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea,
+  .bc-search-input,
+  .bc-filtro-input,
+  .bc-filtro-select,
+  .bc-custom-select-search-input {
+    font-size: 16px !important;
+  }
+
+  /* 2. Áreas táctiles mínimas de 44px para dedos */
+  .bc-menu-btn {
+    display: flex !important;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .bc-btn-buscar,
+  .bc-btn-limpiar,
+  .bc-avanzado-toggle,
+  .bc-custom-select-trigger {
+    min-height: 44px;
+  }
+
+  /* 3. Cajón Lateral Móvil (Drawer) */
+  .bc-sidebar {
+    width: min(85vw, 300px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    box-shadow: 8px 0 30px rgba(15, 23, 42, 0.25);
+  }
+
+  .bc-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .bc-sidebar-backdrop {
+    z-index: 999;
+  }
+
+  /* 4. Encabezado y Navegación Principal */
+  .bc-header-bar {
+    padding: 0.75rem 1rem;
+  }
+
+  .bc-header-title {
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .bc-content {
+    padding: 1rem 0.85rem;
+  }
+
+  /* 5. Buscador y Filtros */
+  .bc-search-header {
+    padding: 1rem;
+  }
+
+  .bc-search-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .bc-search-bar {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .bc-avanzado-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bc-avanzado-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .bc-avanzado-actions {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .bc-btn-buscar, .bc-btn-limpiar {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 6. Grilla de Medicamentos en 1 Columna */
+  .bc-resultados-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .bc-med-card {
+    padding: 1rem;
+  }
+
+  .bc-med-card__badges {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  /* 7. Vista de Detalle de Medicamento */
+  .bc-detalle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bc-detalle-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .bc-tristate-group {
+    flex-direction: column;
+  }
+
+  .bc-tristate-btn {
+    width: 100%;
+    min-height: 46px;
+    justify-content: center;
+  }
+
+  /* 8. Diálogos Modales */
+  .bc-modal-container {
+    width: 94vw;
+    max-height: 90vh;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
   }
 }

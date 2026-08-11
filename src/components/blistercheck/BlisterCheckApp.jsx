@@ -242,7 +242,13 @@ function BlisterCheckApp({ onGoToProfile }) {
           <div className="bc-header-bar__left">
             <button 
               className="bc-menu-btn" 
-              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+              onClick={() => {
+                if (window.innerWidth <= 768) {
+                  setMobileSidebarOpen(prev => !prev);
+                } else {
+                  setSidebarCollapsed(prev => !prev);
+                }
+              }}
               title="Abrir Menú"
             >
               {mobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
