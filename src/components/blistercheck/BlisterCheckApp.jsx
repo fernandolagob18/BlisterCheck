@@ -127,20 +127,32 @@ function BlisterCheckApp({ onGoToProfile }) {
       <aside className={`bc-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
         {/* Header del Sidebar */}
         <div className="bc-sidebar__header">
-          <div className="bc-logo" onClick={() => handleNavClick('search')}>
-            <div className="bc-logo__badge">
-              <ShieldCheck size={20} />
-            </div>
-            <span className="bc-logo__text">BlisterCheck</span>
-          </div>
-          
-          <button 
-            className="bc-sidebar__toggle" 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={sidebarCollapsed ? 'Expandir Menú' : 'Colapsar Menú'}
-          >
-            {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
+          {!sidebarCollapsed ? (
+            <>
+              <div className="bc-logo" onClick={() => handleNavClick('search')}>
+                <div className="bc-logo__badge">
+                  <ShieldCheck size={20} />
+                </div>
+                <span className="bc-logo__text">BlisterCheck</span>
+              </div>
+              
+              <button 
+                className="bc-sidebar__toggle" 
+                onClick={() => setSidebarCollapsed(true)}
+                title="Colapsar Menú"
+              >
+                <ChevronLeft size={18} />
+              </button>
+            </>
+          ) : (
+            <button 
+              className="bc-sidebar__toggle bc-sidebar__toggle--centered" 
+              onClick={() => setSidebarCollapsed(false)}
+              title="Expandir Menú"
+            >
+              <ChevronRight size={18} />
+            </button>
+          )}
         </div>
 
         {/* Perfil de Usuario */}
@@ -163,6 +175,7 @@ function BlisterCheckApp({ onGoToProfile }) {
           <button
             className={`bc-nav-item ${vistaActiva === 'search' || vistaActiva === 'detail' ? 'active' : ''}`}
             onClick={() => handleNavClick('search')}
+            title="Catálogo CIMA"
           >
             <span className="bc-nav-item__icon"><Search size={18} /></span>
             <span className="bc-nav-item__label">Catálogo CIMA</span>
@@ -171,6 +184,7 @@ function BlisterCheckApp({ onGoToProfile }) {
           <button
             className={`bc-nav-item ${vistaActiva === 'optimizer' ? 'active' : ''}`}
             onClick={() => handleNavClick('optimizer')}
+            title="Optimizador Guía"
           >
             <span className="bc-nav-item__icon"><BookOpen size={18} /></span>
             <span className="bc-nav-item__label">Optimizador Guía</span>
@@ -179,6 +193,7 @@ function BlisterCheckApp({ onGoToProfile }) {
           <button
             className={`bc-nav-item ${vistaActiva === 'stats' ? 'active' : ''}`}
             onClick={() => handleNavClick('stats')}
+            title="Estadísticas"
           >
             <span className="bc-nav-item__icon"><BarChart2 size={18} /></span>
             <span className="bc-nav-item__label">Estadísticas</span>
@@ -189,6 +204,7 @@ function BlisterCheckApp({ onGoToProfile }) {
           <button
             className="bc-nav-item"
             onClick={() => { setShowExport(true); setMobileSidebarOpen(false); }}
+            title="Exportar Registro"
           >
             <span className="bc-nav-item__icon"><Download size={18} /></span>
             <span className="bc-nav-item__label">Exportar Registro</span>

@@ -127,14 +127,14 @@ function MedicamentoCard({ medicamento, onClick, desabastecimiento, clasificacio
               </span>
             )}
             {desabastecimiento && (() => {
-              const isCritical = isCriticalShortage({ activo: 1, observ: desabastecimiento.observaciones });
+              const isCritical = desabastecimiento.criticidad === 'critical' || isCriticalShortage({ activo: 1, observ: desabastecimiento.observaciones });
               return (
                 <span
                   className={`bc-badge ${isCritical ? 'bc-badge--shortage-critical' : 'bc-badge--shortage'}`}
-                  title={`Desabastecimiento activo: ${desabastecimiento.nombre}`}
+                  title={`Desabastecimiento activo: ${desabastecimiento.nombre || ''}`}
                 >
                   <AlertTriangle size={11} />
-                  {'Desabastecimiento'}
+                  Desabastecimiento
                 </span>
               );
             })()}

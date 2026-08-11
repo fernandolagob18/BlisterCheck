@@ -390,7 +390,19 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
             </p>
             <div className="bc-resultados-grid">
               {resultados.map(med => {
-                const desabastecimiento = med.cn ? (shortageMap.get(String(med.cn)) || null) : null;
+                const rawCN = med.cn ? String(med.cn) : '';
+                const cleanDigits = rawCN.replace(/\D/g, '');
+                const norm6 = cleanDigits.length >= 6 ? cleanDigits.substring(0, 6) : cleanDigits;
+                const padded6 = cleanDigits ? cleanDigits.padStart(6, '0') : '';
+                
+                const desabastecimiento = med.cn ? (
+                  shortageMap.get(rawCN) || 
+                  shortageMap.get(cleanDigits) || 
+                  shortageMap.get(norm6) || 
+                  shortageMap.get(padded6) || 
+                  null
+                ) : null;
+
                 const clasificacion = med.cn ? (clasificacionMap.get(med.cn) ?? undefined) : undefined;
                 return (
                   <MedicamentoCard

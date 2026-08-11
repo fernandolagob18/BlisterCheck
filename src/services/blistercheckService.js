@@ -633,7 +633,17 @@ export async function getDesabastecimientosByCNs(cns) {
       .select('*')
       .in('cn', chunk);
     if (error) throw error;
-    (data || []).forEach(row => map.set(String(row.cn), row));
+    (data || []).forEach(row => {
+      const rawCN = String(row.cn);
+      map.set(rawCN, row);
+      
+      const cleanDigits = rawCN.replace(/\D/g, '');
+      if (cleanDigits) {
+        map.set(cleanDigits, row);
+        map.set(cleanDigits.substring(0, 6), row);
+        map.set(cleanDigits.padStart(6, '0'), row);
+      }
+    });
   }
   return map;
 }
