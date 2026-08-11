@@ -28,14 +28,14 @@ export default function LandingPage({ onLogin, onRegister }) {
   }, []);
 
   const mockMeds = [
-    { cn: '654321', nombre: 'PARACETAMOL STADA 1 g comprimidos EFG', lab: 'STADA SL', via: 'Oral', dosis: '1000 mg', apto: true, tipo: 'Compatible con SDMDU', badge: 'demo-badge--apto' },
-    { cn: '712384', nombre: 'OMEPRAZOL CINFA 20 mg cápsulas duras EFG', lab: 'CINFA S.A.', via: 'Oral', dosis: '20 mg', apto: true, tipo: 'Compatible con SDMDU', badge: 'demo-badge--apto' },
-    { cn: '689102', nombre: 'ENALAPRIL NORMON 20 mg comprimidos EFG', lab: 'NORMON S.A.', via: 'Oral', dosis: '20 mg', apto: false, tipo: 'Requiere Reenvasado', badge: 'demo-badge--reenvasado' },
+    { cn: '654321', nombre: 'PARACETAMOL 1 g comprimidos EFG', lab: 'Laboratorio genérico A', via: 'Oral', dosis: '1000 mg', apto: true, tipo: 'Compatible con SDMDU', badge: 'demo-badge--apto' },
+    { cn: '712384', nombre: 'OMEPRAZOL 20 mg cápsulas duras EFG', lab: 'Laboratorio genérico B', via: 'Oral', dosis: '20 mg', apto: true, tipo: 'Compatible con SDMDU', badge: 'demo-badge--apto' },
+    { cn: '689102', nombre: 'ENALAPRIL 20 mg comprimidos EFG', lab: 'Laboratorio genérico C', via: 'Oral', dosis: '20 mg', apto: false, tipo: 'Requiere Reenvasado', badge: 'demo-badge--reenvasado' },
   ];
 
   const mockShortages = [
-    { cn: '698123', nombre: 'AMOXICILINA NORMON 500mg cápsulas', inicio: '15/07/2026', fin: '30/08/2026', estado: 'Desabastecimiento oficial AEMPS' },
-    { cn: '723910', nombre: 'VALSARTAN QUALIGEN 160mg comprimidos', inicio: '02/08/2026', fin: '15/09/2026', estado: 'Suministro limitado por laboratorio' },
+    { cn: '698123', nombre: 'AMOXICILINA 500 mg cápsulas EFG', inicio: '15/07/2026', fin: '30/08/2026', estado: 'Desabastecimiento oficial AEMPS' },
+    { cn: '723910', nombre: 'VALSARTAN 160 mg comprimidos EFG', inicio: '02/08/2026', fin: '15/09/2026', estado: 'Suministro limitado por laboratorio' },
   ];
 
   const filtered = mockMeds.filter(m =>
@@ -55,7 +55,22 @@ export default function LandingPage({ onLogin, onRegister }) {
       {/* ── NAVBAR ── */}
       <nav className={`lp-nav${scrolled ? ' scrolled' : ''}`}>
         <a href="#" className="lp-logo">
-          <img src="/blistercheck_logo.jpg" alt="BlisterCheck" className="lp-logo-img" />
+          <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" className="lp-logo-svg">
+            <rect width="38" height="38" rx="9" fill="#0b192c"/>
+            {/* Blister grid */}
+            <rect x="7" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <rect x="21" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <rect x="7" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <rect x="21" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            {/* Pills */}
+            <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="#0ea5e9"/>
+            <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
+            <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
+            {/* Check en la celda activa */}
+            <rect x="21" y="21" width="10" height="8" rx="3" fill="#0ea5e9"/>
+            <polyline points="24,25.5 26,27.5 30,23.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="lp-logo-text">Blister<span>Check</span></span>
         </a>
         <div className="lp-nav-links">
           <a href="#funciones">Funciones</a>
@@ -241,6 +256,89 @@ export default function LandingPage({ onLogin, onRegister }) {
         </div>
       </div>
 
+      {/* ── COLABORATIVO ── */}
+      <div className="lp-section lp-collab-section">
+        <div className="lp-container">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }}>
+
+            {/* Izquierda: texto */}
+            <div>
+              <div className="lp-section-tag">Inteligencia colaborativa</div>
+              <h2 className="lp-section-title">Cada clasificación mejora<br />la experiencia de todos</h2>
+              <p style={{ fontSize: '1.05rem', color: 'var(--text-body)', lineHeight: 1.7, margin: '0 0 32px' }}>
+                BlisterCheck es una plataforma <strong>viva y colaborativa</strong>. Cuando un farmacéutico hospitalario clasifica un medicamento como apto, reenvasado o reetiquetado, esa información queda disponible para el resto de hospitales en tiempo real, creando una base de conocimiento colectiva en constante crecimiento.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {[
+                  { icon: '🏥', title: 'Tu clasificación, disponible al instante', desc: 'Cada vez que clasificas un medicamento en tu hospital, esa información se propaga a toda la red de farmacias.' },
+                  { icon: '📈', title: 'El catálogo crece contigo', desc: 'Cuantos más hospitales participan, más completo está el catálogo. Las presentaciones sin clasificar van desapareciendo progresivamente.' },
+                  { icon: '🔒', title: 'Tu inventario privado permanece tuyo', desc: 'Las clasificaciones clínicas se comparten. Tu stock privado "En mi farmacia" y tus notas son exclusivamente de tu hospital.' },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--bg-muted)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: 4 }}>{item.title}</div>
+                      <div style={{ fontSize: '0.87rem', color: 'var(--text-body)', lineHeight: 1.6 }}>{item.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Derecha: diagrama visual de red */}
+            <div className="lp-collab-diagram">
+              {/* Nodo central: BlisterCheck */}
+              <div className="lp-collab-center">
+                <svg width="28" height="28" viewBox="0 0 38 38" fill="none">
+                  <rect width="38" height="38" rx="9" fill="white"/>
+                  <rect x="7" y="10" width="10" height="8" rx="3" fill="rgba(14,165,233,0.3)"/>
+                  <rect x="21" y="10" width="10" height="8" rx="3" fill="rgba(14,165,233,0.3)"/>
+                  <rect x="7" y="21" width="10" height="8" rx="3" fill="rgba(14,165,233,0.3)"/>
+                  <rect x="21" y="21" width="10" height="8" rx="3" fill="white"/>
+                  <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="#0ea5e9"/>
+                  <polyline points="24,25.5 26,27.5 30,23.5" stroke="#0ea5e9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>BlisterCheck</span>
+              </div>
+
+              {/* Nodos satélite: hospitales */}
+              {[
+                { label: 'H. Universitario Norte', top: '8%', left: '50%', transform: 'translateX(-50%)', delay: '0s', color: '#10b981' },
+                { label: 'H. General Comarcal', top: '28%', right: '4%', delay: '0.4s', color: '#0ea5e9' },
+                { label: 'H. Clínico Regional', bottom: '12%', right: '8%', delay: '0.8s', color: '#10b981' },
+                { label: 'H. de Especialidades', bottom: '8%', left: '50%', transform: 'translateX(-50%)', delay: '1.2s', color: '#0ea5e9' },
+                { label: 'H. Universitario Sur', bottom: '28%', left: '4%', delay: '1.6s', color: '#10b981' },
+                { label: 'H. Materno-Infantil', top: '28%', left: '4%', delay: '2s', color: '#0ea5e9' },
+              ].map((node, i) => (
+                <div
+                  key={i}
+                  className="lp-collab-node"
+                  style={{ top: node.top, left: node.left, right: node.right, bottom: node.bottom, transform: node.transform, animationDelay: node.delay }}
+                >
+                  <div className="lp-collab-node-icon" style={{ background: node.color }}>
+                    🏥
+                  </div>
+                  <span className="lp-collab-node-label">{node.label}</span>
+                </div>
+              ))}
+
+              {/* Notificación flotante animada */}
+              <div className="lp-collab-toast lp-collab-toast--1">
+                <CheckCircle2 size={13} style={{ color: '#10b981', flexShrink: 0 }} />
+                <span>METFORMINA 850 mg clasificada como <strong>Compatible SDMDU</strong></span>
+              </div>
+              <div className="lp-collab-toast lp-collab-toast--2">
+                <CheckCircle2 size={13} style={{ color: '#10b981', flexShrink: 0 }} />
+                <span>BISOPROLOL 5 mg · Requiere <strong>Reenvasado</strong> · 4 hospitales confirmaron</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       {/* ── DEMO INTERACTIVA ── */}
       <div className="lp-section lp-section--dark" id="demo">
         <div className="lp-container">
@@ -346,12 +444,12 @@ export default function LandingPage({ onLogin, onRegister }) {
                     <button style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#0284c7', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', marginBottom: 14, padding: 0 }}>
                       ‹ Volver a resultados
                     </button>
-                    <h3 style={{ margin: '0 0 8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>PARACETAMOL STADA 1 g comprimidos EFG</h3>
+                    <h3 style={{ margin: '0 0 8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>PARACETAMOL 1 g comprimidos EFG</h3>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700, marginBottom: 14 }}>
                       💊 Candidato para SDMDU por forma farmacéutica
                     </div>
                     {[
-                      ['Cód. Nacional', '654321'], ['Laboratorio', 'STADA SL'], ['Dosis', '1000 mg'],
+                      ['Cód. Nacional', '654321'], ['Laboratorio', 'Laboratorio genérico A'], ['Dosis', '1000 mg'],
                       ['Principio activo', 'Paracetamol'], ['Forma farmacéutica', 'COMPRIMIDO'],
                       ['Vía de adm.', 'Oral'], ['Prescripción', 'Con receta médica'],
                     ].map(([k, v]) => (
@@ -549,7 +647,17 @@ export default function LandingPage({ onLogin, onRegister }) {
       {/* ── FOOTER ── */}
       <footer className="lp-footer">
         <div className="lp-footer-logo">
-          <img src="/blistercheck_logo.jpg" alt="BlisterCheck" style={{ height: 30, borderRadius: 6 }} />
+          <svg width="30" height="30" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ borderRadius: 7, flexShrink: 0 }}>
+            <rect width="38" height="38" rx="9" fill="#0ea5e9"/>
+            <rect x="7" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+            <rect x="21" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+            <rect x="7" y="21" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+            <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="white"/>
+            <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
+            <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
+            <rect x="21" y="21" width="10" height="8" rx="3" fill="white"/>
+            <polyline points="24,25.5 26,27.5 30,23.5" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <span className="lp-footer-logo-text">Blister<span>Check</span></span>
         </div>
         <p className="lp-footer-copy">
