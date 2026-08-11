@@ -93,59 +93,74 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
 -- Asegurarse de que el índice en nregistro existe
 CREATE INDEX IF NOT EXISTS idx_bc_catalogo_nregistro ON blistercheck_catalogo(nregistro);
 
--- Tabla 2: Clasificaciones SDMDU del usuario (NUNCA tocada por el cron)
-CREATE TABLE IF NOT EXISTS blistercheck_clasificacion (
-  cn                       TEXT REFERENCES blistercheck_catalogo(cn) ON DELETE CASCADE,
-  user_id                  UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+-- 2. Tabla: Clasificación Global SDMDU (COMÚN Y COMPARTIDA PARA TODOS LOS USUARIOS)
+-- Si un usuario modifica si es Apto, Reenvasado, Reetiquetado o Envase Clínico, se actualiza para TODOS.
+CREATE TABLE IF NOT EXISTS blistercheck_clasificacion_global (
+  cn                       TEXT PRIMARY KEY REFERENCES blistercheck_catalogo(cn) ON DELETE CASCADE,
   requiere_reenvasado      BOOLEAN DEFAULT NULL,
   requiere_reetiquetado    BOOLEAN DEFAULT NULL,
   apto_sdmdu_blister       BOOLEAN DEFAULT NULL,
+  solo_envase_clinico      BOOLEAN DEFAULT NULL,
+  updated_by               UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  updated_at               TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS para Clasificación Global: Cualquier usuario autenticado puede LEER y ACTUALIZAR la base común
+ALTER TABLE blistercheck_clasificacion_global ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Global read clasificacion" ON blistercheck_clasificacion_global;
+CREATE POLICY "Global read clasificacion" ON blistercheck_clasificacion_global
+  FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Global write clasificacion" ON blistercheck_clasificacion_global;
+CREATE POLICY "Global write clasificacion" ON blistercheck_clasificacion_global
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+
+-- 3. Tabla: Datos Privados del Hospital / Usuario (ESTRICTAMENTE PRIVADO POR USUARIO)
+-- Registra si el hospital tiene el fármaco en su stock (en_mi_farmacia) y sus notas internas.
+CREATE TABLE IF NOT EXISTS blistercheck_user_farmacia (
+  cn                       TEXT REFERENCES blistercheck_catalogo(cn) ON DELETE CASCADE,
+  user_id                  UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   en_mi_farmacia           BOOLEAN DEFAULT FALSE,
-  notas                    TEXT,
+  notas                    TEXT DEFAULT NULL,
   fecha_clasificacion      TIMESTAMPTZ DEFAULT NOW(),
   updated_at               TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (cn, user_id)
 );
 
--- Índices para búsqueda eficiente
-CREATE INDEX IF NOT EXISTS idx_bc_catalogo_nombre
-  ON blistercheck_catalogo(nombre);
-CREATE INDEX IF NOT EXISTS idx_bc_catalogo_cn
-  ON blistercheck_catalogo(cn);
-CREATE INDEX IF NOT EXISTS idx_bc_catalogo_principio
-  ON blistercheck_catalogo(principio_activo);
-CREATE INDEX IF NOT EXISTS idx_bc_catalogo_laboratorio
-  ON blistercheck_catalogo(laboratorio);
-CREATE INDEX IF NOT EXISTS idx_bc_catalogo_forma
-  ON blistercheck_catalogo(forma_simplificada);
-CREATE INDEX IF NOT EXISTS idx_bc_clasificacion_farmacia
-  ON blistercheck_clasificacion(en_mi_farmacia);
+CREATE INDEX IF NOT EXISTS idx_bc_user_farmacia_stock ON blistercheck_user_farmacia(user_id, en_mi_farmacia);
 
--- RLS: solo usuarios autenticados pueden leer/escribir
-ALTER TABLE blistercheck_catalogo ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blistercheck_clasificacion ENABLE ROW LEVEL SECURITY;
+-- RLS para Datos Privados: SOLO el propio usuario puede leer y escribir su stock y notas
+ALTER TABLE blistercheck_user_farmacia ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Auth read catalogo" ON blistercheck_catalogo;
-CREATE POLICY "Auth read catalogo" ON blistercheck_catalogo
-  FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Private user farmacia policy" ON blistercheck_user_farmacia;
+CREATE POLICY "Private user farmacia policy" ON blistercheck_user_farmacia
+  FOR ALL TO authenticated 
+  USING (auth.uid() = user_id) 
+  WITH CHECK (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "Auth all clasificacion" ON blistercheck_clasificacion;
-CREATE POLICY "Auth all clasificacion" ON blistercheck_clasificacion
-  FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
--- Función para actualizar updated_at automáticamente
-CREATE OR REPLACE FUNCTION update_blistercheck_updated_at()
-RETURNS TRIGGER AS $$
+-- Migración automática si existe la tabla previa de modelo unificado (blistercheck_clasificacion)
+DO $$
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'blistercheck_clasificacion' AND table_type = 'BASE TABLE') THEN
+    -- Copiar criterios globales a la tabla compartida
+    INSERT INTO blistercheck_clasificacion_global (cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, solo_envase_clinico, updated_at)
+    SELECT DISTINCT ON (cn) cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, solo_envase_clinico, updated_at
+    FROM blistercheck_clasificacion
+    ON CONFLICT (cn) DO UPDATE SET
+      requiere_reenvasado = EXCLUDED.requiere_reenvasado,
+      requiere_reetiquetado = EXCLUDED.requiere_reetiquetado,
+      apto_sdmdu_blister = EXCLUDED.apto_sdmdu_blister,
+      solo_envase_clinico = EXCLUDED.solo_envase_clinico;
 
-DROP TRIGGER IF EXISTS set_blistercheck_updated_at ON blistercheck_clasificacion;
-CREATE TRIGGER set_blistercheck_updated_at
-  BEFORE UPDATE ON blistercheck_clasificacion
-  FOR EACH ROW EXECUTE FUNCTION update_blistercheck_updated_at();
+    -- Copiar stock y notas privadas a la tabla privada por usuario
+    INSERT INTO blistercheck_user_farmacia (cn, user_id, en_mi_farmacia, notas, fecha_clasificacion, updated_at)
+    SELECT cn, user_id, COALESCE(en_mi_farmacia, false), notas, fecha_clasificacion, updated_at
+    FROM blistercheck_clasificacion
+    ON CONFLICT (cn, user_id) DO NOTHING;
+  END IF;
+END $$;
 
 -- =============================================
 -- PARTE 3: DESABASTECIMIENTOS ACTIVOS

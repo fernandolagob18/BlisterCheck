@@ -240,6 +240,10 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
           </div>
 
           <div className="bc-clas-body">
+            <div style={{ marginBottom: '12px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0284c7', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🌐</span> Criterios SDMDU (Base de Datos Común)
+            </div>
+
             <TristateToggle
               label="Requiere Reenvasado"
               descripcion="El envase original no es apto para dosis unitaria y debe ser reenvasado"
@@ -260,9 +264,6 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
               value={form.apto_sdmdu_blister}
               onChange={v => handleChange('apto_sdmdu_blister', v)}
             />
-
-            {/* Separador */}
-            <hr className="bc-clas-divider" />
 
             {/* Envase Clínico */}
             <div className="bc-farmacia-toggle" onClick={() => handleToggle('solo_envase_clinico')}>
@@ -286,6 +287,10 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
             {/* Separador */}
             <hr className="bc-clas-divider" />
 
+            <div style={{ marginBottom: '12px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🔒</span> Tu Hospital (Privado)
+            </div>
+
             {/* Mi farmacia */}
             <div className="bc-farmacia-toggle" onClick={() => handleToggle('en_mi_farmacia')}>
               <div className="bc-farmacia-info">
@@ -305,10 +310,10 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
 
             {/* Notas */}
             <div className="bc-notas-section">
-              <label className="bc-notas-label">📝 Notas</label>
+              <label className="bc-notas-label">📝 Notas privadas de mi hospital</label>
               <textarea
                 className="bc-notas-input"
-                placeholder="Observaciones, comentarios sobre el blíster, condiciones especiales..."
+                placeholder="Observaciones internas, condiciones de almacenamiento, notas clínicas de tu centro..."
                 value={form.notas}
                 onChange={e => handleChange('notas', e.target.value)}
                 rows={4}
