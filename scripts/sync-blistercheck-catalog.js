@@ -12,8 +12,14 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+let SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+if (SUPABASE_URL) {
+  SUPABASE_URL = SUPABASE_URL.trim().replace(/\/+$|\/rest\/v1\/?$/gi, '');
+}
+let SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+if (SUPABASE_SERVICE_KEY) {
+  SUPABASE_SERVICE_KEY = SUPABASE_SERVICE_KEY.trim();
+}
 
 const CIMA_API_BASE = 'https://cima.aemps.es/cima/rest';
 const PAGE_SIZE = 200;
@@ -217,12 +223,22 @@ async function upsertCatalogo(supabase, presentaciones, medicamentosMap) {
   let upsertados = 0;
   for (let i = 0; i < rows.length; i += UPSERT_BATCH_SIZE) {
     const batch = rows.slice(i, i + UPSERT_BATCH_SIZE);
-    const { error } = await supabase
+    let { error } = await supabase
       .from('blistercheck_catalogo')
-      .upsert(batch, { onConflict: 'cn' });   // ← PK ahora es cn
+      .upsert(batch);
 
     if (error) {
-      throw new Error(`Error en UPSERT (lote ${i / UPSERT_BATCH_SIZE + 1}): ${error.message}`);
+      if (error.code === 'PGRST125') {
+        throw new Error(`PGRST125 (Invalid path): La tabla 'blistercheck_catalogo' no existe en tu base de datos de Supabase. Debes ejecutar el script 'scripts/setup-all.sql' en el Editor SQL de Supabase.`);
+      }
+      // Reintentar con onConflict si la tabla tiene restricción específica en 'cn'
+      const { error: retryError } = await supabase
+        .from('blistercheck_catalogo')
+        .upsert(batch, { onConflict: 'cn' });
+
+      if (retryError) {
+        throw new Error(`Error en UPSERT (lote ${i / UPSERT_BATCH_SIZE + 1}): ${retryError.message}`);
+      }
     }
 
     upsertados += batch.length;
@@ -240,7 +256,10 @@ async function main() {
   console.log('═══════════════════════════════════════════════════');
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error('❌ Faltan credenciales de Supabase (SUPABASE_URL / SUPABASE_SERVICE_KEY)');
+    console.error('❌ Faltan credenciales de Supabase en las variables de entorno:');
+    if (!SUPABASE_URL) console.error('  - SUPABASE_URL (o VITE_SUPABASE_URL) falta');
+    if (!SUPABASE_SERVICE_KEY) console.error('  - SUPABASE_SERVICE_KEY (o SUPABASE_SERVICE_ROLE_KEY) falta');
+    console.error('Por favor, configura los Repository Secrets en GitHub: Settings > Secrets and variables > Actions.');
     process.exit(1);
   }
 

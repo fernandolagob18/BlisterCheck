@@ -9,8 +9,14 @@
 const { createClient } = require('@supabase/supabase-js');
 
 // --- Configuration from environment variables ---
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+let SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+if (SUPABASE_URL) {
+    SUPABASE_URL = SUPABASE_URL.trim().replace(/\/+$|\/rest\/v1\/?$/gi, '');
+}
+let SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+if (SUPABASE_SERVICE_KEY) {
+    SUPABASE_SERVICE_KEY = SUPABASE_SERVICE_KEY.trim();
+}
 
 const CIMA_API_URL = 'https://cima.aemps.es/cima/rest/psuministro';
 const PAGE_SIZE = 200;
@@ -104,7 +110,10 @@ async function main() {
     console.log(`Date: ${new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })}`);
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-        console.error('Missing Supabase credentials');
+        console.error('❌ Missing Supabase credentials in environment:');
+        if (!SUPABASE_URL) console.error('  - SUPABASE_URL (or VITE_SUPABASE_URL) is missing');
+        if (!SUPABASE_SERVICE_KEY) console.error('  - SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY) is missing');
+        console.error('Please configure Repository Secrets in GitHub: Settings > Secrets and variables > Actions.');
         process.exit(1);
     }
 
@@ -164,10 +173,23 @@ async function main() {
     }));
 
     for (let i = 0; i < upsertPayload.length; i += 1000) {
-        const { error: upsertError } = await supabase
+        const chunk = upsertPayload.slice(i, i + 1000);
+        let { error: upsertError } = await supabase
             .from('desabastecimientos_activos')
-            .upsert(upsertPayload.slice(i, i + 1000), { onConflict: 'cn' });
-        if (upsertError) console.error("Error upserting chunk:", upsertError);
+            .upsert(chunk);
+        
+        if (upsertError) {
+            if (upsertError.code === 'PGRST125') {
+                console.error("❌ Error PGRST125: La tabla 'desabastecimientos_activos' no existe en tu base de datos de Supabase o la ruta es inválida.");
+                console.error("👉 Por favor, ejecuta el script de base de datos en Supabase SQL Editor: scripts/setup-all.sql");
+            } else {
+                console.warn(`Upsert warning (${upsertError.message}). Intentando insert...`);
+                const { error: insertError } = await supabase
+                    .from('desabastecimientos_activos')
+                    .insert(chunk);
+                if (insertError) console.error("Error inserting chunk:", insertError);
+            }
+        }
     }
     
     console.log("DB Sync complete.");
