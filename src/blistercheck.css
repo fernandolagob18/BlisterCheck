@@ -1,3 +1,33 @@
+:root {
+  /* ── Paleta de Colores (Pasteles en Sintonía y Legibles) ── */
+  --color-primary: #0d9488;        /* Teal 600 - Principal legible */
+  --color-primary-dark: #0f766e;   /* Teal 700 - Hover y énfasis */
+  --color-primary-light: #ccfbf1;  /* Teal 50 - Fondos suaves / pastel */
+  
+  --color-bg: #f8fafc;             /* Slate 50 - Fondo principal (pastel muy claro) */
+  --color-surface: #ffffff;        /* Blanco para superficies */
+  --color-card-bg: #ffffff;        /* Blanco para tarjetas */
+  
+  --color-text: #1e293b;           /* Slate 800 - Texto principal (gran contraste) */
+  --color-text-muted: #64748b;     /* Slate 500 - Texto secundario */
+  
+  --color-border: #e2e8f0;         /* Slate 200 - Bordes suaves */
+  --color-card-border: #e2e8f0;    /* Slate 200 - Bordes de tarjetas */
+  
+  /* ── Estados (Colores Clínicos Ajustados a Tonos Armónicos) ── */
+  --color-success: #059669;        /* Emerald 600 */
+  --color-warning: #d97706;        /* Amber 600 */
+  --color-danger: #dc2626;         /* Red 600 */
+  
+  /* ── Sombras y Radios ── */
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.04);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    MAIN MENU — Pantalla de selección de módulo
    ═══════════════════════════════════════════════════════════════ */
