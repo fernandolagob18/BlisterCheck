@@ -22,7 +22,7 @@ function ClasificacionBadge({ clasificacion }) {
     return (
       <>
         <span className="bc-badge bc-badge--apto">
-          <CheckCircle size={11} /> Apto SDMDU
+          <CheckCircle size={11} /> Compatible con SDMDU
         </span>
         {ecPill}
       </>
@@ -57,7 +57,7 @@ function ClasificacionBadge({ clasificacion }) {
   return (
     <>
       <span className="bc-badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}>
-        <XCircle size={11} /> No Apto SDMDU
+        <XCircle size={11} /> No Compatible con SDMDU
       </span>
       {ecPill}
     </>
@@ -126,7 +126,7 @@ function MedicamentoCard({ medicamento, onClick, desabastecimiento, clasificacio
                   title={`Desabastecimiento activo: ${desabastecimiento.nombre}`}
                 >
                   <AlertTriangle size={11} />
-                  {isCritical ? 'Desab. crítico' : 'Desabastecimiento'}
+                  {'Desabastecimiento'}
                 </span>
               );
             })()}

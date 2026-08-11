@@ -90,7 +90,7 @@ function BlisterCheckStats() {
           </div>
           <div className="bc-summary-card glass-panel bc-summary-card--green">
             <span className="bc-summary-num">{totalAptos}</span>
-            <span className="bc-summary-label">Aptos SDMDU directos</span>
+            <span className="bc-summary-label">Compatibles SDMDU directos</span>
           </div>
           <div className="bc-summary-card glass-panel bc-summary-card--amber">
             <span className="bc-summary-num">{totalIntervencion}</span>
@@ -160,7 +160,7 @@ function BlisterCheckStats() {
                     <th>#</th>
                     <th>Laboratorio</th>
                     <th>Clasificados</th>
-                    <th>Aptos directos</th>
+                    <th>Compatibles directos</th>
                     <th>Con intervención</th>
                     <th>Score SDMDU</th>
                   </tr>

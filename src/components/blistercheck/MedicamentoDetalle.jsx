@@ -259,7 +259,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
             />
 
             <TristateToggle
-              label="Apto SDMDU (blíster OK)"
+              label="Compatible con SDMDU (blíster OK)"
               descripcion="Blíster fraccionable correctamente identificado: nombre, lote y caducidad visibles"
               value={form.apto_sdmdu_blister}
               onChange={v => handleChange('apto_sdmdu_blister', v)}
@@ -438,7 +438,7 @@ function DesabastecimientoPanel({ shortage }) {
       <div className="bc-shortage-panel__header">
         <AlertTriangle size={16} className="bc-shortage-panel__icon" />
         <span className="bc-shortage-panel__title">
-          {isCritical ? 'Desabastecimiento Crítico Activo' : 'Desabastecimiento Activo'}
+          {'Desabastecimiento'}
         </span>
         <span className={`bc-shortage-panel__pill ${isCritical ? 'pill--critical' : 'pill--warning'}`}>
           {isCritical ? '🚨 Crítico' : '⚠️ Activo'}
