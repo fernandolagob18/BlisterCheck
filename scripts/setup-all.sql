@@ -278,3 +278,6 @@ $$;
 GRANT EXECUTE ON FUNCTION public.bc_search_simple(text) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.bc_search_avanzado(text, text, text, text, text, text, boolean) TO anon, authenticated, service_role;
 
+-- Recargar la caché de esquema de PostgREST para asegurar que reconoce la Primary Key en upserts
+NOTIFY pgrst, 'reload schema';
+

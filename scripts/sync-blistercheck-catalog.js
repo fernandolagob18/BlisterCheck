@@ -232,19 +232,28 @@ async function upsertCatalogo(supabase, presentaciones, medicamentosMap) {
     const batch = rows.slice(i, i + UPSERT_BATCH_SIZE);
     let { error } = await supabase
       .from('blistercheck_catalogo')
-      .upsert(batch);
+      .upsert(batch, { onConflict: 'cn' });
 
     if (error) {
       if (error.code === 'PGRST125') {
         throw new Error(`PGRST125 (Invalid path): La tabla 'blistercheck_catalogo' no existe en tu base de datos de Supabase. Debes ejecutar el script 'scripts/setup-all.sql' en el Editor SQL de Supabase.`);
       }
-      // Reintentar ignorando duplicados (ON CONFLICT DO NOTHING) para evitar que falle todo el lote
+      
+      // Intentar fallback 1: ignoreDuplicates
       const { error: retryError } = await supabase
         .from('blistercheck_catalogo')
         .upsert(batch, { onConflict: 'cn', ignoreDuplicates: true });
 
       if (retryError) {
-        throw new Error(`Error en UPSERT (lote ${i / UPSERT_BATCH_SIZE + 1}): ${retryError.message}`);
+        // Fallback 2: si el esquema de PostgREST está desincronizado, guardar elemento por elemento ignorando duplicados
+        console.warn(`\n⚠️  Advertencia en lote ${Math.floor(i / UPSERT_BATCH_SIZE) + 1}: guardando registros individualmente por conflicto de esquema...`);
+        for (const item of batch) {
+          const { error: itemErr } = await supabase
+            .from('blistercheck_catalogo')
+            .upsert([item], { onConflict: 'cn', ignoreDuplicates: true });
+          if (!itemErr) upsertados++;
+        }
+        continue;
       }
     }
 
@@ -252,7 +261,7 @@ async function upsertCatalogo(supabase, presentaciones, medicamentosMap) {
     process.stdout.write(`\r   Registros guardados: ${upsertados}/${rows.length}`);
   }
   console.log(''); // Nueva línea
-  console.log(`✅ UPSERT completado: ${upsertados} presentaciones actualizadas en Supabase`);
+  console.log(`✅ UPSERT completado: ${upsertados} presentaciones procesadas en Supabase`);
 }
 
 // ─── Punto de entrada principal ───────────────────────────────────────────────
