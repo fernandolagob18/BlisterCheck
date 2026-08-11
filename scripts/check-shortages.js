@@ -149,16 +149,20 @@ async function main() {
     const cnKeysToKeep = Array.from(currentCimaMap.keys());
     console.log(`Extracted ${cnKeysToKeep.length} valid shortages.`);
 
-    // Refresh active shortages table - delete all existing and insert new
-    console.log('Replacing desabastecimientos_activos table...');
+    // Sincronización diferencial: borrar solo los desabastecimientos que ya no están activos
+    console.log('Sincronizando tabla desabastecimientos_activos (Diff sync)...');
     
-    // We cannot truncate without RPC, so we do a blanket delete using a truthy condition
-    // or we just delete in batches. It's safer to fetch existing CNs and delete them.
     let { data: existingData } = await supabase.from('desabastecimientos_activos').select('cn');
     if (existingData && existingData.length > 0) {
         const existingCns = existingData.map(r => r.cn);
-        for (let i = 0; i < existingCns.length; i += 1000) {
-            await supabase.from('desabastecimientos_activos').delete().in('cn', existingCns.slice(i, i + 1000));
+        // Cuales están en la DB pero YA NO están en CIMA
+        const cnsToDelete = existingCns.filter(cn => !currentCimaMap.has(cn));
+        
+        if (cnsToDelete.length > 0) {
+            console.log(`Borrando ${cnsToDelete.length} desabastecimientos resueltos...`);
+            for (let i = 0; i < cnsToDelete.length; i += 1000) {
+                await supabase.from('desabastecimientos_activos').delete().in('cn', cnsToDelete.slice(i, i + 1000));
+            }
         }
     }
 
@@ -183,11 +187,11 @@ async function main() {
                 console.error("❌ Error PGRST125: La tabla 'desabastecimientos_activos' no existe en tu base de datos de Supabase o la ruta es inválida.");
                 console.error("👉 Por favor, ejecuta el script de base de datos en Supabase SQL Editor: scripts/setup-all.sql");
             } else {
-                console.warn(`Upsert warning (${upsertError.message}). Intentando insert...`);
-                const { error: insertError } = await supabase
+                console.warn(`Upsert warning (${upsertError.message}). Intentando fallback onConflict...`);
+                const { error: fallbackError } = await supabase
                     .from('desabastecimientos_activos')
-                    .insert(chunk);
-                if (insertError) console.error("Error inserting chunk:", insertError);
+                    .upsert(chunk, { onConflict: 'cn' });
+                if (fallbackError) console.error("Error en fallback upsert chunk:", fallbackError);
             }
         }
     }
