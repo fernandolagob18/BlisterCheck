@@ -93,6 +93,17 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
 -- Asegurarse de que el índice en nregistro existe
 CREATE INDEX IF NOT EXISTS idx_bc_catalogo_nregistro ON blistercheck_catalogo(nregistro);
 
+-- RLS para Catálogo de Medicamentos: Lectura y Escritura permitidas
+ALTER TABLE blistercheck_catalogo ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Lectura publica catalogo" ON blistercheck_catalogo;
+CREATE POLICY "Lectura publica catalogo" ON blistercheck_catalogo
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Escritura catalogo" ON blistercheck_catalogo;
+CREATE POLICY "Escritura catalogo" ON blistercheck_catalogo
+  FOR ALL USING (true) WITH CHECK (true);
+
 -- 2. Tabla: Clasificación Global SDMDU (COMÚN Y COMPARTIDA PARA TODOS LOS USUARIOS)
 -- Si un usuario modifica si es Apto, Reenvasado, Reetiquetado o Envase Clínico, se actualiza para TODOS.
 CREATE TABLE IF NOT EXISTS blistercheck_clasificacion_global (
