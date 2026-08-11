@@ -246,7 +246,8 @@ async function upsertCatalogo(supabase, presentaciones, medicamentosMap) {
 
       if (retryError) {
         // Fallback 2: si el esquema de PostgREST está desincronizado, guardar elemento por elemento ignorando duplicados
-        console.warn(`\n⚠️  Advertencia en lote ${Math.floor(i / UPSERT_BATCH_SIZE) + 1}: guardando registros individualmente por conflicto de esquema...`);
+        console.error(`\n❌ ERROR EXACTO DEL LOTE: ${retryError.message} (Code: ${retryError.code}, Details: ${retryError.details})`);
+        console.warn(`⚠️  Advertencia en lote ${Math.floor(i / UPSERT_BATCH_SIZE) + 1}: guardando registros individualmente...`);
         for (const item of batch) {
           const { error: itemErr } = await supabase
             .from('blistercheck_catalogo')
