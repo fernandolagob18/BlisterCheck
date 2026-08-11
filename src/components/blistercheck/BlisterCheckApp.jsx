@@ -257,9 +257,13 @@ function BlisterCheckApp({ onGoToProfile }) {
           </div>
 
           <div className="bc-header-bar__right">
-            <button className="bc-header-profile-btn" onClick={onGoToProfile}>
-              <User size={16} />
-              <span>{profile?.nombre || 'Perfil'}</span>
+            <button 
+              className="bc-nav-btn bc-nav-btn--export"
+              onClick={() => setShowExport(true)}
+              title="Exportar Registro BlisterCheck"
+            >
+              <Download size={15} />
+              <span>Exportar</span>
             </button>
           </div>
         </header>
