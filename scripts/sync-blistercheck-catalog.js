@@ -146,7 +146,7 @@ async function fetchAllPresentacionesComercializadas() {
   // Deduplicar por CN (API CIMA a veces devuelve duplicados)
   const mapUnicas = new Map();
   validas.forEach(p => {
-    mapUnicas.set(String(p.cn), p);
+    mapUnicas.set(String(p.cn).trim(), p);
   });
   const unicas = Array.from(mapUnicas.values());
 
@@ -204,7 +204,7 @@ function transformPresentacion(item, medPadre) {
   const tipoPrescripcion  = item.cpresc || medPadre?.cpresc || null;
 
   return {
-    cn:                 String(item.cn),        // PK — código nacional del envase
+    cn:                 String(item.cn).trim(), // PK — código nacional del envase
     nregistro:          String(item.nregistro), // FK al medicamento padre
     nombre:             item.nombre || '',      // nombre completo del envase (incluye tamaño)
     laboratorio,
@@ -238,10 +238,10 @@ async function upsertCatalogo(supabase, presentaciones, medicamentosMap) {
       if (error.code === 'PGRST125') {
         throw new Error(`PGRST125 (Invalid path): La tabla 'blistercheck_catalogo' no existe en tu base de datos de Supabase. Debes ejecutar el script 'scripts/setup-all.sql' en el Editor SQL de Supabase.`);
       }
-      // Reintentar con onConflict si la tabla tiene restricción específica en 'cn'
+      // Reintentar ignorando duplicados (ON CONFLICT DO NOTHING) para evitar que falle todo el lote
       const { error: retryError } = await supabase
         .from('blistercheck_catalogo')
-        .upsert(batch, { onConflict: 'cn' });
+        .upsert(batch, { onConflict: 'cn', ignoreDuplicates: true });
 
       if (retryError) {
         throw new Error(`Error en UPSERT (lote ${i / UPSERT_BATCH_SIZE + 1}): ${retryError.message}`);
