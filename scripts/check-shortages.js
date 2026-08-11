@@ -123,24 +123,7 @@ async function main() {
     const allCimaRaw = await fetchAllShortages();
     const currentCimaMap = new Map();
 
-    // Ignore shortages > 1 year old if they have no definite end date
-    const nowMs = Date.now();
-    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
-
     allCimaRaw.forEach(item => {
-        const startMs = item.fini ? Number(item.fini) : null;
-        let hasIndefiniteEnd = false;
-
-        if (!item.ffin) {
-            hasIndefiniteEnd = true;
-        } else {
-            const endYear = new Date(item.ffin).getFullYear();
-            if (endYear > 2040) hasIndefiniteEnd = true;
-        }
-
-        if (startMs && (nowMs - startMs > oneYearMs) && hasIndefiniteEnd) {
-            return; // Skip adding to current active map
-        }
 
         const cn = normalizeCN(item.cn || item.nregistro);
         if (cn) currentCimaMap.set(cn, item);
