@@ -708,3 +708,80 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
   
   return data || [];
 }
+
+/**
+ * ─── IMPORTACIÓN MASIVA ───────────────────────────────────────────────────
+ */
+
+/**
+ * Obtiene un array de CNs que existen en el catálogo a partir de una lista dada.
+ */
+export async function getExistingCatalogCNs(cns) {
+  if (!cns || cns.length === 0) return [];
+  const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
+  if (validCNs.length === 0) return [];
+
+  const CHUNK_SIZE = 900;
+  let existingCNs = [];
+
+  for (let i = 0; i < validCNs.length; i += CHUNK_SIZE) {
+    const chunk = validCNs.slice(i, i + CHUNK_SIZE);
+    
+    const { data, error } = await supabase
+      .from(CATALOG_TABLE)
+      .select('cn')
+      .in('cn', chunk);
+
+    if (error) {
+      console.error('Error fetching catalog CNs:', error);
+      throw error;
+    }
+    
+    if (data) {
+      existingCNs = existingCNs.concat(data.map(d => d.cn));
+    }
+  }
+
+  return existingCNs;
+}
+
+/**
+ * Marca masivamente como "En mi farmacia" un listado de CNs.
+ */
+export async function bulkMarkEnMiFarmacia(cns) {
+  if (!cns || cns.length === 0) return 0;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesión para realizar esta acción.");
+
+  const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
+  if (validCNs.length === 0) return 0;
+
+  const CHUNK_SIZE = 900;
+  let totalUpserted = 0;
+
+  for (let i = 0; i < validCNs.length; i += CHUNK_SIZE) {
+    const chunk = validCNs.slice(i, i + CHUNK_SIZE);
+    const payload = chunk.map(cn => ({
+      cn: cn,
+      user_id: user.id,
+      en_mi_farmacia: true,
+      updated_at: new Date().toISOString()
+    }));
+
+    const { data, error } = await supabase
+      .from(USER_FARMACIA_TABLE)
+      .upsert(payload, { onConflict: 'cn,user_id' })
+      .select();
+
+    if (error) {
+      console.error('Error in bulk upsert:', error);
+      throw error;
+    }
+    
+    if (data) {
+      totalUpserted += data.length;
+    }
+  }
+
+  return totalUpserted;
+}

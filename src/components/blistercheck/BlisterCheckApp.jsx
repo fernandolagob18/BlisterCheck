@@ -10,12 +10,14 @@ import {
   X, 
   ChevronLeft, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Upload
 } from 'lucide-react';
 import MedicamentoBuscador from './MedicamentoBuscador';
 import MedicamentoDetalle from './MedicamentoDetalle';
 import BlisterCheckStats from './BlisterCheckStats';
 import BlisterCheckExport from './BlisterCheckExport';
+import BlisterCheckUploadMeds from './BlisterCheckUploadMeds';
 import GuiaOptimizer from './GuiaOptimizer';
 import { getCatalogInfo, getClasificacion, getDesabastecimientoByCN } from '../../services/blistercheckService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -28,6 +30,7 @@ function BlisterCheckApp({ onGoToProfile }) {
   const [desabastecimientoActual, setDesabastecimientoActual] = useState(null);
   const [catalogInfo, setCatalogInfo] = useState({ totalCatalogo: 0, totalClasificados: 0, enMiFarmacia: 0, ultimaSync: null });
   const [showExport, setShowExport] = useState(false);
+  const [showUploadMeds, setShowUploadMeds] = useState(false);
   
   // Estado para el menú lateral (colapsado en desktop / abierto en móvil)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -203,6 +206,15 @@ function BlisterCheckApp({ onGoToProfile }) {
 
           <button
             className="bc-nav-item"
+            onClick={() => { setShowUploadMeds(true); setMobileSidebarOpen(false); }}
+            title="Subir mis medicamentos"
+          >
+            <span className="bc-nav-item__icon"><Upload size={18} /></span>
+            <span className="bc-nav-item__label">Subir mis medicamentos</span>
+          </button>
+
+          <button
+            className="bc-nav-item"
             onClick={() => { setShowExport(true); setMobileSidebarOpen(false); }}
             title="Exportar Registro"
           >
@@ -254,6 +266,29 @@ function BlisterCheckApp({ onGoToProfile }) {
               {mobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <h1 className="bc-header-title">{getHeaderTitle()}</h1>
+            
+            {vistaActiva === 'search' && catalogInfo && catalogInfo.totalCatalogo > 0 && (
+              <div className="bc-header-stats" style={{ display: 'flex', gap: '12px', marginLeft: '16px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>Total:</span>
+                  <span className="bc-sidebar-stat__pill bc-sidebar-stat__pill--blue">
+                    {catalogInfo.totalCatalogo.toLocaleString('es-ES')}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>Clasificados:</span>
+                  <span className="bc-sidebar-stat__pill bc-sidebar-stat__pill--mint">
+                    {catalogInfo.totalClasificados.toLocaleString('es-ES')}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>En mi farmacia:</span>
+                  <span className="bc-sidebar-stat__pill" style={{ background: 'var(--color-primary-light, #e0f2fe)', color: 'var(--color-primary-dark, #0369a1)' }}>
+                    {catalogInfo.enMiFarmacia.toLocaleString('es-ES')}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bc-header-bar__right">
@@ -299,6 +334,17 @@ function BlisterCheckApp({ onGoToProfile }) {
       {/* Modal de exportación */}
       {showExport && (
         <BlisterCheckExport onClose={() => setShowExport(false)} />
+      )}
+
+      {/* Modal Subir mis medicamentos */}
+      {showUploadMeds && (
+        <BlisterCheckUploadMeds 
+          onClose={() => setShowUploadMeds(false)} 
+          onUploadComplete={() => {
+            getCatalogInfo().then(setCatalogInfo);
+            setShowUploadMeds(false);
+          }}
+        />
       )}
     </div>
   );

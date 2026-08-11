@@ -375,11 +375,6 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
             <ShieldCheckIcon />
             <h3>Catálogo BlisterCheck</h3>
             <p>Busca cualquier medicamento comercializado en España para clasificar su aptitud para el Sistema de Dispensación en Dosis Unitarias (SDMDU).</p>
-            <div className="bc-welcome-tips">
-              <span>💊 Busca por nombre de marca</span>
-              <span>🔬 Busca por principio activo</span>
-              <span>🔍 Usa filtros avanzados por forma farmacéutica</span>
-            </div>
           </div>
         )}
 
