@@ -143,8 +143,15 @@ async function fetchAllPresentacionesComercializadas() {
     /^\d{5,9}$/.test(String(item.cn).trim())  // CN debe ser numérico de 5-9 dígitos
   );
 
-  console.log(`✅ Descargadas ${allResults.length} presentaciones → ${validas.length} válidas (comercializadas con CN numérico)`);
-  return validas;
+  // Deduplicar por CN (API CIMA a veces devuelve duplicados)
+  const mapUnicas = new Map();
+  validas.forEach(p => {
+    mapUnicas.set(String(p.cn), p);
+  });
+  const unicas = Array.from(mapUnicas.values());
+
+  console.log(`✅ Descargadas ${allResults.length} presentaciones → ${validas.length} válidas → ${unicas.length} únicas`);
+  return unicas;
 }
 
 // ─── Transformar datos de CIMA al formato de Supabase ────────────────────────
