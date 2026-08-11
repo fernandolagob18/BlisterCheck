@@ -1,548 +1,562 @@
-import React, { useState } from 'react';
-import { 
-  ShieldCheck, 
-  Search, 
-  FileSpreadsheet, 
-  BarChart3, 
-  AlertTriangle, 
-  CheckCircle2, 
-  ArrowRight, 
-  Building2, 
-  Lock, 
+import React, { useState, useEffect } from 'react';
+import {
+  Search,
+  FileSpreadsheet,
+  BarChart3,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
+  Lock,
   Database,
-  ExternalLink,
-  Pill,
   Sparkles,
-  FileText,
-  RefreshCw,
   Check,
-  XCircle,
-  HelpCircle
+  RefreshCw,
+  Upload,
+  ShieldCheck
 } from 'lucide-react';
 import '../../landing.css';
 
 export default function LandingPage({ onLogin, onRegister }) {
-  const [activeSimTab, setActiveSimTab] = useState('search'); // 'search' | 'optimizer' | 'shortages' | 'stats'
-  const [simSearchQuery, setSimSearchQuery] = useState('Paracetamol');
+  const [activeTab, setActiveTab] = useState('search');
+  const [simQuery, setSimQuery] = useState('Paracetamol');
+  const [scrolled, setScrolled] = useState(false);
 
-  // Datos simulados hiper-reales de la interfaz de BlisterCheck
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const mockMeds = [
-    {
-      cn: '654321',
-      nombre: 'PARACETAMOL STADA 1 g comprimidos EFG',
-      laboratorio: 'STADA SL',
-      apto: true,
-      tipo: 'Apto Blíster Unitario',
-      via: 'Oral',
-      dosis: '1000 mg',
-      prescripcion: 'Con receta',
-      comercializado: true,
-      badgeClass: 'demo-badge-apto'
-    },
-    {
-      cn: '712384',
-      nombre: 'OMEPRAZOL CINFA 20 mg cápsulas duras',
-      laboratorio: 'LABORATORIOS CINFA S.A.',
-      apto: true,
-      tipo: 'Apto Blíster Unitario',
-      via: 'Oral',
-      dosis: '20 mg',
-      prescripcion: 'Con receta',
-      comercializado: true,
-      badgeClass: 'demo-badge-apto'
-    },
-    {
-      cn: '689102',
-      nombre: 'ENALAPRIL NORMON 20 mg comprimidos EFG',
-      laboratorio: 'LABORATORIOS NORMON S.A.',
-      apto: false,
-      tipo: 'Requiere Reenvasado (Envase Multidosis)',
-      via: 'Oral',
-      dosis: '20 mg',
-      prescripcion: 'Con receta',
-      comercializado: true,
-      badgeClass: 'demo-badge-reenvasado'
-    }
-  ];
-
-  const mockExcelRows = [
-    { cn: '689102', nombre: 'ENALAPRIL NORMON 20mg', estado: 'Requiere Reenvasado', sugNombre: 'ENALAPRIL KERN PHARMA 20mg Blíster Unitario', sugCn: '702114', ahorro: '94% Tiempo' },
-    { cn: '712384', nombre: 'OMEPRAZOL CINFA 20mg', estado: 'Apto Blíster', sugNombre: '— (Ya es Apto de Fábrica)', sugCn: '—', ahorro: 'Directo en SDMDU' },
-    { cn: '654321', nombre: 'PARACETAMOL STADA 1g', estado: 'Apto Blíster', sugNombre: '— (Ya es Apto de Fábrica)', sugCn: '—', ahorro: 'Directo en SDMDU' },
+    { cn: '654321', nombre: 'PARACETAMOL STADA 1 g comprimidos EFG', lab: 'STADA SL', via: 'Oral', dosis: '1000 mg', apto: true, tipo: 'Compatible con SDMDU', badge: 'demo-badge--apto' },
+    { cn: '712384', nombre: 'OMEPRAZOL CINFA 20 mg cápsulas duras EFG', lab: 'CINFA S.A.', via: 'Oral', dosis: '20 mg', apto: true, tipo: 'Compatible con SDMDU', badge: 'demo-badge--apto' },
+    { cn: '689102', nombre: 'ENALAPRIL NORMON 20 mg comprimidos EFG', lab: 'NORMON S.A.', via: 'Oral', dosis: '20 mg', apto: false, tipo: 'Requiere Reenvasado', badge: 'demo-badge--reenvasado' },
   ];
 
   const mockShortages = [
-    { cn: '698123', nombre: 'AMOXICILINA NORMON 500mg cápsulas', inicio: '15/07/2026', finPrevista: '30/08/2026', estado: 'En desabastecimiento oficial AEMPS' },
-    { cn: '723910', nombre: 'VALSARTAN QUALIGEN 160mg comprimidos', inicio: '02/08/2026', finPrevista: '15/09/2026', estado: 'Suministro limitado por laboratorio' },
+    { cn: '698123', nombre: 'AMOXICILINA NORMON 500mg cápsulas', inicio: '15/07/2026', fin: '30/08/2026', estado: 'Desabastecimiento oficial AEMPS' },
+    { cn: '723910', nombre: 'VALSARTAN QUALIGEN 160mg comprimidos', inicio: '02/08/2026', fin: '15/09/2026', estado: 'Suministro limitado por laboratorio' },
   ];
 
-  const filteredMeds = mockMeds.filter(m => 
-    m.nombre.toLowerCase().includes(simSearchQuery.toLowerCase()) || 
-    m.cn.includes(simSearchQuery)
+  const filtered = mockMeds.filter(m =>
+    m.nombre.toLowerCase().includes(simQuery.toLowerCase()) || m.cn.includes(simQuery)
   );
 
   return (
     <div className="landing-page">
-      {/* --- BANNER DE OFICIALIDAD INSTITUCIONAL --- */}
-      <div className="official-top-banner">
-        <span> Plataforma de Diagnóstico Clínico para Servicios de Farmacia Hospitalaria y Unidades de Dosis Unitaria</span>
-        <span className="badge-gov">Sincronización Oficial AEMPS / CIMA</span>
+
+      {/* ── TOP BANNER ── */}
+      <div className="lp-top-banner">
+        <div className="lp-top-banner-dot" />
+        <span>Plataforma oficial para Servicios de Farmacia Hospitalaria y Unidades de Dosis Unitaria (SDMDU)</span>
+        <span className="lp-top-banner-badge">Sincronización AEMPS · CIMA</span>
       </div>
 
-      {/* --- NAVBAR --- */}
-      <nav className="landing-nav">
-        <div className="landing-logo">
-          <ShieldCheck size={30} color="#0284c7" />
-          <span>BlisterCheck</span>
-          <span className="landing-logo-badge">v4.2 Oficial</span>
+      {/* ── NAVBAR ── */}
+      <nav className={`lp-nav${scrolled ? ' scrolled' : ''}`}>
+        <a href="#" className="lp-logo">
+          <img src="/blistercheck_logo.jpg" alt="BlisterCheck" className="lp-logo-img" />
+        </a>
+        <div className="lp-nav-links">
+          <a href="#funciones">Funciones</a>
+          <a href="#demo">Demo</a>
+          <a href="#como-funciona">Cómo funciona</a>
+          <a href="#seguridad">Seguridad</a>
         </div>
-
-        <div className="landing-nav-links">
-          <a href="#demostrador">Buscador AEMPS</a>
-          <a href="#optimizador">Optimizador Excel</a>
-          <a href="#desabastecimientos">Alertas CIMA</a>
-          <a href="#garantias">Seguridad RLS</a>
-        </div>
-
-        <div className="landing-nav-actions">
-          <button className="btn-nav-login" onClick={onLogin}>
-            Iniciar Sesión
-          </button>
-          <button className="btn-nav-register" onClick={onRegister}>
-            Acceso Institucional
-          </button>
+        <div className="lp-nav-actions">
+          <button className="lp-btn-login" onClick={onLogin}>Iniciar Sesión</button>
+          <button className="lp-btn-register" onClick={onRegister}>Registrarse</button>
         </div>
       </nav>
 
-      {/* --- HERO SECTION --- */}
-      <header className="landing-hero">
-        <div className="hero-pill">
-          <Sparkles size={16} />
-          <span>Farmacia Hospitalaria & SDMDU</span>
-        </div>
-
-        <h1>
-          Gestión Inteligente de Blíster y <br />
-          <span className="gradient-text">Acondicionamiento Primario de Medicamentos</span>
-        </h1>
-
-        <p>
-          BlisterCheck es la solución clínica que conecta en tiempo real el catálogo de la Agencia Española de Medicamentos (AEMPS) con los sistemas de dosificación hospitalaria (SDMDU/SPD). Identifique qué presentaciones son aptas para blíster unitario, elimine reenvasados innecesarios y optimice su guía farmacoterapéutica.
-        </p>
-
-        <div className="hero-ctas">
-          <button className="btn-hero-primary" onClick={onRegister}>
-            Crear Cuenta de Centro / Servicio <ArrowRight size={20} />
-          </button>
-          <button className="btn-hero-secondary" onClick={onLogin}>
-            Acceder a Mi Farmacia
-          </button>
-        </div>
-      </header>
-
-      {/* --- INTERACTIVE LIVE APP PREVIEW SIMULATOR --- */}
-      <section className="preview-simulator-section" id="demostrador">
-        <div className="browser-mockup-wrapper">
-          {/* Barra de título de la app */}
-          <div className="browser-header-bar">
-            <div className="browser-dots">
-              <span className="dot dot-red"></span>
-              <span className="dot dot-yellow"></span>
-              <span className="dot dot-green"></span>
+      {/* ── HERO ── */}
+      <div className="lp-hero-wrapper">
+        <div className="lp-hero">
+          <div className="lp-hero-left">
+            <div className="lp-hero-pill">
+              <div className="lp-hero-pill-dot" />
+              Conectado con AEMPS en tiempo real
             </div>
-            <div className="browser-url-input">
-              <Lock size={12} color="#059669" />
-              <span>https://blistercheck.app/farmacia-hospitalaria/dashboard</span>
+            <h1>
+              La plataforma definitiva para clasificar medicamentos en{' '}
+              <span className="highlight">blíster unitario</span>
+            </h1>
+            <p className="lp-hero-sub">
+              BlisterCheck analiza automáticamente el catálogo oficial de la AEMPS para indicar en segundos si un medicamento es apto para el SDMDU, requiere reenvasado o reetiquetado. Ahorra horas de trabajo a tu equipo de farmacia.
+            </p>
+            <div className="lp-hero-ctas">
+              <button className="lp-btn-primary" onClick={onRegister}>
+                Crear cuenta gratuita <ArrowRight size={18} />
+              </button>
+              <button className="lp-btn-ghost" onClick={() => document.getElementById('demo').scrollIntoView({ behavior: 'smooth' })}>
+                <Sparkles size={16} /> Ver demostración
+              </button>
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-              🟢 Conectado con AEMPS API
+            <div className="lp-hero-stats">
+              <div className="lp-hero-stat">
+                <span className="lp-hero-stat-val">27<span>.000+</span></span>
+                <span className="lp-hero-stat-label">Presentaciones AEMPS</span>
+              </div>
+              <div className="lp-hero-stat">
+                <span className="lp-hero-stat-val">3<span> tipos</span></span>
+                <span className="lp-hero-stat-label">Reenvasado, reetiquetado y aptos para SDMDU</span>
+              </div>
+              <div className="lp-hero-stat">
+                <span className="lp-hero-stat-val">100<span>%</span></span>
+                <span className="lp-hero-stat-label">Datos oficiales</span>
+              </div>
             </div>
           </div>
-
-          {/* Pestañas de funciones reales de la app */}
-          <div className="sim-tabs-bar">
-            <button 
-              className={`sim-tab-btn ${activeSimTab === 'search' ? 'active' : ''}`}
-              onClick={() => setActiveSimTab('search')}
-            >
-              <Search size={16} /> 1. Buscador AEMPS y Clasificación
-            </button>
-            <button 
-              className={`sim-tab-btn ${activeSimTab === 'optimizer' ? 'active' : ''}`}
-              onClick={() => setActiveSimTab('optimizer')}
-            >
-              <FileSpreadsheet size={16} /> 2. Optimizador de Guía Excel
-            </button>
-            <button 
-              className={`sim-tab-btn ${activeSimTab === 'shortages' ? 'active' : ''}`}
-              onClick={() => setActiveSimTab('shortages')}
-            >
-              <AlertTriangle size={16} /> 3. Alertas Desabastecimiento CIMA
-            </button>
-            <button 
-              className={`sim-tab-btn ${activeSimTab === 'stats' ? 'active' : ''}`}
-              onClick={() => setActiveSimTab('stats')}
-            >
-              <BarChart3 size={16} /> 4. Métricas e Idoneidad SDMDU
-            </button>
-          </div>
-
-          {/* Viewport interactivo con la UI Real */}
-          <div className="sim-content-viewport">
-            {activeSimTab === 'search' && (
-              <div className="demo-card-container">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0b192c' }}>Catálogo Oficial de Medicamentos AEMPS</h3>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                      25.400+ registros sincronizados. Pruebe a buscar por nombre o Código Nacional:
-                    </p>
-                  </div>
-                  <span style={{ fontSize: '0.78rem', backgroundColor: '#e0f2fe', color: '#0284c7', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>
-                    Interactivo
-                  </span>
-                </div>
-
-                <div className="demo-search-header">
-                  <div className="demo-search-input">
-                    <Search size={18} color="#64748b" />
-                    <input 
-                      type="text" 
-                      value={simSearchQuery} 
-                      onChange={(e) => setSimSearchQuery(e.target.value)}
-                      placeholder="Ej: Paracetamol, Omeprazol, Enalapril, 654321..."
-                      style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '0.95rem', color: '#0f172a' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="demo-med-grid">
-                  {filteredMeds.map(med => (
-                    <div className="demo-med-card" key={med.cn}>
-                      <div className="demo-med-thumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#eff6ff', color: '#1e40af' }}>
-                        <Pill size={32} />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b' }}>CN: {med.cn}</span>
-                          <span className={med.badgeClass}>
-                            {med.apto ? <Check size={12} /> : <AlertTriangle size={12} />}
-                            {med.tipo}
-                          </span>
-                        </div>
-                        <h4 style={{ margin: '0 0 6px', fontSize: '0.95rem', color: '#0b192c', fontWeight: 800 }}>{med.nombre}</h4>
-                        <div style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                          <span><strong>Lab:</strong> {med.laboratorio}</span>
-                          <span><strong>Vía:</strong> {med.via}</span>
-                          <span><strong>Dosis:</strong> {med.dosis}</span>
-                        </div>
-                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '12px', fontSize: '0.78rem', color: '#0284c7', fontWeight: 700 }}>
-                          <span style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={13} /> Ficha Técnica PDF</span>
-                          <span style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}><ExternalLink size={13} /> Prospecto AEMPS</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {filteredMeds.length === 0 && (
-                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', gridColumn: '1 / -1' }}>
-                      Sin resultados coincidentes. Pruebe a buscar "Paracetamol", "Omeprazol" o "Enalapril".
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeSimTab === 'optimizer' && (
-              <div className="demo-card-container">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0b192c' }}>Optimizador de Guía Farmacoterapéutica (Excel / CSV)</h3>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                      Analiza automáticamente miles de medicamentos y sugiere equivalentes con blíster unitario de fábrica:
-                    </p>
-                  </div>
-                  <button className="btn-hero-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-                    <FileSpreadsheet size={16} /> Cargar Archivo Excel
-                  </button>
-                </div>
-
-                <div className="demo-table-wrapper">
-                  <table className="demo-table">
-                    <thead>
-                      <tr>
-                        <th>CN Guía</th>
-                        <th>Medicamento Solicitado</th>
-                        <th>Acondicionamiento Actual</th>
-                        <th>Sugerencia Directa de Fábrica</th>
-                        <th>Impacto en SDMDU</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mockExcelRows.map((row, idx) => (
-                        <tr key={idx}>
-                          <td><strong>{row.cn}</strong></td>
-                          <td>{row.nombre}</td>
-                          <td>
-                            <span className={row.estado === 'Apto Blíster' ? 'demo-badge-apto' : 'demo-badge-reenvasado'}>
-                              {row.estado}
-                            </span>
-                          </td>
-                          <td style={{ color: '#0284c7', fontWeight: row.sugCn !== '—' ? 700 : 400 }}>
-                            {row.sugNombre}
-                          </td>
-                          <td>
-                            <span style={{ background: '#eff6ff', color: '#1e40af', padding: '4px 8px', borderRadius: '6px', fontWeight: 700, fontSize: '0.78rem' }}>
-                              {row.ahorro}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {activeSimTab === 'shortages' && (
-              <div className="demo-card-container">
-                <div style={{ marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0b192c', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <AlertTriangle color="#d97706" size={20} /> Alertas de Desabastecimiento en Tiempo Real (CIMA)
-                  </h3>
-                  <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                    Monitorización automática para evitar rupturas de stock en la farmacia del hospital:
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {mockShortages.map((item, idx) => (
-                    <div key={idx} style={{ border: '1px solid #fef3c7', background: '#fffbeb', borderRadius: '8px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#b45309' }}>CN {item.cn}</span>
-                        <h4 style={{ margin: '2px 0 4px', fontSize: '0.95rem', color: '#92400e' }}>{item.nombre}</h4>
-                        <span style={{ fontSize: '0.8rem', color: '#78350f' }}>{item.estado}</span>
-                      </div>
-                      <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#92400e' }}>
-                        <div><strong>Inicio:</strong> {item.inicio}</div>
-                        <div><strong>Previsto:</strong> {item.finPrevista}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeSimTab === 'stats' && (
-              <div className="demo-card-container">
-                <h3 style={{ margin: '0 0 16px', fontSize: '1.2rem', color: '#0b192c' }}>Cuadro de Mando de Idoneidad en Stock</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 900, color: '#059669' }}>78.4%</span>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>Apto Blíster de Fábrica</p>
-                  </div>
-                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 900, color: '#d97706' }}>18.2%</span>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>Reenvasado Interno</p>
-                  </div>
-                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2rem', fontWeight: 900, color: '#0284c7' }}>3.4%</span>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 700 }}>Reetiquetado Unidosis</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* --- TRUST BAR --- */}
-      <div className="trust-bar">
-        <div className="trust-bar-container">
-          <div className="trust-item">
-            <h4>+25.000</h4>
-            <p>Presentaciones Oficiales AEMPS</p>
-          </div>
-          <div className="trust-item">
-            <h4>100% Rigor</h4>
-            <p>Sincronización API CIMA Directa</p>
-          </div>
-          <div className="trust-item">
-            <h4>Ahorro Clínico</h4>
-            <p>Reducción de Costes de Reenvasado</p>
-          </div>
-          <div className="trust-item">
-            <h4>SDMDU & SPD</h4>
-            <p>Idoneidad Inmediata de Blíster</p>
+          <div className="lp-hero-right">
+            <img src="/dashboard_mockup.jpg" alt="Dashboard BlisterCheck" className="lp-hero-mockup" />
           </div>
         </div>
       </div>
 
-      {/* --- SECCIÓN 1: BUSCADOR AEMPS --- */}
-      <section className="landing-section" id="optimizador">
-        <div className="section-header">
-          <span className="section-tag">Diagnóstico Clínico Avanzado</span>
-          <h2>Búsqueda e Inspección de Medicamentos</h2>
-          <p>
-            Consulte instantáneamente cualquier Código Nacional o principio activo y obtenga una evaluación técnica del blíster primario.
+      {/* ── TRUST BAR ── */}
+      <div className="lp-trust-bar">
+        <div className="lp-trust-inner">
+          <div className="lp-trust-item">
+            <div className="lp-trust-icon" style={{ background: '#eff6ff', color: '#1e40af' }}><Database size={20} /></div>
+            <h4>AEMPS Oficial</h4>
+            <p>Catálogo CIMA sincronizado</p>
+          </div>
+          <div className="lp-trust-item">
+            <div className="lp-trust-icon" style={{ background: '#f0fdf4', color: '#065f46' }}><CheckCircle2 size={20} /></div>
+            <h4>Clasificación SDMDU</h4>
+            <p>Apto · Reenvasado · Reetiquetado</p>
+          </div>
+          <div className="lp-trust-item">
+            <div className="lp-trust-icon" style={{ background: '#fefce8', color: '#92400e' }}><AlertTriangle size={20} /></div>
+            <h4>Alertas CIMA</h4>
+            <p>Desabastecimientos en tiempo real</p>
+          </div>
+          <div className="lp-trust-item">
+            <div className="lp-trust-icon" style={{ background: '#fdf4ff', color: '#7e22ce' }}><Lock size={20} /></div>
+            <h4>Datos Protegidos</h4>
+            <p>Aislamiento RLS por hospital</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── PROBLEMA / SOLUCIÓN ── */}
+      <div className="lp-section" id="funciones">
+        <div className="lp-container">
+          <div className="lp-section-header-center" style={{ marginBottom: '56px' }}>
+            <div className="lp-section-tag">El problema que resolvemos</div>
+            <h2 className="lp-section-title">La gestión del SDMDU es compleja.<br />BlisterCheck la simplifica.</h2>
+          </div>
+          <div className="lp-problem-grid">
+            <div className="lp-problem-card">
+              <h3><span style={{ fontSize: '1.3rem' }}>❌</span> Sin BlisterCheck</h3>
+              <ul className="lp-problem-list">
+                {[
+                  'Horas revisando manualmente cada presentación del catálogo',
+                  'Incertidumbre sobre qué medicamentos necesitan reenvasado',
+                  'Guías farmacoterapéuticas desactualizadas o incompletas',
+                  'Sin visibilidad sobre desabastecimientos hasta que ocurren',
+                  'Informes para la Comisión de Farmacia lentos y manuales',
+                  'Sin registro privado del inventario propio del hospital',
+                ].map((t, i) => (
+                  <li key={i}>
+                    <span style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px', fontSize: '1rem' }}>✗</span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="lp-problem-card lp-problem-card--solution">
+              <h3><span style={{ fontSize: '1.3rem' }}>✅</span> Con BlisterCheck</h3>
+              <ul className="lp-problem-list">
+                {[
+                  'Clasificación instantánea de cualquier CN: apto, reenvasado o reetiquetado',
+                  'Búsqueda inteligente por nombre, principio activo o Código Nacional',
+                  'Optimizador que analiza tu guía Excel entera en segundos',
+                  'Alertas de desabastecimiento CIMA en tiempo real',
+                  'Exportación a Excel/CSV con un clic para la Comisión de Farmacia',
+                  'Inventario privado "En mi farmacia" con carga masiva desde Excel',
+                ].map((t, i) => (
+                  <li key={i}>
+                    <span style={{ color: '#059669', flexShrink: 0, marginTop: '2px', fontSize: '1rem' }}>✓</span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── FEATURES GRID ── */}
+      <div className="lp-section lp-section--alt">
+        <div className="lp-container">
+          <div className="lp-section-header-center" style={{ marginBottom: '56px' }}>
+            <div className="lp-section-tag">Funcionalidades</div>
+            <h2 className="lp-section-title">Todo lo que necesita tu<br />servicio de farmacia</h2>
+            <p className="lp-section-sub" style={{ textAlign: 'center' }}>
+              Cuatro herramientas integradas diseñadas específicamente para el flujo de trabajo de la farmacia hospitalaria española.
+            </p>
+          </div>
+          <div className="lp-features-grid">
+            {[
+              {
+                icon: '🔍', bg: '#eff6ff',
+                title: 'Catálogo AEMPS completo',
+                desc: 'Accede a más de 27.000 presentaciones comercializadas en España. Busca por nombre, principio activo o Código Nacional y obtén la clasificación SDMDU en un instante.',
+                bullets: ['Clasificación: Apto · Reenvasado · Reetiquetado', 'Ficha técnica y prospecto oficial AEMPS', 'Filtros por vía, forma farmacéutica y laboratorio'],
+              },
+              {
+                icon: '📊', bg: '#f0fdf4',
+                title: 'Optimizador de Guía Excel',
+                desc: 'Sube tu guía farmacoterapéutica en formato Excel o CSV y BlisterCheck la analiza entera automáticamente, sugiriendo alternativas ya envasadas en blíster unitario de fábrica.',
+                bullets: ['Análisis de miles de registros en segundos', 'Sugerencias de equivalentes de fábrica', 'Informe descargable para la Comisión de Farmacia'],
+              },
+              {
+                icon: '🏥', bg: '#fdf4ff',
+                title: 'Inventario privado de tu hospital',
+                desc: 'Marca los medicamentos que dispones en tu farmacia como "En mi farmacia". Importa tu listado desde Excel con un solo clic y mantén siempre actualizado tu stock.',
+                bullets: ['Marcado individual o carga masiva desde Excel', 'Notas privadas por medicamento', 'Estadísticas de cobertura de tu inventario'],
+              },
+              {
+                icon: '⚠️', bg: '#fefce8',
+                title: 'Alertas de desabastecimiento',
+                desc: 'Monitorización automática de las comunicaciones oficiales de suministro de la AEMPS. Anticípate a las rupturas de stock antes de que afecten a tu servicio.',
+                bullets: ['Alertas en tiempo real desde CIMA', 'Fechas de inicio y fin previstas', 'Integrado en la ficha de cada medicamento'],
+              },
+            ].map((f, i) => (
+              <div className="lp-feature-card" key={i}>
+                <div className="lp-feature-icon" style={{ background: f.bg }}>
+                  <span style={{ fontSize: '1.6rem' }}>{f.icon}</span>
+                </div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+                <ul className="lp-feature-bullets">
+                  {f.bullets.map((b, j) => (
+                    <li key={j}><CheckCircle2 size={14} style={{ color: '#059669', flexShrink: 0 }} />{b}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── DEMO INTERACTIVA ── */}
+      <div className="lp-section lp-section--dark" id="demo">
+        <div className="lp-container">
+          <div className="lp-section-header-center" style={{ marginBottom: '48px' }}>
+            <div className="lp-section-tag">
+              <span style={{ color: '#0ea5e9', fontWeight: 800, fontSize: '0.78rem', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                <span style={{ display: 'inline-block', width: 18, height: 2, background: '#0ea5e9', borderRadius: 2 }} />
+                Demo interactiva
+              </span>
+            </div>
+            <h2 className="lp-section-title" style={{ color: 'white' }}>Así se ve BlisterCheck por dentro</h2>
+            <p className="lp-section-sub" style={{ textAlign: 'center', color: '#94a3b8' }}>
+              Interfaz real de la aplicación. Explora el buscador, la ficha de medicamento, las alertas y el cuadro de mando.
+            </p>
+          </div>
+
+          {/* Marco de navegador */}
+          <div className="lp-demo-wrapper">
+            <div className="lp-demo-header">
+              <div className="lp-demo-dots">
+                <div className="lp-demo-dot lp-demo-dot--red" />
+                <div className="lp-demo-dot lp-demo-dot--yellow" />
+                <div className="lp-demo-dot lp-demo-dot--green" />
+              </div>
+              <div className="lp-demo-url">
+                <Lock size={11} style={{ color: '#10b981' }} />
+                https://blistercheck.app/catalogo
+              </div>
+              <div className="lp-demo-status">
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                AEMPS conectado
+              </div>
+            </div>
+
+            {/* Pestañas */}
+            <div className="lp-demo-tabs">
+              {[
+                { key: 'search', label: 'Buscador', icon: <Search size={14} /> },
+                { key: 'detalle', label: 'Ficha del medicamento', icon: <ShieldCheck size={14} /> },
+                { key: 'shortages', label: 'Alertas CIMA', icon: <AlertTriangle size={14} /> },
+                { key: 'stats', label: 'Estadísticas', icon: <BarChart3 size={14} /> },
+              ].map(t => (
+                <button key={t.key} className={`lp-demo-tab${activeTab === t.key ? ' active' : ''}`} onClick={() => setActiveTab(t.key)}>
+                  {t.icon} {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Viewport */}
+            <div className="lp-demo-viewport">
+
+              {/* TAB: Buscador */}
+              {activeTab === 'search' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>Catálogo BlisterCheck</h3>
+                      <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#64748b' }}>27.553 presentaciones · Busca por nombre, principio activo o CN</p>
+                    </div>
+                    <span style={{ background: '#eff6ff', color: '#1e40af', fontSize: '0.72rem', fontWeight: 700, padding: '4px 10px', borderRadius: 6 }}>Demo interactiva</span>
+                  </div>
+                  <div className="demo-search-bar">
+                    <Search size={17} style={{ color: '#94a3b8' }} />
+                    <input type="text" value={simQuery} onChange={e => setSimQuery(e.target.value)} placeholder="Busca por nombre, principio activo o Código Nacional…" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {filtered.length === 0
+                      ? <p style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>Sin resultados. Prueba "Paracetamol", "Omeprazol" o "Enalapril".</p>
+                      : filtered.map(m => (
+                          <div key={m.cn} style={{ display: 'flex', alignItems: 'stretch', background: 'white', border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', cursor: 'pointer' }}>
+                            <div style={{ width: 5, flexShrink: 0, background: m.apto ? '#10b981' : '#f59e0b' }} />
+                            <div style={{ padding: '12px 16px', flex: 1 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                  <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700 }}>CN {m.cn}</span>
+                                  {m.apto && <span style={{ background: '#f0fdf4', color: '#065f46', padding: '2px 8px', borderRadius: 6, fontSize: '0.7rem', fontWeight: 700 }}>Candidato SDMDU</span>}
+                                </div>
+                                <span className={`demo-badge ${m.badge}`}>
+                                  {m.apto ? <Check size={11} /> : <AlertTriangle size={11} />}
+                                  {m.tipo}
+                                </span>
+                              </div>
+                              <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#0f172a', marginBottom: 5 }}>{m.nombre}</div>
+                              <div style={{ display: 'flex', gap: 14, fontSize: '0.78rem', color: '#64748b' }}>
+                                <span><strong style={{ color: '#94a3b8' }}>Lab:</strong> {m.lab}</span>
+                                <span><strong style={{ color: '#94a3b8' }}>Dosis:</strong> {m.dosis}</span>
+                                <span><strong style={{ color: '#94a3b8' }}>Vía:</strong> {m.via}</span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12, color: '#cbd5e1', fontSize: '1.2rem', fontWeight: 700 }}>›</div>
+                          </div>
+                        ))
+                    }
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: Ficha del medicamento */}
+              {activeTab === 'detalle' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  {/* Columna izquierda */}
+                  <div style={{ background: '#f8fafc', borderRadius: 12, padding: 20, border: '1px solid #e2e8f0' }}>
+                    <button style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: '#0284c7', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer', marginBottom: 14, padding: 0 }}>
+                      ‹ Volver a resultados
+                    </button>
+                    <h3 style={{ margin: '0 0 8px', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>PARACETAMOL STADA 1 g comprimidos EFG</h3>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#eff6ff', color: '#1d4ed8', padding: '3px 10px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700, marginBottom: 14 }}>
+                      💊 Candidato para SDMDU por forma farmacéutica
+                    </div>
+                    {[
+                      ['Cód. Nacional', '654321'], ['Laboratorio', 'STADA SL'], ['Dosis', '1000 mg'],
+                      ['Principio activo', 'Paracetamol'], ['Forma farmacéutica', 'COMPRIMIDO'],
+                      ['Vía de adm.', 'Oral'], ['Prescripción', 'Con receta médica'],
+                    ].map(([k, v]) => (
+                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', padding: '6px 0', fontSize: '0.82rem' }}>
+                        <span style={{ color: '#64748b', fontWeight: 600 }}>{k}</span>
+                        <span style={{ color: '#0f172a', fontWeight: 700, fontFamily: k === 'Cód. Nacional' ? 'monospace' : 'inherit' }}>{v}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                      <a href="#" style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, padding: '7px 12px', fontSize: '0.78rem', color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}>📄 Ficha Técnica</a>
+                      <a href="#" style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, padding: '7px 12px', fontSize: '0.78rem', color: '#0284c7', fontWeight: 700, textDecoration: 'none' }}>📖 Prospecto</a>
+                    </div>
+                  </div>
+                  {/* Columna derecha: clasificación */}
+                  <div style={{ background: '#f8fafc', borderRadius: 12, padding: 20, border: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e40af' }}>
+                        <ShieldCheck size={16} />
+                      </div>
+                      <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>Clasificación BlisterCheck</h3>
+                    </div>
+                    {[
+                      { label: 'Requiere Reenvasado', desc: 'El envase original no es apto para dosis unitaria', val: false },
+                      { label: 'Requiere Reetiquetado', desc: 'Necesita etiqueta adicional con nombre, lote o caducidad', val: false },
+                      { label: 'Compatible con SDMDU', desc: 'Blíster fraccionable correctamente identificado', val: true },
+                    ].map((item, i) => (
+                      <div key={i} style={{ borderBottom: i < 2 ? '1px solid #e2e8f0' : 'none', paddingBottom: i < 2 ? 12 : 0, marginBottom: i < 2 ? 12 : 0 }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: 3 }}>{item.label}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 7 }}>{item.desc}</div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          {[
+                            { l: 'Sí', active: item.val === true, col: '#059669', bg: '#f0fdf4' },
+                            { l: 'No', active: item.val === false, col: '#dc2626', bg: '#fef2f2' },
+                            { l: '—', active: item.val === null, col: '#64748b', bg: '#f1f5f9' },
+                          ].map((b, j) => (
+                            <span key={j} style={{ padding: '4px 12px', borderRadius: 6, fontSize: '0.78rem', fontWeight: 700, background: b.active ? b.bg : '#f8fafc', color: b.active ? b.col : '#94a3b8', border: `1px solid ${b.active ? b.col + '40' : '#e2e8f0'}`, cursor: 'pointer' }}>
+                              {b.l}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 4, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={12} color="white" />
+                        </div>
+                        En mi farmacia
+                      </label>
+                      <button style={{ background: 'linear-gradient(135deg, #0b192c, #0284c7)', color: 'white', border: 'none', borderRadius: 8, padding: '8px 18px', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}>
+                        Guardar clasificación
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: Alertas CIMA */}
+              {activeTab === 'shortages' && (
+                <div>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <AlertTriangle size={18} style={{ color: '#f59e0b' }} /> Alertas de Desabastecimiento (CIMA)
+                    </h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#64748b' }}>Monitorización automática de la AEMPS para evitar rupturas de stock</p>
+                  </div>
+                  {mockShortages.map((item, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'stretch', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, overflow: 'hidden', marginBottom: 10 }}>
+                      <div style={{ width: 5, background: '#f59e0b', flexShrink: 0 }} />
+                      <div style={{ padding: '14px 18px', flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#92400e' }}>⚠️ CN {item.cn}</span>
+                          <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#78350f', margin: '3px 0' }}>{item.nombre}</div>
+                          <span style={{ fontSize: '0.78rem', color: '#92400e' }}>{item.estado}</span>
+                        </div>
+                        <div style={{ textAlign: 'right', fontSize: '0.78rem', color: '#92400e' }}>
+                          <div><strong>Inicio:</strong> {item.inicio}</div>
+                          <div><strong>Previsto:</strong> {item.fin}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* TAB: Estadísticas */}
+              {activeTab === 'stats' && (
+                <div>
+                  <h3 style={{ margin: '0 0 20px', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>Cuadro de Mando — Idoneidad SDMDU</h3>
+                  <div className="demo-stats-grid">
+                    <div className="demo-stat-card" style={{ borderTop: '3px solid #10b981' }}>
+                      <span className="val" style={{ color: '#059669' }}>78.4%</span>
+                      <span className="lbl">Compatible con SDMDU</span>
+                    </div>
+                    <div className="demo-stat-card" style={{ borderTop: '3px solid #f59e0b' }}>
+                      <span className="val" style={{ color: '#d97706' }}>18.2%</span>
+                      <span className="lbl">Requiere Reenvasado</span>
+                    </div>
+                    <div className="demo-stat-card" style={{ borderTop: '3px solid #0284c7' }}>
+                      <span className="val" style={{ color: '#0284c7' }}>3.4%</span>
+                      <span className="lbl">Requiere Reetiquetado</span>
+                    </div>
+                  </div>
+                  <div style={{ background: '#f0fdf4', borderRadius: 10, padding: '14px 18px', border: '1px solid #a7f3d0', marginTop: 16, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <CheckCircle2 size={18} style={{ color: '#059669', flexShrink: 0, marginTop: 2 }} />
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#065f46', fontWeight: 500, lineHeight: 1.55 }}>
+                      <strong>Resultado del análisis:</strong> El 78.4% de tu stock puede dispensarse directamente en SDMDU sin manipulación adicional. Se han identificado 42 medicamentos candidatos a sustitución por equivalentes con blíster unitario de fábrica.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+            </div>{/* /lp-demo-viewport */}
+          </div>{/* /lp-demo-wrapper */}
+        </div>{/* /lp-container */}
+      </div>{/* /lp-section--dark */}
+
+      {/* ── CÓMO FUNCIONA ── */}
+      <div className="lp-section lp-section--alt" id="como-funciona">
+        <div className="lp-container">
+          <div className="lp-section-header-center" style={{ marginBottom: '64px' }}>
+            <div className="lp-section-tag">Proceso</div>
+            <h2 className="lp-section-title">Tres pasos para optimizar tu SDMDU</h2>
+          </div>
+          <div className="lp-steps">
+            {[
+              { num: '1', title: 'Busca o sube tu guía', desc: 'Busca medicamentos individualmente por nombre o Código Nacional, o sube toda tu guía farmacoterapéutica en formato Excel.' },
+              { num: '2', title: 'BlisterCheck clasifica', desc: 'Nuestro motor cruza los datos con el catálogo oficial AEMPS y clasifica automáticamente cada presentación: Apta, Reenvasado o Reetiquetado.' },
+              { num: '3', title: 'Exporta e implementa', desc: 'Descarga el informe completo en Excel, compártelo con la Comisión de Farmacia y aplica las optimizaciones directamente en tu stock.' },
+            ].map((s, i) => (
+              <div className="lp-step" key={i}>
+                <div className="lp-step-num">{s.num}</div>
+                <h3>{s.title}</h3>
+                <p>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── SEGURIDAD ── */}
+      <div className="lp-section lp-section--dark" id="seguridad">
+        <div className="lp-container">
+          <div className="lp-section-header-center" style={{ marginBottom: '56px' }}>
+            <div className="lp-section-tag">
+              <span style={{ color: '#0ea5e9', fontWeight: 800, fontSize: '0.78rem', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
+                <span style={{ display: 'inline-block', width: 18, height: 2, background: '#0ea5e9', borderRadius: 2 }} />
+                Infraestructura
+              </span>
+            </div>
+            <h2 className="lp-section-title">Seguridad de grado hospitalario</h2>
+            <p className="lp-section-sub" style={{ textAlign: 'center' }}>
+              Los datos de tu hospital son privados, aislados y protegidos bajo los más altos estándares de la industria sanitaria.
+            </p>
+          </div>
+          <div className="lp-security-grid">
+            {[
+              { icon: <Database size={22} />, title: 'Sincronización directa AEMPS', desc: 'Conexión automatizada con la API oficial del CIMA de la Agencia Española de Medicamentos. Los datos están siempre actualizados.' },
+              { icon: <Lock size={22} />, title: 'Aislamiento Multi-Tenant (RLS)', desc: 'Los datos privados de cada hospital están protegidos mediante políticas Row Level Security en base de datos. Nadie más puede ver tu inventario.' },
+              { icon: <RefreshCw size={22} />, title: 'Actualización continua 24/7', desc: 'Las alertas de desabastecimiento y los cambios en el catálogo AEMPS se sincronizan automáticamente. Siempre trabajas con datos en vigor.' },
+            ].map((c, i) => (
+              <div className="lp-security-card" key={i}>
+                <div className="lp-security-icon">{c.icon}</div>
+                <h4>{c.title}</h4>
+                <p>{c.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── CTA FINAL ── */}
+      <div className="lp-cta-section">
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', padding: '6px 16px', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700, color: 'white', marginBottom: 24, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <ShieldCheck size={14} /> Acceso gratuito · Sin tarjeta de crédito
+          </div>
+          <h2 className="lp-section-title" style={{ color: 'white', marginBottom: 16 }}>
+            ¿Listo para optimizar tu servicio de farmacia?
+          </h2>
+          <p style={{ fontSize: '1.08rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, maxWidth: 580, margin: '0 auto 40px' }}>
+            Únete a los farmacéuticos hospitalarios que ya clasifican su catálogo con BlisterCheck y ahorran horas de trabajo cada semana.
           </p>
-        </div>
-
-        <div className="feature-row">
-          <div className="feature-text-content">
-            <div className="feature-icon-badge">
-              <Search size={26} />
-            </div>
-            <h3>Información Técnica Completa y Clasificación SDMDU</h3>
-            <p>
-              Acceda directamente a las fotografías oficiales de envase y forma farmacéutica, prospectos autorizados y fichas técnicas aprobadas por el Ministerio de Sanidad.
-            </p>
-            <ul className="feature-bullet-list">
-              <li><CheckCircle2 size={18} /> Clasificación explícita: Apto Blíster, Reenvasado o Reetiquetado.</li>
-              <li><CheckCircle2 size={18} /> Filtrado por vía de administración y forma farmacéutica.</li>
-              <li><CheckCircle2 size={18} /> Marcado rápido de inventario local ("En mi farmacia").</li>
-            </ul>
-          </div>
-
-          <div className="feature-card-visual">
-            <img src="/images/hero_app_preview.jpg" alt="Buscador AEMPS BlisterCheck" />
-          </div>
-        </div>
-      </section>
-
-      {/* --- SECCIÓN 2: OPTIMIZADOR EXCEL --- */}
-      <section className="landing-section" style={{ backgroundColor: '#ffffff', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-        <div className="section-header">
-          <span className="section-tag">Automatización de Guías Farmacoterapéuticas</span>
-          <h2>Optimizador de Guías en Excel / CSV</h2>
-          <p>
-            Cargue su listado de medicamentos y el motor inteligente diagnosticará toda la guía del hospital en segundos.
-          </p>
-        </div>
-
-        <div className="feature-row reverse">
-          <div className="feature-text-content">
-            <div className="feature-icon-badge">
-              <FileSpreadsheet size={26} />
-            </div>
-            <h3>Sugerencias Directas de Alternativas Comercializadas</h3>
-            <p>
-              Para cada presentación que requiera reenvasado manual, BlisterCheck busca equivalentes con el mismo principio activo que ya vengan en blíster unitario de fábrica.
-            </p>
-            <ul className="feature-bullet-list">
-              <li><CheckCircle2 size={18} /> Análisis por lotes de miles de registros en segundos.</li>
-              <li><CheckCircle2 size={18} /> Reducción drástica del gasto de material y tiempo de personal.</li>
-              <li><CheckCircle2 size={18} /> Informes descargables en Excel listos para la Comisión de Farmacia.</li>
-            </ul>
-          </div>
-
-          <div className="feature-card-visual">
-            <img src="/images/excel_optimizer_preview.jpg" alt="Optimizador de Guía Excel" />
-          </div>
-        </div>
-      </section>
-
-      {/* --- SECCIÓN 3: CUADRO DE MANDO Y ESTADÍSTICAS --- */}
-      <section className="landing-section" id="desabastecimientos">
-        <div className="section-header">
-          <span className="section-tag">Auditoría e Indicadores</span>
-          <h2>Cuadro de Mando y Análisis por Laboratorio</h2>
-          <p>
-            Evalúe cuantitativamente el grado de idoneidad del stock de su centro hospitalario.
-          </p>
-        </div>
-
-        <div className="feature-row">
-          <div className="feature-text-content">
-            <div className="feature-icon-badge">
-              <BarChart3 size={26} />
-            </div>
-            <h3>Informes de Acondicionamiento por Proveedor</h3>
-            <p>
-              Compare la tasa de blíster unitario de los laboratorios proveedores durante los procesos de adquisición y pliegos públicos.
-            </p>
-            <ul className="feature-bullet-list">
-              <li><CheckCircle2 size={18} /> Gráficos de distribución de acondicionado primario.</li>
-              <li><CheckCircle2 size={18} /> Exportación completa a CSV/Excel con 1 clic.</li>
-              <li><CheckCircle2 size={18} /> Control de idoneidad en inventario propio.</li>
-            </ul>
-          </div>
-
-          <div className="feature-card-visual">
-            <img src="/images/stats_dashboard_preview.jpg" alt="Cuadro de Mando Analítico" />
-          </div>
-        </div>
-      </section>
-
-      {/* --- GARANTÍAS INSTITUCIONALES --- */}
-      <section className="landing-section" id="garantias">
-        <div className="section-header">
-          <span className="section-tag">Arquitectura e Infraestructura</span>
-          <h2>Estándares de Seguridad para Entornos Sanitarios</h2>
-          <p>
-            Seguridad de grado hospitalario, actualización continua y aislamiento de datos.
-          </p>
-        </div>
-
-        <div className="grid-3-col">
-          <div className="interactive-card">
-            <div className="card-icon">
-              <Database size={24} />
-            </div>
-            <h4>Sincronización Directa AEMPS</h4>
-            <p>
-              Actualización automatizada con la base de datos oficial de la Agencia Española de Medicamentos.
-            </p>
-          </div>
-
-          <div className="interactive-card">
-            <div className="card-icon">
-              <AlertTriangle size={24} />
-            </div>
-            <h4>Alertas de Desabastecimiento</h4>
-            <p>
-              Notificación inmediata de problemas de suministro comunicados oficialmente para planificar sustituciones.
-            </p>
-          </div>
-
-          <div className="interactive-card">
-            <div className="card-icon">
-              <Lock size={24} />
-            </div>
-            <h4>Aislamiento Multi-Tenant (RLS)</h4>
-            <p>
-              Sus datos e inventario local de farmacia están totalmente protegidos por políticas Row Level Security en base de datos.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* --- BANNER INFERIOR DE ACCESO --- */}
-      <section className="bottom-cta-banner">
-        <div className="bottom-cta-container">
-          <h2>¿Desea optimizar la gestión de SDMDU en su hospital?</h2>
-          <p>
-            Únase a los profesionales de Farmacia Hospitalaria que agilizan el acondicionamiento primario de medicamentos con BlisterCheck.
-          </p>
-
-          <div className="bottom-cta-actions">
-            <button className="btn-hero-primary" onClick={onRegister}>
-              Solicitar Acceso Institucional <ArrowRight size={20} />
+          <div className="lp-cta-actions">
+            <button className="lp-btn-cta-primary" onClick={onRegister}>
+              Crear cuenta gratuita <ArrowRight size={18} />
             </button>
-            <button className="btn-hero-secondary" onClick={onLogin}>
-              Iniciar Sesión
+            <button className="lp-btn-cta-ghost" onClick={onLogin}>
+              Ya tengo cuenta · Iniciar sesión
             </button>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* --- FOOTER OFICIAL --- */}
-      <footer className="landing-footer-main">
-        <div className="footer-logo">
-          <ShieldCheck size={24} color="#0284c7" />
-          <span>BlisterCheck © 2026</span>
+      {/* ── FOOTER ── */}
+      <footer className="lp-footer">
+        <div className="lp-footer-logo">
+          <img src="/blistercheck_logo.jpg" alt="BlisterCheck" style={{ height: 30, borderRadius: 6 }} />
+          <span className="lp-footer-logo-text">Blister<span>Check</span></span>
         </div>
-        <p>Sistema de Optimización de Acondicionamiento Primario de Medicamentos y SDMDU.</p>
+        <p className="lp-footer-copy">
+          © 2026 BlisterCheck · Sistema de Clasificación SDMDU · Datos sincronizados con AEMPS/CIMA
+        </p>
       </footer>
+
     </div>
   );
 }
