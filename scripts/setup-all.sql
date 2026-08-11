@@ -153,17 +153,37 @@ CREATE POLICY "Private user farmacia policy" ON blistercheck_user_farmacia
 
 -- Migración automática si existe la tabla previa de modelo unificado (blistercheck_clasificacion)
 DO $$
+DECLARE
+  has_ec_col BOOLEAN;
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'blistercheck_clasificacion' AND table_type = 'BASE TABLE') THEN
-    -- Copiar criterios globales a la tabla compartida
-    INSERT INTO blistercheck_clasificacion_global (cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, solo_envase_clinico, updated_at)
-    SELECT DISTINCT ON (cn) cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, solo_envase_clinico, updated_at
-    FROM blistercheck_clasificacion
-    ON CONFLICT (cn) DO UPDATE SET
-      requiere_reenvasado = EXCLUDED.requiere_reenvasado,
-      requiere_reetiquetado = EXCLUDED.requiere_reetiquetado,
-      apto_sdmdu_blister = EXCLUDED.apto_sdmdu_blister,
-      solo_envase_clinico = EXCLUDED.solo_envase_clinico;
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns 
+      WHERE table_name = 'blistercheck_clasificacion' AND column_name = 'solo_envase_clinico'
+    ) INTO has_ec_col;
+
+    IF has_ec_col THEN
+      EXECUTE '
+        INSERT INTO blistercheck_clasificacion_global (cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, solo_envase_clinico, updated_at)
+        SELECT DISTINCT ON (cn) cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, solo_envase_clinico, updated_at
+        FROM blistercheck_clasificacion
+        ON CONFLICT (cn) DO UPDATE SET
+          requiere_reenvasado = EXCLUDED.requiere_reenvasado,
+          requiere_reetiquetado = EXCLUDED.requiere_reetiquetado,
+          apto_sdmdu_blister = EXCLUDED.apto_sdmdu_blister,
+          solo_envase_clinico = EXCLUDED.solo_envase_clinico;
+      ';
+    ELSE
+      EXECUTE '
+        INSERT INTO blistercheck_clasificacion_global (cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, updated_at)
+        SELECT DISTINCT ON (cn) cn, requiere_reenvasado, requiere_reetiquetado, apto_sdmdu_blister, updated_at
+        FROM blistercheck_clasificacion
+        ON CONFLICT (cn) DO UPDATE SET
+          requiere_reenvasado = EXCLUDED.requiere_reenvasado,
+          requiere_reetiquetado = EXCLUDED.requiere_reetiquetado,
+          apto_sdmdu_blister = EXCLUDED.apto_sdmdu_blister;
+      ';
+    END IF;
 
     -- Copiar stock y notas privadas a la tabla privada por usuario
     INSERT INTO blistercheck_user_farmacia (cn, user_id, en_mi_farmacia, notas, fecha_clasificacion, updated_at)
