@@ -37,8 +37,17 @@ export async function searchSimple(query) {
 
   // Búsqueda por nombre / principio activo usando RPC con unaccent (insensible a tildes)
   const { data, error } = await supabase.rpc('bc_search_simple', { q });
-  if (error) throw error;
-  return data || [];
+  if (!error) return data || [];
+
+  // Fallback si la función RPC no está creada en Supabase
+  const { data: fallbackData, error: fallbackError } = await supabase
+    .from(CATALOG_TABLE)
+    .select('*')
+    .or(`nombre.ilike.%${q}%,principio_activo.ilike.%${q}%,laboratorio.ilike.%${q}%`)
+    .limit(100);
+
+  if (fallbackError) throw fallbackError;
+  return fallbackData || [];
 }
 
 /**
@@ -84,17 +93,36 @@ export async function searchAvanzado(filtros = {}) {
                                    filtros.soloEnMiFarmacia || 
                                    (filtros.estadoAcondicionamiento && filtros.estadoAcondicionamiento !== 'todos');
 
-  const { data, error } = await supabase.rpc('bc_search_avanzado', {
-    p_cn:                 filtros.cn?.trim()                || null,
-    p_nombre:             filtros.nombre?.trim()            || null,
-    p_principio_activo:   filtros.principioActivo?.trim()   || null,
-    p_laboratorio:        filtros.laboratorio?.trim()       || null,
-    p_forma_farmaceutica: filtros.formaFarmaceutica?.trim() || null,
-    p_via_administracion: filtros.viaAdministracion?.trim() || null,
-    p_solo_clasificados:  requiereEstarClasificado          ?? false,
-  });
+  let data, error;
+  try {
+    const res = await supabase.rpc('bc_search_avanzado', {
+      p_cn:                 filtros.cn?.trim()                || null,
+      p_nombre:             filtros.nombre?.trim()            || null,
+      p_principio_activo:   filtros.principioActivo?.trim()   || null,
+      p_laboratorio:        filtros.laboratorio?.trim()       || null,
+      p_forma_farmaceutica: filtros.formaFarmaceutica?.trim() || null,
+      p_via_administracion: filtros.viaAdministracion?.trim() || null,
+      p_solo_clasificados:  requiereEstarClasificado          ?? false,
+    });
+    data = res.data;
+    error = res.error;
+  } catch (err) {
+    error = err;
+  }
 
-  if (error) throw error;
+  if (error) {
+    let query = supabase.from(CATALOG_TABLE).select('*');
+    if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
+    if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
+    if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
+    if (filtros.laboratorio?.trim()) query = query.ilike('laboratorio', `%${filtros.laboratorio.trim()}%`);
+    if (filtros.formaFarmaceutica?.trim()) query = query.eq('forma_farmaceutica', filtros.formaFarmaceutica.trim());
+    if (filtros.viaAdministracion?.trim()) query = query.eq('via_administracion', filtros.viaAdministracion.trim());
+    const { data: fbData, error: fbErr } = await query.limit(200);
+    if (fbErr) throw fbErr;
+    data = fbData;
+  }
+
   let results = data || [];
 
   // Si hay filtros adicionales que dependen de la clasificación, necesitamos obtenerla

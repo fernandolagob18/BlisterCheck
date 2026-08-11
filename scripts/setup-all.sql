@@ -73,8 +73,8 @@ $$;
 
 -- Tabla 1: Catálogo completo de medicamentos comercializados (sincronizado regularmente)
 CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
-  nregistro              TEXT PRIMARY KEY,
-  cn                     TEXT UNIQUE,
+  cn                     TEXT PRIMARY KEY,
+  nregistro              TEXT NOT NULL,
   nombre                 TEXT NOT NULL,
   laboratorio            TEXT,
   dosis                  TEXT,
@@ -90,16 +90,10 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
   last_sync              TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Asegurarse de que el constraint UNIQUE existe aunque la tabla ya estuviera creada
-DO $$ 
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'blistercheck_catalogo_cn_key') THEN
-    ALTER TABLE blistercheck_catalogo ADD CONSTRAINT blistercheck_catalogo_cn_key UNIQUE (cn);
-  END IF;
-END $$;
+-- Asegurarse de que el índice en nregistro existe
+CREATE INDEX IF NOT EXISTS idx_bc_catalogo_nregistro ON blistercheck_catalogo(nregistro);
 
 -- Tabla 2: Clasificaciones SDMDU del usuario (NUNCA tocada por el cron)
-DROP TABLE IF EXISTS blistercheck_clasificacion CASCADE;
 CREATE TABLE IF NOT EXISTS blistercheck_clasificacion (
   cn                       TEXT REFERENCES blistercheck_catalogo(cn) ON DELETE CASCADE,
   user_id                  UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -177,3 +171,64 @@ CREATE POLICY "Lectura pública de desabastecimientos"
     FOR SELECT
     TO authenticated
     USING (true);
+
+-- =======================================================================
+-- PARTE 4: FUNCIONES DE BÚSQUEDA RPC (bc_search_simple y bc_search_avanzado)
+-- =======================================================================
+
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
+-- RPC: Búsqueda simple
+CREATE OR REPLACE FUNCTION public.bc_search_simple(q text)
+RETURNS SETOF public.blistercheck_catalogo
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT *
+  FROM public.blistercheck_catalogo
+  WHERE 
+    unaccent(nombre) ILIKE '%' || unaccent(q) || '%'
+    OR unaccent(COALESCE(principio_activo, '')) ILIKE '%' || unaccent(q) || '%'
+    OR unaccent(COALESCE(laboratorio, '')) ILIKE '%' || unaccent(q) || '%'
+    OR cn ILIKE q || '%'
+  ORDER BY 
+    CASE WHEN cn ILIKE q || '%' THEN 1 ELSE 2 END,
+    nombre ASC
+  LIMIT 100;
+$$;
+
+-- RPC: Búsqueda avanzada
+CREATE OR REPLACE FUNCTION public.bc_search_avanzado(
+  p_cn text DEFAULT NULL,
+  p_nombre text DEFAULT NULL,
+  p_principio_activo text DEFAULT NULL,
+  p_laboratorio text DEFAULT NULL,
+  p_forma_farmaceutica text DEFAULT NULL,
+  p_via_administracion text DEFAULT NULL,
+  p_solo_clasificados boolean DEFAULT false
+)
+RETURNS SETOF public.blistercheck_catalogo
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT c.*
+  FROM public.blistercheck_catalogo c
+  LEFT JOIN public.blistercheck_clasificacion cl ON c.cn = cl.cn
+  WHERE
+    (p_cn IS NULL OR c.cn ILIKE p_cn || '%')
+    AND (p_nombre IS NULL OR unaccent(c.nombre) ILIKE '%' || unaccent(p_nombre) || '%')
+    AND (p_principio_activo IS NULL OR unaccent(COALESCE(c.principio_activo, '')) ILIKE '%' || unaccent(p_principio_activo) || '%')
+    AND (p_laboratorio IS NULL OR unaccent(COALESCE(c.laboratorio, '')) ILIKE '%' || unaccent(p_laboratorio) || '%')
+    AND (p_forma_farmaceutica IS NULL OR c.forma_farmaceutica = p_forma_farmaceutica OR c.forma_simplificada = p_forma_farmaceutica)
+    AND (p_via_administracion IS NULL OR c.via_administracion = p_via_administracion)
+    AND (
+      NOT p_solo_clasificados OR 
+      (cl.requiere_reenvasado IS NOT NULL OR cl.requiere_reetiquetado IS NOT NULL OR cl.apto_sdmdu_blister IS NOT NULL)
+    )
+  ORDER BY c.nombre ASC
+  LIMIT 200;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.bc_search_simple(text) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.bc_search_avanzado(text, text, text, text, text, text, boolean) TO anon, authenticated, service_role;
+

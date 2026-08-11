@@ -5,8 +5,8 @@
 
 -- Tabla 1: Catálogo completo de medicamentos comercializados (sincronizado cada 14 días)
 CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
-  nregistro              TEXT PRIMARY KEY,
-  cn                     TEXT,
+  cn                     TEXT PRIMARY KEY,
+  nregistro              TEXT NOT NULL,
   nombre                 TEXT NOT NULL,
   laboratorio            TEXT,
   dosis                  TEXT,
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
 
 -- Tabla 2: Clasificaciones SDMDU del usuario (NUNCA tocada por el cron)
 CREATE TABLE IF NOT EXISTS blistercheck_clasificacion (
-  nregistro                TEXT PRIMARY KEY
-                           REFERENCES blistercheck_catalogo(nregistro) ON DELETE CASCADE,
+  cn                       TEXT PRIMARY KEY
+                           REFERENCES blistercheck_catalogo(cn) ON DELETE CASCADE,
   requiere_reenvasado      BOOLEAN DEFAULT NULL,
   requiere_reetiquetado    BOOLEAN DEFAULT NULL,
   apto_sdmdu_blister       BOOLEAN DEFAULT NULL,
