@@ -29,14 +29,22 @@ function ClasificacionBadge({ clasificacion }) {
     );
   }
 
-  if (requiere_reenvasado === true || requiere_reetiquetado === true) {
-    const partes = [];
-    if (requiere_reenvasado) partes.push('Reenvasado');
-    if (requiere_reetiquetado) partes.push('Reetiquetado');
+  if (requiere_reenvasado === true) {
     return (
       <>
         <span className="bc-badge bc-badge--intervencion">
-          <AlertTriangle size={11} /> {partes.join(' + ')}
+          <AlertTriangle size={11} /> Reenvasado
+        </span>
+        {ecPill}
+      </>
+    );
+  }
+
+  if (requiere_reetiquetado === true) {
+    return (
+      <>
+        <span className="bc-badge bc-badge--intervencion">
+          <AlertTriangle size={11} /> Reetiquetado
         </span>
         {ecPill}
       </>
