@@ -12,6 +12,9 @@ import {
   Check,
   RefreshCw,
   Upload,
+  BookOpen,
+  BarChart2,
+  Download,
   ShieldCheck
 } from 'lucide-react';
 import '../../landing.css';
@@ -144,22 +147,22 @@ export default function LandingPage({ onLogin, onRegister }) {
                 </div>
                 <div className="lp-mock-nav-label">Módulos Clínicos</div>
                 {[
-                  { icon: '🔍', label: 'Catálogo CIMA', active: true },
-                  { icon: '📋', label: 'Optimizador Guía', active: false },
-                  { icon: '📊', label: 'Estadísticas', active: false },
+                  { icon: <Search size={14} />, label: 'Catálogo CIMA', active: true },
+                  { icon: <BookOpen size={14} />, label: 'Optimizador Guía', active: false },
+                  { icon: <BarChart2 size={14} />, label: 'Estadísticas', active: false },
                 ].map((item, i) => (
                   <div key={i} className={`lp-mock-nav-item ${item.active ? 'active' : ''}`}>
-                    <span>{item.icon}</span>
+                    <span style={{ display: 'flex' }}>{item.icon}</span>
                     <span>{item.label}</span>
                   </div>
                 ))}
                 <div className="lp-mock-nav-label" style={{ marginTop: 6 }}>Herramientas</div>
                 {[
-                  { icon: '⬆️', label: 'Subir medicamentos' },
-                  { icon: '⬇️', label: 'Exportar Registro' },
+                  { icon: <Upload size={14} />, label: 'Subir medicamentos' },
+                  { icon: <Download size={14} />, label: 'Exportar Registro' },
                 ].map((item, i) => (
                   <div key={i} className="lp-mock-nav-item">
-                    <span>{item.icon}</span>
+                    <span style={{ display: 'flex' }}>{item.icon}</span>
                     <span>{item.label}</span>
                   </div>
                 ))}

@@ -74,6 +74,10 @@ html, body {
   0%, 100% { transform: translateY(0px) rotate(-2deg); }
   50%       { transform: translateY(-12px) rotate(-2deg); }
 }
+@keyframes float3D {
+  0%, 100% { transform: translateY(0px) rotateY(-18deg) rotateX(8deg) rotateZ(-2deg); }
+  50%       { transform: translateY(-16px) rotateY(-14deg) rotateX(10deg) rotateZ(-1deg); }
+}
 @keyframes pulse-ring {
   0%   { box-shadow: 0 0 0 0 var(--cyan-glow); }
   70%  { box-shadow: 0 0 0 14px rgba(14,165,233,0); }
@@ -379,6 +383,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 1200px;
 }
 .lp-hero-app-mockup {
   width: 100%;
@@ -386,9 +391,12 @@ html, body {
   height: 400px;
   background: white;
   border-radius: 12px;
-  box-shadow: var(--shadow-xl), 0 0 80px rgba(14,165,233,0.15);
-  animation: floatY 5s ease-in-out infinite;
-  transform: rotate(-2deg);
+  box-shadow: 
+    -20px 30px 60px rgba(11,25,44,0.3),
+    0 0 80px rgba(14,165,233,0.15);
+  animation: float3D 6s ease-in-out infinite;
+  transform: rotateY(-18deg) rotateX(8deg) rotateZ(-2deg);
+  transform-style: preserve-3d;
   display: flex;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -398,6 +406,7 @@ html, body {
 
 .lp-mock-sidebar {
   width: 180px;
+  flex-shrink: 0;
   background: #f8fafc;
   border-right: 1px solid var(--border);
   padding: 16px 12px;
@@ -430,6 +439,7 @@ html, body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
+  flex-shrink: 0;
   background: #dcfce7;
   color: #14532d;
   display: flex;
@@ -443,6 +453,9 @@ html, body {
   font-weight: 600;
   color: #334155;
   font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lp-mock-urole {
@@ -467,6 +480,7 @@ html, body {
   border-radius: 6px;
   margin-bottom: 4px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .lp-mock-nav-item.active {
@@ -477,6 +491,7 @@ html, body {
 
 .lp-mock-main {
   flex: 1;
+  min-width: 0;
   background: white;
   padding: 20px;
   display: flex;
@@ -514,6 +529,11 @@ html, body {
   border-radius: 8px;
   color: #94a3b8;
   background: #f8fafc;
+}
+.lp-mock-search span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lp-mock-results {
