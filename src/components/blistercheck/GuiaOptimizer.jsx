@@ -113,10 +113,14 @@ export default function GuiaOptimizer() {
         }
       }
 
-      // 5. Calcular puntuación (basada solo en los analizados - orales)
+      // 5. Calcular puntuación (basada solo en los medicamentos que tienen datos de clasificación)
       results.totalAnalizados = results.optimos.length + results.problematicos.length + results.desconocidos.length;
-      if (results.totalAnalizados > 0) {
-        results.score = Math.round((results.optimos.length / results.totalAnalizados) * 100);
+      
+      const totalClasificados = results.optimos.length + results.problematicos.length;
+      if (totalClasificados > 0) {
+        results.score = Math.round((results.optimos.length / totalClasificados) * 100);
+      } else {
+        results.score = 0;
       }
 
       setReport(results);
