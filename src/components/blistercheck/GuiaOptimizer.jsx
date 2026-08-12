@@ -7,8 +7,9 @@ import { getMedicationStatusByCNs, findAlternatives } from '../../services/blist
 
 const createPieChartBase64 = (data, title) => {
   const canvas = document.createElement('canvas');
-  canvas.width = 450;
-  canvas.height = 250;
+  // Aumentar resolución para evitar cortes de texto
+  canvas.width = 650;
+  canvas.height = 300;
   const ctx = canvas.getContext('2d');
   
   const total = data.reduce((sum, d) => sum + d.value, 0);
@@ -18,9 +19,9 @@ const createPieChartBase64 = (data, title) => {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const cx = 120;
-  const cy = 135;
-  const r = 90;
+  const cx = 150;
+  const cy = 150;
+  const r = 110;
   
   let startAngle = -Math.PI / 2;
   
@@ -45,25 +46,25 @@ const createPieChartBase64 = (data, title) => {
   });
   
   // Draw Legend
-  let legendY = 60;
-  ctx.font = 'bold 16px sans-serif';
+  let legendY = 70;
+  ctx.font = 'bold 18px sans-serif';
   ctx.fillStyle = '#333333';
-  ctx.fillText(title, 240, 30);
+  ctx.fillText(title, 310, 40);
   
-  ctx.font = '14px sans-serif';
+  ctx.font = '16px sans-serif';
   data.forEach(d => {
     if(d.value === 0) return;
     const pct = ((d.value / total) * 100).toFixed(1);
     
     // color box
     ctx.fillStyle = d.color;
-    ctx.fillRect(240, legendY, 15, 15);
+    ctx.fillRect(310, legendY, 18, 18);
     
     // text
     ctx.fillStyle = '#555555';
-    ctx.fillText(`${d.label}: ${d.value} (${pct}%)`, 265, legendY + 12);
+    ctx.fillText(`${d.label}: ${d.value} (${pct}%)`, 340, legendY + 14);
     
-    legendY += 25;
+    legendY += 30;
   });
   
   return canvas.toDataURL('image/png');
@@ -215,8 +216,8 @@ export default function GuiaOptimizer() {
     if (!report) return { chart1Img: null, chart2Img: null };
 
     const dataConocidos = [
-      { label: 'Conocidos (Clasificados)', value: report.optimos.length + report.problematicos.length, color: '#3498db' },
-      { label: 'Desconocidos', value: report.desconocidos.length, color: '#95a5a6' }
+      { label: 'Conocidos (Clasificados)', value: report.optimos.length + report.problematicos.length, color: '#0d9488' },
+      { label: 'Desconocidos', value: report.desconocidos.length, color: '#cbd5e1' }
     ];
     
     const reenvasablesCount = report.problematicos.filter(p => p.clasificacion.requiere_reenvasado && !p.clasificacion.requiere_reetiquetado).length;
@@ -224,10 +225,10 @@ export default function GuiaOptimizer() {
     const ambosCount = report.problematicos.filter(p => p.clasificacion.requiere_reenvasado && p.clasificacion.requiere_reetiquetado).length;
 
     const dataClasificacion = [
-      { label: 'Aptos SDMDU', value: report.optimos.length, color: '#2ecc71' },
-      { label: 'Solo Reenvasar', value: reenvasablesCount, color: '#e67e22' },
-      { label: 'Solo Reetiquetar', value: reetiquetablesCount, color: '#f1c40f' },
-      { label: 'Reenvasar + Reetiquetar', value: ambosCount, color: '#e74c3c' }
+      { label: 'Aptos SDMDU', value: report.optimos.length, color: '#16a34a' },
+      { label: 'Solo Reenvasar', value: reenvasablesCount, color: '#d97706' },
+      { label: 'Solo Reetiquetar', value: reetiquetablesCount, color: '#f59e0b' },
+      { label: 'Reenvasar + Reetiquetar', value: ambosCount, color: '#dc2626' }
     ];
 
     return {
@@ -390,12 +391,12 @@ export default function GuiaOptimizer() {
 
             {/* Renderizar los gráficos generados */}
             {(chartImages.chart1Img || chartImages.chart2Img) && (
-              <div style={{ display: 'flex', gap: '20px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '30px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {chartImages.chart1Img && (
-                  <img src={chartImages.chart1Img} alt="Gráfico de Conocidos vs Desconocidos" style={{ maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px' }} />
+                  <img src={chartImages.chart1Img} alt="Gráfico de Conocidos vs Desconocidos" style={{ flex: '1 1 400px', maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px', objectFit: 'contain' }} />
                 )}
                 {chartImages.chart2Img && (
-                  <img src={chartImages.chart2Img} alt="Gráfico de Clasificación de Conocidos" style={{ maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px' }} />
+                  <img src={chartImages.chart2Img} alt="Gráfico de Clasificación de Conocidos" style={{ flex: '1 1 400px', maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px', objectFit: 'contain' }} />
                 )}
               </div>
             )}
