@@ -155,11 +155,11 @@ export default function LandingPage({ onLogin, onRegister }) {
       </div>
 
       {/* ── PROBLEMA / SOLUCIÓN ── */}
-      <div className="lp-section" id="funciones">
+      <div className="lp-section lp-section--dark" id="funciones">
         <div className="lp-container">
           <div className="lp-section-header-center" style={{ marginBottom: '56px' }}>
             <div className="lp-section-tag">El problema que resolvemos</div>
-            <h2 className="lp-section-title">La gestión del SDMDU es compleja.<br />BlisterCheck la simplifica.</h2>
+            <h2 className="lp-section-title" style={{ color: 'white' }}>La gestión del SDMDU es compleja.<br />BlisterCheck la simplifica.</h2>
           </div>
           <div className="lp-problem-grid">
             <div className="lp-problem-card">
@@ -171,7 +171,6 @@ export default function LandingPage({ onLogin, onRegister }) {
                   'Guías farmacoterapéuticas desactualizadas o incompletas',
                   'Sin visibilidad sobre desabastecimientos hasta que ocurren',
                   'Informes para la Comisión de Farmacia lentos y manuales',
-                  'Sin registro privado del inventario propio del hospital',
                 ].map((t, i) => (
                   <li key={i}>
                     <span style={{ color: '#ef4444', flexShrink: 0, marginTop: '2px', fontSize: '1rem' }}>✗</span>
@@ -189,7 +188,6 @@ export default function LandingPage({ onLogin, onRegister }) {
                   'Optimizador que analiza tu guía Excel entera en segundos',
                   'Alertas de desabastecimiento CIMA en tiempo real',
                   'Exportación a Excel/CSV con un clic para la Comisión de Farmacia',
-                  'Inventario privado "En mi farmacia" con carga masiva desde Excel',
                 ].map((t, i) => (
                   <li key={i}>
                     <span style={{ color: '#059669', flexShrink: 0, marginTop: '2px', fontSize: '1rem' }}>✓</span>
@@ -215,25 +213,25 @@ export default function LandingPage({ onLogin, onRegister }) {
           <div className="lp-features-grid">
             {[
               {
-                icon: '🔍', bg: '#eff6ff',
+                icon: <Search size={22} color="#1e40af" />, bg: '#eff6ff',
                 title: 'Catálogo AEMPS completo',
                 desc: 'Accede a más de 27.000 presentaciones comercializadas en España. Busca por nombre, principio activo o Código Nacional y obtén la clasificación SDMDU en un instante.',
                 bullets: ['Clasificación: Apto · Reenvasado · Reetiquetado', 'Ficha técnica y prospecto oficial AEMPS', 'Filtros por vía, forma farmacéutica y laboratorio'],
               },
               {
-                icon: '📊', bg: '#f0fdf4',
+                icon: <FileSpreadsheet size={22} color="#065f46" />, bg: '#f0fdf4',
                 title: 'Optimizador de Guía Excel',
                 desc: 'Sube tu guía farmacoterapéutica en formato Excel o CSV y BlisterCheck la analiza entera automáticamente, sugiriendo alternativas ya envasadas en blíster unitario de fábrica.',
                 bullets: ['Análisis de miles de registros en segundos', 'Sugerencias de equivalentes de fábrica', 'Informe descargable para la Comisión de Farmacia'],
               },
               {
-                icon: '🏥', bg: '#fdf4ff',
+                icon: <Database size={22} color="#7e22ce" />, bg: '#fdf4ff',
                 title: 'Inventario privado de tu hospital',
                 desc: 'Marca los medicamentos que dispones en tu farmacia como "En mi farmacia". Importa tu listado desde Excel con un solo clic y mantén siempre actualizado tu stock.',
                 bullets: ['Marcado individual o carga masiva desde Excel', 'Notas privadas por medicamento', 'Estadísticas de cobertura de tu inventario'],
               },
               {
-                icon: '⚠️', bg: '#fefce8',
+                icon: <AlertTriangle size={22} color="#92400e" />, bg: '#fefce8',
                 title: 'Alertas de desabastecimiento',
                 desc: 'Monitorización automática de las comunicaciones oficiales de suministro de la AEMPS. Anticípate a las rupturas de stock antes de que afecten a tu servicio.',
                 bullets: ['Alertas en tiempo real desde CIMA', 'Fechas de inicio y fin previstas', 'Integrado en la ficha de cada medicamento'],
@@ -241,7 +239,7 @@ export default function LandingPage({ onLogin, onRegister }) {
             ].map((f, i) => (
               <div className="lp-feature-card" key={i}>
                 <div className="lp-feature-icon" style={{ background: f.bg }}>
-                  <span style={{ fontSize: '1.6rem' }}>{f.icon}</span>
+                  {f.icon}
                 </div>
                 <h3>{f.title}</h3>
                 <p>{f.desc}</p>
@@ -270,12 +268,12 @@ export default function LandingPage({ onLogin, onRegister }) {
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {[
-                  { icon: '🏥', title: 'Tu clasificación, disponible al instante', desc: 'Cada vez que clasificas un medicamento en tu hospital, esa información se propaga a toda la red de farmacias.' },
-                  { icon: '📈', title: 'El catálogo crece contigo', desc: 'Cuantos más hospitales participan, más completo está el catálogo. Las presentaciones sin clasificar van desapareciendo progresivamente.' },
-                  { icon: '🔒', title: 'Tu inventario privado permanece tuyo', desc: 'Las clasificaciones clínicas se comparten. Tu stock privado "En mi farmacia" y tus notas son exclusivamente de tu hospital.' },
+                  { icon: <CheckCircle2 size={20} color="#0284c7" />, bg: '#eff6ff', title: 'Tu clasificación, disponible al instante', desc: 'Cada vez que clasificas un medicamento en tu hospital, esa información se propaga a toda la red de farmacias.' },
+                  { icon: <BarChart3 size={20} color="#059669" />, bg: '#f0fdf4', title: 'El catálogo crece contigo', desc: 'Cuantos más hospitales participan, más completo está el catálogo. Las presentaciones sin clasificar van desapareciendo progresivamente.' },
+                  { icon: <Lock size={20} color="#7e22ce" />, bg: '#fdf4ff', title: 'Tu inventario privado permanece tuyo', desc: 'Las clasificaciones clínicas se comparten. Tu stock privado "En mi farmacia" y tus notas son exclusivamente de tu hospital.' },
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--bg-muted)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: item.bg, border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {item.icon}
                     </div>
                     <div>
@@ -317,8 +315,11 @@ export default function LandingPage({ onLogin, onRegister }) {
                   className="lp-collab-node"
                   style={{ top: node.top, left: node.left, right: node.right, bottom: node.bottom, transform: node.transform, animationDelay: node.delay }}
                 >
-                  <div className="lp-collab-node-icon" style={{ background: node.color }}>
-                    🏥
+                  <div className="lp-collab-node-icon" style={{ background: node.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                      <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
                   </div>
                   <span className="lp-collab-node-label">{node.label}</span>
                 </div>
@@ -625,7 +626,7 @@ export default function LandingPage({ onLogin, onRegister }) {
       <div className="lp-cta-section">
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', padding: '6px 16px', borderRadius: 999, fontSize: '0.78rem', fontWeight: 700, color: 'white', marginBottom: 24, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            <ShieldCheck size={14} /> Acceso gratuito · Sin tarjeta de crédito
+            <ShieldCheck size={14} /> Acceso gratuito
           </div>
           <h2 className="lp-section-title" style={{ color: 'white', marginBottom: 16 }}>
             ¿Listo para optimizar tu servicio de farmacia?

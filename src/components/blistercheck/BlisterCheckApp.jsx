@@ -133,9 +133,18 @@ function BlisterCheckApp({ onGoToProfile }) {
           {!sidebarCollapsed ? (
             <>
               <div className="bc-logo" onClick={() => handleNavClick('search')}>
-                <div className="bc-logo__badge">
-                  <ShieldCheck size={20} />
-                </div>
+                <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: 8, boxShadow: '0 2px 8px rgba(11,25,44,0.25)' }}>
+                  <rect width="38" height="38" rx="9" fill="#0b192c"/>
+                  <rect x="7" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
+                  <rect x="21" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
+                  <rect x="7" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
+                  <rect x="21" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
+                  <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="#0ea5e9"/>
+                  <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
+                  <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
+                  <rect x="21" y="21" width="10" height="8" rx="3" fill="#0ea5e9"/>
+                  <polyline points="24,25.5 26,27.5 30,23.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <span className="bc-logo__text">BlisterCheck</span>
               </div>
               
