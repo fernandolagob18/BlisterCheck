@@ -11,7 +11,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   Sparkles,
-  Upload
+  Upload,
+  LogOut
 } from 'lucide-react';
 import MedicamentoBuscador from './MedicamentoBuscador';
 import MedicamentoDetalle from './MedicamentoDetalle';
@@ -23,7 +24,7 @@ import { getCatalogInfo, getClasificacion, getDesabastecimientoByCN } from '../.
 import { useAuth } from '../../contexts/AuthContext';
 
 function BlisterCheckApp({ onGoToProfile }) {
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
   const [vistaActiva, setVistaActiva] = useState('search'); // 'search' | 'detail' | 'stats' | 'optimizer'
   const [medicamentoSeleccionado, setMedicamentoSeleccionado] = useState(null);
   const [clasificacionActual, setClasificacionActual] = useState(null);
@@ -133,17 +134,16 @@ function BlisterCheckApp({ onGoToProfile }) {
           {!sidebarCollapsed ? (
             <>
               <div className="bc-logo" onClick={() => handleNavClick('search')}>
-                <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: 8, boxShadow: '0 2px 8px rgba(11,25,44,0.25)' }}>
-                  <rect width="38" height="38" rx="9" fill="#0b192c"/>
-                  <rect x="7" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
-                  <rect x="21" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
-                  <rect x="7" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
-                  <rect x="21" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
-                  <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="#0ea5e9"/>
-                  <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
-                  <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
-                  <rect x="21" y="21" width="10" height="8" rx="3" fill="#0ea5e9"/>
-                  <polyline points="24,25.5 26,27.5 30,23.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: 8, boxShadow: '0 4px 12px rgba(14,165,233,0.35)' }}>
+                  <rect width="38" height="38" rx="9" fill="#0ea5e9"/>
+                  <rect x="7" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+                  <rect x="21" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+                  <rect x="7" y="21" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+                  <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="white"/>
+                  <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
+                  <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
+                  <rect x="21" y="21" width="10" height="8" rx="3" fill="white"/>
+                  <polyline points="24,25.5 26,27.5 30,23.5" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <span className="bc-logo__text">BlisterCheck</span>
               </div>
@@ -235,7 +235,24 @@ function BlisterCheckApp({ onGoToProfile }) {
 
         {/* Pie del Sidebar */}
         <div className="bc-sidebar__footer">
-          <span>BlisterCheck v2.4 • SDMDU</span>
+          {!sidebarCollapsed ? (
+            <button
+              className="bc-sidebar-logout-btn"
+              onClick={async () => { await signOut(); }}
+              title="Cerrar sesión"
+            >
+              <LogOut size={16} />
+              <span>Cerrar sesión</span>
+            </button>
+          ) : (
+            <button
+              className="bc-sidebar-logout-btn bc-sidebar-logout-btn--icon"
+              onClick={async () => { await signOut(); }}
+              title="Cerrar sesión"
+            >
+              <LogOut size={16} />
+            </button>
+          )}
         </div>
       </aside>
 

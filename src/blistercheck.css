@@ -412,6 +412,10 @@
   color: var(--color-text);
   letter-spacing: -0.02em;
   white-space: nowrap;
+  background: linear-gradient(90deg, #0ea5e9 0%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .bc-sidebar__toggle {
@@ -591,11 +595,40 @@
 .bc-sidebar-stat__pill--blue { background: var(--pastel-blue-bg); color: var(--pastel-blue-text); }
 
 .bc-sidebar__footer {
-  padding: 0.85rem 1.25rem;
+  padding: 0.85rem 1rem;
   border-top: 1px solid var(--color-border-subtle);
-  font-size: 0.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.bc-sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: transparent;
   color: var(--color-text-muted);
-  text-align: center;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bc-sidebar-logout-btn:hover {
+  background: #fff0f0;
+  color: #be123c;
+  border-color: #fca5a5;
+}
+
+.bc-sidebar-logout-btn--icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  justify-content: center;
+  border-radius: var(--radius-md);
 }
 
 /* --- Contenedor Principal (Main Wrapper) --- */

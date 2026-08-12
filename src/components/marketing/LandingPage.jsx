@@ -45,13 +45,6 @@ export default function LandingPage({ onLogin, onRegister }) {
   return (
     <div className="landing-page">
 
-      {/* ── TOP BANNER ── */}
-      <div className="lp-top-banner">
-        <div className="lp-top-banner-dot" />
-        <span>Plataforma oficial para Servicios de Farmacia Hospitalaria y Unidades de Dosis Unitaria (SDMDU)</span>
-        <span className="lp-top-banner-badge">Sincronización AEMPS · CIMA</span>
-      </div>
-
       {/* ── NAVBAR ── */}
       <nav className={`lp-nav${scrolled ? ' scrolled' : ''}`}>
         <a href="#" className="lp-logo">
@@ -74,6 +67,7 @@ export default function LandingPage({ onLogin, onRegister }) {
         </a>
         <div className="lp-nav-links">
           <a href="#funciones">Funciones</a>
+          <a href="#colaborativo">Colaborativo</a>
           <a href="#demo">Demo</a>
           <a href="#como-funciona">Cómo funciona</a>
           <a href="#seguridad">Seguridad</a>
@@ -97,7 +91,7 @@ export default function LandingPage({ onLogin, onRegister }) {
               <span className="highlight">blíster unitario</span>
             </h1>
             <p className="lp-hero-sub">
-              BlisterCheck analiza automáticamente el catálogo oficial de la AEMPS para indicar en segundos si un medicamento es apto para el SDMDU, requiere reenvasado o reetiquetado. Ahorra horas de trabajo a tu equipo de farmacia.
+              BlisterCheck es la plataforma colaborativa donde los farmacéuticos hospitalarios clasifican sus medicamentos según su idoneidad para SDMDU y comparten ese conocimiento con toda la red. Cada clasificación enriquece un catálogo colectivo basado en el registro oficial de la AEMPS, construido entre todos.
             </p>
             <div className="lp-hero-ctas">
               <button className="lp-btn-primary" onClick={onRegister}>
@@ -255,7 +249,7 @@ export default function LandingPage({ onLogin, onRegister }) {
       </div>
 
       {/* ── COLABORATIVO ── */}
-      <div className="lp-section lp-collab-section">
+      <div className="lp-section lp-collab-section" id="colaborativo">
         <div className="lp-container">
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }}>
 
@@ -364,10 +358,7 @@ export default function LandingPage({ onLogin, onRegister }) {
                 <div className="lp-demo-dot lp-demo-dot--yellow" />
                 <div className="lp-demo-dot lp-demo-dot--green" />
               </div>
-              <div className="lp-demo-url">
-                <Lock size={11} style={{ color: '#10b981' }} />
-                https://blistercheck.app/catalogo
-              </div>
+
               <div className="lp-demo-status">
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
                 AEMPS conectado

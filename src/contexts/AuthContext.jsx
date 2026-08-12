@@ -87,6 +87,14 @@ export function AuthProvider({ children }) {
 
   const clearAuthNotification = () => setAuthNotification(null);
 
+  const signOut = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -94,7 +102,8 @@ export function AuthProvider({ children }) {
     loading,
     authNotification,
     clearAuthNotification,
-    setProfile
+    setProfile,
+    signOut
   };
 
   return (
