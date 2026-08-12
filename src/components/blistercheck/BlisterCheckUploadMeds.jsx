@@ -44,7 +44,11 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
         for (let i = 1; i < json.length; i++) {
           const row = json[i];
           if (row && row[cnIndex]) {
-            extractedCns.push(String(row[cnIndex]).trim());
+            const rawValue = String(row[cnIndex]);
+            const match = rawValue.match(/\d{6,7}/);
+            if (match) {
+              extractedCns.push(match[0]);
+            }
           }
         }
 

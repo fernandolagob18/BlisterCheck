@@ -64,7 +64,17 @@ export default function Register({ onSwitchToLogin, onGoToHome }) {
     <div className="bc-auth-container">
       <div className="bc-auth-card glass-panel">
         <div className="bc-auth-header">
-          <ShieldCheck size={48} className="bc-auth-icon" />
+          <svg width="64" height="64" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: 12, boxShadow: '0 8px 24px rgba(13, 148, 136, 0.4)', margin: '0 auto 1rem' }}>
+            <rect width="38" height="38" rx="9" fill="#0b192c"/>
+            <rect x="7" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <rect x="21" y="10" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <rect x="7" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <rect x="21" y="21" width="10" height="8" rx="3" fill="#1a3a5c"/>
+            <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="#0ea5e9"/>
+            <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
+            <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="#0ea5e9" opacity="0.5"/>
+            <polyline points="24,25.5 26,27.5 30,23.5" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <h2>Crear Cuenta</h2>
           <p>Únete a BlisterCheck</p>
         </div>
