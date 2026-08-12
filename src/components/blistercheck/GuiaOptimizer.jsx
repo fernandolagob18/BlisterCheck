@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import * as XLSX from 'xlsx';
-import { UploadCloud, FileText, CheckCircle, AlertTriangle, XCircle, Info, RefreshCw } from 'lucide-react';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { UploadCloud, FileText, CheckCircle, AlertTriangle, XCircle, Info, RefreshCw, FileDown } from 'lucide-react';
 import { getMedicationStatusByCNs, findAlternatives } from '../../services/blistercheckService';
 
 export default function GuiaOptimizer() {
@@ -86,11 +88,9 @@ export default function GuiaOptimizer() {
           continue;
         }
 
-        const clasificacion = med.blistercheck_clasificacion && med.blistercheck_clasificacion.length > 0 
-          ? med.blistercheck_clasificacion[0] 
-          : null;
+        const clasificacion = med.blistercheck_clasificacion;
 
-        if (!clasificacion) {
+        if (!clasificacion || (clasificacion.apto_sdmdu_blister === null && clasificacion.requiere_reenvasado === null && clasificacion.requiere_reetiquetado === null)) {
           // No está clasificado aún por el usuario, asumimos desconocido/neutro
           results.desconocidos.push({ cn, nombre: med.nombre });
           continue;
@@ -138,6 +138,79 @@ export default function GuiaOptimizer() {
         <div className="score-label">Adaptación SDMDU</div>
       </div>
     );
+  };
+
+  const generatePDF = () => {
+    if (!report) return;
+
+    const doc = new jsPDF();
+    const date = new Date().toLocaleDateString();
+
+    // Título
+    doc.setFontSize(18);
+    doc.setTextColor(41, 128, 185);
+    doc.text('Informe de Optimización de Guía Farmacoterapéutica', 14, 20);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Fecha: ${date}`, 14, 28);
+    doc.text(`Medicamentos Orales Analizados: ${report.totalAnalizados}`, 14, 34);
+    doc.text(`Puntuación de Adaptación a SDMDU: ${report.score}%`, 14, 40);
+
+    // Resumen
+    doc.setFontSize(14);
+    doc.setTextColor(40);
+    doc.text('Resumen del Análisis', 14, 52);
+    
+    doc.setFontSize(11);
+    doc.text(`- Óptimos (Listos para blíster): ${report.optimos.length}`, 14, 60);
+    doc.text(`- Oportunidades de Mejora (Requieren reenvasado/reetiquetado): ${report.problematicos.length}`, 14, 66);
+    doc.text(`- Sin Clasificar en la base de datos: ${report.desconocidos.length}`, 14, 72);
+    doc.text(`- Omitidos (No orales/sublinguales/bucales): ${report.noOrales.length}`, 14, 78);
+
+    if (report.problematicos.length > 0) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.setTextColor(231, 76, 60);
+      doc.text('Medicamentos a Mejorar y Alternativas Sugeridas', 14, 20);
+
+      const tableData = [];
+      
+      report.problematicos.forEach(item => {
+        const medName = item.med.nombre;
+        const medCN = item.med.cn;
+        const issues = [];
+        if (item.clasificacion.requiere_reenvasado) issues.push('Reenvasado');
+        if (item.clasificacion.requiere_reetiquetado) issues.push('Reetiquetado');
+        
+        let alternativesText = 'Sin alternativas óptimas';
+        if (item.alternativas.length > 0) {
+          alternativesText = item.alternativas.map(alt => `${alt.nombre} (CN: ${alt.cn})`).join('\n');
+        }
+
+        tableData.push([
+          `${medName}\nCN: ${medCN}`,
+          issues.join(', '),
+          alternativesText
+        ]);
+      });
+
+      doc.autoTable({
+        startY: 28,
+        head: [['Medicamento Original', 'Problema', 'Alternativas Sugeridas']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185] },
+        styles: { fontSize: 9, cellPadding: 4 },
+        columnStyles: {
+          0: { cellWidth: 60 },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 'auto' }
+        }
+      });
+    }
+
+    doc.save(`optimizacion_guia_${date.replace(/\//g, '-')}.pdf`);
   };
 
   return (
@@ -208,9 +281,14 @@ export default function GuiaOptimizer() {
                 <span className="stat-value">{report.noOrales.length}</span>
               </div>
             </div>
-            <button className="bc-btn-secondary" onClick={() => { setFile(null); setReport(null); }}>
-              Subir otra guía
-            </button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+              <button className="bc-btn-secondary" onClick={() => { setFile(null); setReport(null); }}>
+                Subir otra guía
+              </button>
+              <button className="bc-btn-primary" onClick={generatePDF} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileDown size={18} /> Generar Informe PDF
+              </button>
+            </div>
           </div>
 
           <div className="report-details">
