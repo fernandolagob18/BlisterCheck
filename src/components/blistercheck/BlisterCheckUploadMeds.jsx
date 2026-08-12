@@ -56,10 +56,13 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
           throw new Error('No se encontraron Códigos Nacionales en la columna.');
         }
 
+        const uniqueCns = [...new Set(extractedCns)];
+
         // Buscar coincidencias
-        const matchingCNs = await getExistingCatalogCNs(extractedCns);
+        const matchingCNs = await getExistingCatalogCNs(uniqueCns);
         
         setMatchDetails({
+          totalExtracted: uniqueCns.length,
           total: matchingCNs.length,
           matchingCNs: matchingCNs
         });
@@ -162,8 +165,15 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
                     <CheckCircle size={18} /> Resultado del análisis
                   </h4>
                   <p style={{ margin: '0 0 1rem', color: 'var(--color-text-body)', lineHeight: 1.5 }}>
-                    Se han encontrado <strong>{matchDetails.total} fármacos</strong> de su guía farmacológica en el catálogo.
+                    Se han encontrado <strong>{matchDetails.total} fármacos</strong> en nuestro catálogo a partir de los {matchDetails.totalExtracted} códigos únicos extraídos de su archivo.
                   </p>
+                  
+                  {matchDetails.totalExtracted > matchDetails.total && (
+                    <div style={{ background: 'var(--pastel-amber-bg, #fef3c7)', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', color: 'var(--pastel-amber-text, #78350f)', marginBottom: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                      <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }}/>
+                      <span>Hay <strong>{matchDetails.totalExtracted - matchDetails.total} códigos</strong> en su archivo que no existen en la base de datos general de BlisterCheck (pueden ser códigos internos, productos sanitarios u otros). Se han ignorado.</span>
+                    </div>
+                  )}
                   <p style={{ margin: '0 0 1.5rem', color: 'var(--color-text-body)', fontWeight: 600 }}>
                     ¿Desea indicar que dispone de esa medicación en su farmacia hospitalaria?
                   </p>

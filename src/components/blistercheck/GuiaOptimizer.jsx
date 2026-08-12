@@ -138,6 +138,7 @@ export default function GuiaOptimizer() {
         problematicos: [],
         desconocidos: [],
         noOrales: [],
+        noEncontrados: [],
         score: 0
       };
 
@@ -145,7 +146,7 @@ export default function GuiaOptimizer() {
       for (const cn of uniqueCnList) {
         const med = dbMeds.find(m => m.cn === cn);
         if (!med) {
-          results.desconocidos.push({ cn });
+          results.noEncontrados.push({ cn });
           continue;
         }
 
@@ -264,16 +265,17 @@ export default function GuiaOptimizer() {
     doc.text(`- Oportunidades de Mejora (Requieren reenvasado/reetiquetado): ${report.problematicos.length}`, 14, 66);
     doc.text(`- Sin Clasificar en la base de datos: ${report.desconocidos.length}`, 14, 72);
     doc.text(`- Omitidos (No orales/sublinguales/bucales): ${report.noOrales.length}`, 14, 78);
+    doc.text(`- Ignorados (No existen en el catálogo general): ${report.noEncontrados.length}`, 14, 84);
 
     // Gráficos lado a lado
     if (chartImages.chart1Img && chartImages.chart2Img) {
       // Dimensiones para mantener el ratio 650x300 (2.166)
       // Ancho: 90, Alto: 41.5
-      doc.addImage(chartImages.chart1Img, 'PNG', 14, 90, 90, 41.5);
-      doc.addImage(chartImages.chart2Img, 'PNG', 106, 90, 90, 41.5);
+      doc.addImage(chartImages.chart1Img, 'PNG', 14, 95, 90, 41.5);
+      doc.addImage(chartImages.chart2Img, 'PNG', 106, 95, 90, 41.5);
     } else {
-      if (chartImages.chart1Img) doc.addImage(chartImages.chart1Img, 'PNG', 14, 90, 150, 69.2);
-      if (chartImages.chart2Img) doc.addImage(chartImages.chart2Img, 'PNG', 14, 165, 150, 69.2);
+      if (chartImages.chart1Img) doc.addImage(chartImages.chart1Img, 'PNG', 14, 95, 150, 69.2);
+      if (chartImages.chart2Img) doc.addImage(chartImages.chart2Img, 'PNG', 14, 170, 150, 69.2);
     }
 
     if (report.problematicos.length > 0) {
@@ -387,6 +389,10 @@ export default function GuiaOptimizer() {
               <div className="stat-item neutral" style={{ opacity: 0.7 }}>
                 <span className="stat-label">Omitidos (No Orales)</span>
                 <span className="stat-value">{report.noOrales.length}</span>
+              </div>
+              <div className="stat-item neutral" style={{ opacity: 0.5, borderLeft: '4px solid #f87171' }}>
+                <span className="stat-label">No Encontrados</span>
+                <span className="stat-value">{report.noEncontrados?.length || 0}</span>
               </div>
             </div>
 
