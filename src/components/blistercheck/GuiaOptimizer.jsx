@@ -121,7 +121,7 @@ export default function GuiaOptimizer() {
 
       setReport(results);
     } catch (err) {
-      setError(err.message);
+      setError('Error procesando el archivo: ' + err.message);
     } finally {
       setIsProcessing(false);
     }
