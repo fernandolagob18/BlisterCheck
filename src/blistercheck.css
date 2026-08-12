@@ -3009,3 +3009,94 @@
     border-radius: var(--radius-lg);
   }
 }
+
+
+/* =======================================================================
+   RESPONSIVE GLOBAL (SMARTPHONES & TABLETS - AptoBlister UX)
+   ======================================================================= */
+
+@media (max-width: 1024px) {
+  /* Grilla de Catálogo en Tablet */
+  .bc-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Estadísticas del Optimizador en Tablet/Móvil */
+  .summary-stats {
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    flex: 1 1 calc(50% - 1rem);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Áreas táctiles mínimas (Botones, inputs, paginación) */
+  .bc-btn, .bc-btn-secondary, .bc-btn-danger, .bc-btn-ghost, 
+  .bc-pagination-btn, .bc-menu-btn, .bc-search-input, .bc-filtro-select {
+    min-height: 44px;
+  }
+
+  /* Grilla de Catálogo en Móvil */
+  .bc-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Header y Búsqueda */
+  .bc-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .bc-search-bar {
+    width: 100%;
+  }
+  .bc-filtro-select {
+    width: 100%;
+  }
+
+  /* Paginación - Ocultar números en móvil muy pequeño */
+  .bc-pagination-numbers {
+    display: none;
+  }
+  
+  /* Modales */
+  .bc-modal {
+    width: 95% !important;
+    max-width: none !important;
+  }
+  .bc-modal-body, .bc-modal-header, .bc-modal-footer {
+    padding: 1rem !important;
+  }
+  
+  /* Optimizador - Gráficos y Tablas */
+  .problematic-card table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .optimizer-report img {
+    min-width: 100%;
+  }
+
+  /* Estadísticas del Optimizador en Móvil estrecho */
+  .stat-item {
+    flex: 1 1 100%;
+  }
+  
+  /* Header Title Truncation */
+  .bc-header-title {
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+  }
+  
+  /* Botones del Detalle de Medicamento */
+  .bc-clasificacion-grid {
+    grid-template-columns: 1fr;
+  }
+}
