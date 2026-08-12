@@ -134,8 +134,8 @@ function BlisterCheckApp({ onGoToProfile }) {
           {!sidebarCollapsed ? (
             <>
               <div className="bc-logo" onClick={() => handleNavClick('search')}>
-                <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: 8, boxShadow: '0 4px 12px rgba(14,165,233,0.35)' }}>
-                  <rect width="38" height="38" rx="9" fill="#0ea5e9"/>
+                <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, borderRadius: 8, boxShadow: '0 4px 12px rgba(13, 148, 136, 0.35)' }}>
+                  <rect width="38" height="38" rx="9" fill="var(--color-primary)"/>
                   <rect x="7" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
                   <rect x="21" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
                   <rect x="7" y="21" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
@@ -143,7 +143,7 @@ function BlisterCheckApp({ onGoToProfile }) {
                   <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
                   <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
                   <rect x="21" y="21" width="10" height="8" rx="3" fill="white"/>
-                  <polyline points="24,25.5 26,27.5 30,23.5" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points="24,25.5 26,27.5 30,23.5" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <span className="bc-logo__text">BlisterCheck</span>
               </div>
