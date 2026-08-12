@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { UploadCloud, FileText, CheckCircle, AlertTriangle, XCircle, Info, RefreshCw, FileDown } from 'lucide-react';
 import { getMedicationStatusByCNs, findAlternatives } from '../../services/blistercheckService';
 
@@ -199,7 +199,7 @@ export default function GuiaOptimizer() {
         ]);
       });
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: 28,
         head: [['Medicamento Original', 'Problema', 'Alternativas Sugeridas']],
         body: tableData,
