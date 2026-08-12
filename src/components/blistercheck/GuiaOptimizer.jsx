@@ -225,10 +225,10 @@ export default function GuiaOptimizer() {
     const ambosCount = report.problematicos.filter(p => p.clasificacion.requiere_reenvasado && p.clasificacion.requiere_reetiquetado).length;
 
     const dataClasificacion = [
-      { label: 'Aptos SDMDU', value: report.optimos.length, color: '#16a34a' },
-      { label: 'Solo Reenvasar', value: reenvasablesCount, color: '#d97706' },
-      { label: 'Solo Reetiquetar', value: reetiquetablesCount, color: '#f59e0b' },
-      { label: 'Reenvasar + Reetiquetar', value: ambosCount, color: '#dc2626' }
+      { label: 'Aptos SDMDU', value: report.optimos.length, color: '#10b981' },
+      { label: 'Solo Reenvasar', value: reenvasablesCount, color: '#f59e0b' },
+      { label: 'Solo Reetiquetar', value: reetiquetablesCount, color: '#8b5cf6' },
+      { label: 'Ambos', value: ambosCount, color: '#ef4444' }
     ];
 
     return {
@@ -265,14 +265,15 @@ export default function GuiaOptimizer() {
     doc.text(`- Sin Clasificar en la base de datos: ${report.desconocidos.length}`, 14, 72);
     doc.text(`- Omitidos (No orales/sublinguales/bucales): ${report.noOrales.length}`, 14, 78);
 
-    // Gráfico 1: Conocidos vs Desconocidos
-    if (chartImages.chart1Img) {
-      doc.addImage(chartImages.chart1Img, 'PNG', 14, 90, 150, 83);
-    }
-
-    // Gráfico 2: Aptos vs Reetiquetables vs Reenvasables
-    if (chartImages.chart2Img) {
-      doc.addImage(chartImages.chart2Img, 'PNG', 14, 180, 150, 83);
+    // Gráficos lado a lado
+    if (chartImages.chart1Img && chartImages.chart2Img) {
+      // Dimensiones para mantener el ratio 650x300 (2.166)
+      // Ancho: 90, Alto: 41.5
+      doc.addImage(chartImages.chart1Img, 'PNG', 14, 90, 90, 41.5);
+      doc.addImage(chartImages.chart2Img, 'PNG', 106, 90, 90, 41.5);
+    } else {
+      if (chartImages.chart1Img) doc.addImage(chartImages.chart1Img, 'PNG', 14, 90, 150, 69.2);
+      if (chartImages.chart2Img) doc.addImage(chartImages.chart2Img, 'PNG', 14, 165, 150, 69.2);
     }
 
     if (report.problematicos.length > 0) {
@@ -393,10 +394,10 @@ export default function GuiaOptimizer() {
             {(chartImages.chart1Img || chartImages.chart2Img) && (
               <div style={{ display: 'flex', gap: '20px', marginTop: '30px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {chartImages.chart1Img && (
-                  <img src={chartImages.chart1Img} alt="Gráfico de Conocidos vs Desconocidos" style={{ flex: '1 1 400px', maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px', objectFit: 'contain' }} />
+                  <img src={chartImages.chart1Img} alt="Gráfico de Conocidos vs Desconocidos" style={{ width: '100%', maxWidth: '420px', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px' }} />
                 )}
                 {chartImages.chart2Img && (
-                  <img src={chartImages.chart2Img} alt="Gráfico de Clasificación de Conocidos" style={{ flex: '1 1 400px', maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px', objectFit: 'contain' }} />
+                  <img src={chartImages.chart2Img} alt="Gráfico de Clasificación de Conocidos" style={{ width: '100%', maxWidth: '420px', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px' }} />
                 )}
               </div>
             )}
