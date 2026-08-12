@@ -62,10 +62,12 @@ export default function GuiaOptimizer() {
       const dbMeds = await getMedicationStatusByCNs(cnList);
       
       const results = {
-        totalAnalizados: cnList.length,
+        totalProcesados: cnList.length,
+        totalAnalizados: 0,
         optimos: [],
         problematicos: [],
         desconocidos: [],
+        noOrales: [],
         score: 0
       };
 
@@ -74,6 +76,13 @@ export default function GuiaOptimizer() {
         const med = dbMeds.find(m => m.cn === cn);
         if (!med) {
           results.desconocidos.push({ cn });
+          continue;
+        }
+
+        // Filtro estricto: Solo analizar vías orales, sublinguales y bucales
+        const viaAdmin = med.via_administracion ? med.via_administracion.toUpperCase() : '';
+        if (!viaAdmin.includes('ORAL') && !viaAdmin.includes('SUBLINGUAL') && !viaAdmin.includes('BUCAL')) {
+          results.noOrales.push(med);
           continue;
         }
 
@@ -104,10 +113,10 @@ export default function GuiaOptimizer() {
         }
       }
 
-      // 5. Calcular Score (de 0 a 100)
-      const validosTotal = results.optimos.length + results.problematicos.length;
-      if (validosTotal > 0) {
-        results.score = Math.round((results.optimos.length / validosTotal) * 100);
+      // 5. Calcular puntuación (basada solo en los analizados - orales)
+      results.totalAnalizados = results.optimos.length + results.problematicos.length + results.desconocidos.length;
+      if (results.totalAnalizados > 0) {
+        results.score = Math.round((results.optimos.length / results.totalAnalizados) * 100);
       }
 
       setReport(results);
@@ -179,7 +188,7 @@ export default function GuiaOptimizer() {
             {renderScore(report.score)}
             <div className="summary-stats">
               <div className="stat-item">
-                <span className="stat-label">Analizados</span>
+                <span className="stat-label">Orales Analizados</span>
                 <span className="stat-value">{report.totalAnalizados}</span>
               </div>
               <div className="stat-item success">
@@ -193,6 +202,10 @@ export default function GuiaOptimizer() {
               <div className="stat-item neutral">
                 <span className="stat-label">Sin Clasificar</span>
                 <span className="stat-value">{report.desconocidos.length}</span>
+              </div>
+              <div className="stat-item neutral" style={{ opacity: 0.7 }}>
+                <span className="stat-label">Omitidos (No Orales)</span>
+                <span className="stat-value">{report.noOrales.length}</span>
               </div>
             </div>
             <button className="bc-btn-secondary" onClick={() => { setFile(null); setReport(null); }}>
