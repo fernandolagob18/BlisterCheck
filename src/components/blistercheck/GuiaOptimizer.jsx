@@ -1,9 +1,73 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { UploadCloud, FileText, CheckCircle, AlertTriangle, XCircle, Info, RefreshCw, FileDown } from 'lucide-react';
 import { getMedicationStatusByCNs, findAlternatives } from '../../services/blistercheckService';
+
+const createPieChartBase64 = (data, title) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 450;
+  canvas.height = 250;
+  const ctx = canvas.getContext('2d');
+  
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) return null;
+  
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cx = 120;
+  const cy = 135;
+  const r = 90;
+  
+  let startAngle = -Math.PI / 2;
+  
+  // Draw slices
+  data.forEach(d => {
+    const sliceAngle = (d.value / total) * 2 * Math.PI;
+    if (sliceAngle === 0) return;
+    
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    
+    ctx.fillStyle = d.color;
+    ctx.fill();
+    
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    startAngle += sliceAngle;
+  });
+  
+  // Draw Legend
+  let legendY = 60;
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillStyle = '#333333';
+  ctx.fillText(title, 240, 30);
+  
+  ctx.font = '14px sans-serif';
+  data.forEach(d => {
+    if(d.value === 0) return;
+    const pct = ((d.value / total) * 100).toFixed(1);
+    
+    // color box
+    ctx.fillStyle = d.color;
+    ctx.fillRect(240, legendY, 15, 15);
+    
+    // text
+    ctx.fillStyle = '#555555';
+    ctx.fillText(`${d.label}: ${d.value} (${pct}%)`, 265, legendY + 12);
+    
+    legendY += 25;
+  });
+  
+  return canvas.toDataURL('image/png');
+};
 
 export default function GuiaOptimizer() {
   const [file, setFile] = useState(null);
@@ -60,11 +124,14 @@ export default function GuiaOptimizer() {
 
       if (cnList.length === 0) throw new Error('No se encontraron Códigos Nacionales válidos en la columna.');
 
+      // Eliminar duplicados para analizar solo medicamentos únicos
+      const uniqueCnList = [...new Set(cnList)];
+
       // 3. Consultar Base de Datos
-      const dbMeds = await getMedicationStatusByCNs(cnList);
+      const dbMeds = await getMedicationStatusByCNs(uniqueCnList);
       
       const results = {
-        totalProcesados: cnList.length,
+        totalProcesados: uniqueCnList.length,
         totalAnalizados: 0,
         optimos: [],
         problematicos: [],
@@ -74,7 +141,7 @@ export default function GuiaOptimizer() {
       };
 
       // 4. Analizar estado y buscar alternativas
-      for (const cn of cnList) {
+      for (const cn of uniqueCnList) {
         const med = dbMeds.find(m => m.cn === cn);
         if (!med) {
           results.desconocidos.push({ cn });
@@ -144,6 +211,31 @@ export default function GuiaOptimizer() {
     );
   };
 
+  const chartImages = useMemo(() => {
+    if (!report) return { chart1Img: null, chart2Img: null };
+
+    const dataConocidos = [
+      { label: 'Conocidos (Clasificados)', value: report.optimos.length + report.problematicos.length, color: '#3498db' },
+      { label: 'Desconocidos', value: report.desconocidos.length, color: '#95a5a6' }
+    ];
+    
+    const reenvasablesCount = report.problematicos.filter(p => p.clasificacion.requiere_reenvasado && !p.clasificacion.requiere_reetiquetado).length;
+    const reetiquetablesCount = report.problematicos.filter(p => p.clasificacion.requiere_reetiquetado && !p.clasificacion.requiere_reenvasado).length;
+    const ambosCount = report.problematicos.filter(p => p.clasificacion.requiere_reenvasado && p.clasificacion.requiere_reetiquetado).length;
+
+    const dataClasificacion = [
+      { label: 'Aptos SDMDU', value: report.optimos.length, color: '#2ecc71' },
+      { label: 'Solo Reenvasar', value: reenvasablesCount, color: '#e67e22' },
+      { label: 'Solo Reetiquetar', value: reetiquetablesCount, color: '#f1c40f' },
+      { label: 'Reenvasar + Reetiquetar', value: ambosCount, color: '#e74c3c' }
+    ];
+
+    return {
+      chart1Img: createPieChartBase64(dataConocidos, 'Estado en el Catálogo'),
+      chart2Img: createPieChartBase64(dataClasificacion, 'Clasificación de Conocidos')
+    };
+  }, [report]);
+
   const generatePDF = () => {
     if (!report) return;
 
@@ -161,7 +253,7 @@ export default function GuiaOptimizer() {
     doc.text(`Medicamentos Orales Analizados: ${report.totalAnalizados}`, 14, 34);
     doc.text(`Puntuación de Adaptación a SDMDU: ${report.score}%`, 14, 40);
 
-    // Resumen
+    // Resumen de números
     doc.setFontSize(14);
     doc.setTextColor(40);
     doc.text('Resumen del Análisis', 14, 52);
@@ -171,6 +263,16 @@ export default function GuiaOptimizer() {
     doc.text(`- Oportunidades de Mejora (Requieren reenvasado/reetiquetado): ${report.problematicos.length}`, 14, 66);
     doc.text(`- Sin Clasificar en la base de datos: ${report.desconocidos.length}`, 14, 72);
     doc.text(`- Omitidos (No orales/sublinguales/bucales): ${report.noOrales.length}`, 14, 78);
+
+    // Gráfico 1: Conocidos vs Desconocidos
+    if (chartImages.chart1Img) {
+      doc.addImage(chartImages.chart1Img, 'PNG', 14, 90, 150, 83);
+    }
+
+    // Gráfico 2: Aptos vs Reetiquetables vs Reenvasables
+    if (chartImages.chart2Img) {
+      doc.addImage(chartImages.chart2Img, 'PNG', 14, 180, 150, 83);
+    }
 
     if (report.problematicos.length > 0) {
       doc.addPage();
@@ -285,7 +387,20 @@ export default function GuiaOptimizer() {
                 <span className="stat-value">{report.noOrales.length}</span>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+
+            {/* Renderizar los gráficos generados */}
+            {(chartImages.chart1Img || chartImages.chart2Img) && (
+              <div style={{ display: 'flex', gap: '20px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {chartImages.chart1Img && (
+                  <img src={chartImages.chart1Img} alt="Gráfico de Conocidos vs Desconocidos" style={{ maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px' }} />
+                )}
+                {chartImages.chart2Img && (
+                  <img src={chartImages.chart2Img} alt="Gráfico de Clasificación de Conocidos" style={{ maxWidth: '100%', height: 'auto', border: '1px solid #eef2f5', borderRadius: '8px' }} />
+                )}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'center' }}>
               <button className="bc-btn-secondary" onClick={() => { setFile(null); setReport(null); }}>
                 Subir otra guía
               </button>

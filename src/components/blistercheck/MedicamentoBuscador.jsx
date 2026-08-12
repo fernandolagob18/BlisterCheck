@@ -27,6 +27,8 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
 
   // Buscador avanzado
   const [showAvanzado, setShowAvanzado] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 120;
   const [filtros, setFiltros] = useState({
     cn: '',
     nombre: '',
@@ -106,6 +108,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
         const data = await searchSimple(query);
         if (isCurrent) {
           setResultados(data);
+          setCurrentPage(1);
           fetchShortages(data);
           fetchClasificaciones(data);
         }
@@ -143,6 +146,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
     try {
       const data = await searchAvanzado(f);
       setResultados(data);
+      setCurrentPage(1);
       fetchShortages(data);
       fetchClasificaciones(data);
     } catch (err) {
@@ -380,11 +384,22 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
 
         {!loading && resultados.length > 0 && (
           <>
-            <p className="bc-resultados-count">
-              {resultados.length} resultado{resultados.length !== 1 ? 's' : ''}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <p className="bc-resultados-count" style={{ margin: 0 }}>
+                {resultados.length} resultado{resultados.length !== 1 ? 's' : ''} 
+                {resultados.length > itemsPerPage && ` (Mostrando ${(currentPage - 1) * itemsPerPage + 1} - ${Math.min(currentPage * itemsPerPage, resultados.length)})`}
+              </p>
+              {Math.ceil(resultados.length / itemsPerPage) > 1 && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Anterior</button>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Pág {currentPage} de {Math.ceil(resultados.length / itemsPerPage)}</span>
+                  <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={currentPage === Math.ceil(resultados.length / itemsPerPage)} onClick={() => setCurrentPage(p => p + 1)}>Siguiente</button>
+                </div>
+              )}
+            </div>
+            
             <div className="bc-resultados-grid">
-              {resultados.map(med => {
+              {resultados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(med => {
                 const rawCN = med.cn ? String(med.cn) : '';
                 const cleanDigits = rawCN.replace(/\D/g, '');
                 const norm6 = cleanDigits.length >= 6 ? cleanDigits.substring(0, 6) : cleanDigits;
@@ -410,6 +425,14 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
                 );
               })}
             </div>
+
+            {Math.ceil(resultados.length / itemsPerPage) > 1 && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', marginTop: '2rem' }}>
+                <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={currentPage === 1} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Página {currentPage} de {Math.ceil(resultados.length / itemsPerPage)}</span>
+                <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={currentPage === Math.ceil(resultados.length / itemsPerPage)} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+              </div>
+            )}
           </>
         )}
       </div>
