@@ -169,10 +169,10 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
                   </p>
                   
                   <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                    <button className="bc-btn" onClick={() => { setMatchDetails(null); setError(null); }} style={{ background: 'white', border: '1px solid var(--color-border)' }}>
+                    <button className="bc-btn-secondary" onClick={() => { setMatchDetails(null); setError(null); }}>
                       No, cancelar
                     </button>
-                    <button className="bc-btn bc-btn--primary" onClick={handleConfirm}>
+                    <button className="bc-btn-primary" onClick={handleConfirm}>
                       Sí, marcar todos
                     </button>
                   </div>
