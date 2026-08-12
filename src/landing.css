@@ -1359,3 +1359,99 @@ html, body {
   .lp-footer { padding: 32px 20px; flex-direction: column; align-items: flex-start; }
   .lp-top-banner { font-size: 0.72rem; padding: 8px 12px; }
 }
+
+
+
+@media (max-width: 640px) {
+  /* Fix nav bar overflowing */
+  .lp-nav {
+    padding: 0 12px;
+    height: 60px;
+  }
+  
+  .lp-logo-text {
+    font-size: 1.1rem;
+  }
+  
+  .lp-logo-svg {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .lp-nav-actions {
+    gap: 6px;
+  }
+  
+  .lp-btn-login {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .lp-btn-register {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  /* Fix top banner text wrap */
+  .lp-top-banner {
+    flex-wrap: wrap;
+    text-align: center;
+    padding: 8px;
+    gap: 8px;
+    line-height: 1.4;
+  }
+
+  /* Fix Hero CTAs */
+  .lp-hero-ctas {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .lp-btn-primary, .lp-btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Fix Trust Bar (AEMPS Oficial etc) */
+  .lp-trust-inner {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Fix inline grid in Demo (activeTab === 'detalle') */
+  .landing-page [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Fix the buttons at the bottom of the Demo detalle tab */
+  .landing-page [style*="justify-content: space-between"] {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+  
+  .landing-page button {
+    white-space: normal;
+  }
+
+  /* Fix CTA Final section buttons */
+  .lp-cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .lp-btn-cta-primary, .lp-btn-cta-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Fix hero stats overlap */
+  .lp-hero-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* Garantizar que nada se desborda */
+  * {
+    max-width: 100%;
+  }
+}
