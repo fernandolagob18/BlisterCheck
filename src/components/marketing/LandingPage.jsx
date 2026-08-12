@@ -117,7 +117,91 @@ export default function LandingPage({ onLogin, onRegister }) {
             </div>
           </div>
           <div className="lp-hero-right">
-            <img src="/dashboard_mockup.jpg" alt="Dashboard BlisterCheck" className="lp-hero-mockup" />
+            {/* Replica fiel de la UI interna de la app */}
+            <div className="lp-hero-app-mockup">
+              {/* Sidebar */}
+              <div className="lp-mock-sidebar">
+                <div className="lp-mock-sidebar-logo">
+                  <svg width="26" height="26" viewBox="0 0 38 38" fill="none">
+                    <rect width="38" height="38" rx="9" fill="#0ea5e9"/>
+                    <rect x="7" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+                    <rect x="21" y="10" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+                    <rect x="7" y="21" width="10" height="8" rx="3" fill="rgba(255,255,255,0.25)"/>
+                    <ellipse cx="12" cy="14" rx="3" ry="2.5" fill="white"/>
+                    <ellipse cx="26" cy="14" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
+                    <ellipse cx="12" cy="25" rx="3" ry="2.5" fill="rgba(255,255,255,0.5)"/>
+                    <rect x="21" y="21" width="10" height="8" rx="3" fill="white"/>
+                    <polyline points="24,25.5 26,27.5 30,23.5" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>BlisterCheck</span>
+                </div>
+                <div className="lp-mock-user">
+                  <div className="lp-mock-avatar">F</div>
+                  <div>
+                    <div className="lp-mock-uname">Farmacéutico</div>
+                    <div className="lp-mock-urole">Ver perfil</div>
+                  </div>
+                </div>
+                <div className="lp-mock-nav-label">Módulos Clínicos</div>
+                {[
+                  { icon: '🔍', label: 'Catálogo CIMA', active: true },
+                  { icon: '📋', label: 'Optimizador Guía', active: false },
+                  { icon: '📊', label: 'Estadísticas', active: false },
+                ].map((item, i) => (
+                  <div key={i} className={`lp-mock-nav-item ${item.active ? 'active' : ''}`}>
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </div>
+                ))}
+                <div className="lp-mock-nav-label" style={{ marginTop: 6 }}>Herramientas</div>
+                {[
+                  { icon: '⬆️', label: 'Subir medicamentos' },
+                  { icon: '⬇️', label: 'Exportar Registro' },
+                ].map((item, i) => (
+                  <div key={i} className="lp-mock-nav-item">
+                    <span>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Panel principal */}
+              <div className="lp-mock-main">
+                {/* Header */}
+                <div className="lp-mock-header">
+                  <span className="lp-mock-header-title">Catálogo de Medicamentos</span>
+                  <div className="lp-mock-header-badge">27.553 registros</div>
+                </div>
+
+                {/* Buscador */}
+                <div className="lp-mock-search">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <span>Buscar por nombre, principio activo o CN…</span>
+                </div>
+
+                {/* Resultados */}
+                <div className="lp-mock-results">
+                  {[
+                    { nombre: 'PARACETAMOL 1 g Comp. EFG', lab: 'Lab. Genérico A', badge: 'Apto SDMDU', badgeColor: '#dcfce7', badgeText: '#14532d', cn: '656428' },
+                    { nombre: 'OMEPRAZOL 20 mg Cáps. EFG', lab: 'Lab. Genérico B', badge: 'Reenvasado', badgeColor: '#fef3c7', badgeText: '#78350f', cn: '731248' },
+                    { nombre: 'ENALAPRIL 10 mg Comp. EFG', lab: 'Lab. Genérico C', badge: 'Apto SDMDU', badgeColor: '#dcfce7', badgeText: '#14532d', cn: '563291' },
+                    { nombre: 'METFORMINA 850 mg Comp. EFG', lab: 'Lab. Genérico A', badge: 'Reetiquetado', badgeColor: '#f3e8ff', badgeText: '#581c87', cn: '612847' },
+                  ].map((med, i) => (
+                    <div key={i} className="lp-mock-result-row">
+                      <div className="lp-mock-result-info">
+                        <div className="lp-mock-result-name">{med.nombre}</div>
+                        <div className="lp-mock-result-meta">CN {med.cn} · {med.lab}</div>
+                      </div>
+                      <span className="lp-mock-badge" style={{ background: med.badgeColor, color: med.badgeText }}>
+                        {med.badge}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
