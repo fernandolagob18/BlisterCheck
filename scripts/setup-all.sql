@@ -259,7 +259,7 @@ STABLE
 AS $$
   SELECT c.*
   FROM public.blistercheck_catalogo c
-  LEFT JOIN public.blistercheck_clasificacion cl ON c.cn = cl.cn
+  LEFT JOIN public.blistercheck_clasificacion_global cl ON c.cn = cl.cn
   WHERE
     (p_cn IS NULL OR c.cn ILIKE p_cn || '%')
     AND (p_nombre IS NULL OR unaccent(c.nombre) ILIKE '%' || unaccent(p_nombre) || '%')

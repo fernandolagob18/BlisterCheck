@@ -1145,7 +1145,7 @@
 .bc-last-update-icon { flex-shrink: 0; opacity: 0.75; }
 
 /* ── Estadísticas ── */
-.bc-stats { max-width: 1000px; }
+.bc-stats { width: 100%; }
 
 .bc-stats-header {
   display: flex; align-items: center; justify-content: space-between;
