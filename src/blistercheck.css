@@ -3100,3 +3100,147 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =======================================================================
+   EXTRA RESPONSIVE FIXES PARA MÓVIL ESTRECHO Y TABLET
+   ======================================================================= */
+
+@media (max-width: 850px) {
+  /* Ocultar estadísticas del header en móvil/tablet para no romper el layout horizontal */
+  .bc-header-stats {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Asegurar que la app no haga scroll horizontal nunca */
+  body, html {
+    overflow-x: hidden;
+  }
+
+  .bc-app {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* El content principal debe tener un padding minimo */
+  .bc-content {
+    padding: 0.75rem !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Fix header */
+  .bc-header-bar {
+    padding: 0.75rem !important;
+  }
+
+  /* Grid en Buscador (fuerza 1 columna si o si y evita desborde) */
+  .bc-resultados-grid {
+    grid-template-columns: 1fr !important;
+    width: 100%;
+  }
+
+  /* Forzar ancho 100% en inputs */
+  .bc-search-bar {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .bc-filtro-select {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  
+  .bc-search-row {
+    flex-direction: column !important;
+    width: 100%;
+  }
+  
+  .bc-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* Forzar wrap de botones en detalle */
+  .bc-detalle-acciones {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .bc-detalle-acciones button {
+    width: 100% !important;
+  }
+
+  /* El titulo debe poder bajar de linea sin romper todo */
+  .bc-header-title {
+    max-width: none !important;
+    font-size: 1.1rem;
+    white-space: normal !important;
+  }
+  
+  /* Ajuste de Paginación para que quepa todo */
+  .bc-pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+
+
+
+@media (max-width: 640px) {
+  /* Arreglos ultra-estrictos para evitar desbordes */
+  .bc-sidebar { max-width: 85% !important; }
+  
+  .bc-med-card {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  
+  .bc-med-card__color-bar {
+    width: 100% !important;
+    height: 6px !important;
+  }
+  
+  .bc-med-card__header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+  }
+  
+  .bc-data-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  
+  .bc-alt-card {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  
+  .alt-item {
+    flex-wrap: wrap !important;
+  }
+  
+  .bc-table-wrap, .bc-stats-table-scroll {
+    overflow-x: auto !important;
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  /* Hacer que los textos larguisimos se corten o dividan */
+  .bc-med-card__name, .med-header strong, .bc-header-title {
+    word-break: break-word !important;
+    hyphens: auto;
+  }
+  
+  .bc-btn, .bc-btn-secondary, .bc-btn-ghost, .bc-btn-danger, .bc-btn-primary {
+    white-space: normal !important;
+    height: auto !important;
+    min-height: 44px;
+    padding: 0.5rem 1rem !important;
+  }
+}
