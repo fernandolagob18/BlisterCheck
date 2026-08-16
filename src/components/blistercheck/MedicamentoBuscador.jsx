@@ -38,6 +38,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
     viaAdministracion: '',
     soloClasificados: false,
     soloEnMiFarmacia: false,
+    soloFotosensibles: false,
     estadoAcondicionamiento: 'todos',
   });
   const [formas, setFormas] = useState([]);
@@ -159,7 +160,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   }, [filtros, fetchShortages]);
 
   const handleLimpiarAvanzado = () => {
-    setFiltros({ cn: '', nombre: '', principioActivo: '', laboratorio: '', formaFarmaceutica: '', viaAdministracion: '', soloClasificados: false, soloEnMiFarmacia: false, estadoAcondicionamiento: 'todos' });
+    setFiltros({ cn: '', nombre: '', principioActivo: '', laboratorio: '', formaFarmaceutica: '', viaAdministracion: '', soloClasificados: false, soloEnMiFarmacia: false, soloFotosensibles: false, estadoAcondicionamiento: 'todos' });
     setResultados([]);
     setShortageMap(new Map());
     setClasificacionMap(new Map());
@@ -321,6 +322,19 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
               />
               <label htmlFor="solo-en-mi-farmacia" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 600 }}>
                 Mostrar únicamente medicamentos que están en mi farmacia
+              </label>
+            </div>
+
+            <div className="bc-filtro-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem', padding: '1rem', background: 'var(--color-card-bg)', border: '1px solid var(--color-card-border)', borderRadius: '8px', marginBottom: '1rem' }}>
+              <input
+                type="checkbox"
+                id="solo-fotosensibles"
+                checked={filtros.soloFotosensibles}
+                onChange={e => handleFiltroChange('soloFotosensibles', e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: '#eab308', cursor: 'pointer' }}
+              />
+              <label htmlFor="solo-fotosensibles" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 600 }}>
+                Mostrar únicamente medicamentos fotosensibles ☀️
               </label>
             </div>
 

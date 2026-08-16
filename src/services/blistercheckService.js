@@ -210,6 +210,10 @@ export async function searchAvanzado(filtros = {}) {
 
   let results = data || [];
 
+  if (filtros.soloFotosensibles) {
+    results = results.filter(med => med.fotosensible === true);
+  }
+
   if (filtros.soloEnMiFarmacia || (filtros.estadoAcondicionamiento && filtros.estadoAcondicionamiento !== 'todos')) {
     if (results.length === 0) return [];
 
