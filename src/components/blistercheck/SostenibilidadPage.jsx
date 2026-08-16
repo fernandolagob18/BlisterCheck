@@ -8,35 +8,32 @@ import {
 const MATERIALES = [
   {
     nombre: 'Aluminio (lámina blíster)',
-    factor: '6.3 kg CO₂e/kg',
+    factor: '6,3 kg CO₂e/kg',
     fuente: 'European Aluminium Association (2024)',
     url: 'https://european-aluminium.eu/resource/environmental-profile-report/',
     color: '#e8f4f8',
     border: '#7ecae4',
-    icon: '🥫',
-    nota: 'Aluminio primario de producción europea. El aluminio reciclado puede reducir hasta un 95% esta cifra.',
+    nota: 'Aluminio primario de producción europea. El aluminio reciclado puede reducir hasta un 95 % esta cifra.',
     fiabilidad: 'SECTORIAL',
   },
   {
     nombre: 'Plástico HDPE (frascos)',
-    factor: '~1.9–3.1 kg CO₂e/kg',
+    factor: '~1,9–3,1 kg CO₂e/kg',
     fuente: 'PlasticsEurope Eco-profiles (2022/2026)',
     url: 'https://www.plasticseurope.org/en/resources/eco-profiles',
     color: '#f0fdf4',
     border: '#86efac',
-    icon: '🧴',
-    nota: 'Rango típico cuna-a-puerta. Varía según la versión del eco-perfil y la energía del proceso.',
+    nota: 'Rango típico cuna a puerta. Varía según la versión del eco-perfil y la energía del proceso.',
     fiabilidad: 'SECTORIAL',
   },
   {
     nombre: 'Electricidad (España)',
-    factor: '0.258 kg CO₂e/kWh',
+    factor: '0,258 kg CO₂e/kWh',
     fuente: 'MITECO — Factor de emisión mix nacional 2025',
     url: 'https://www.miteco.gob.es/es/cambio-climatico/temas/mitigacion-politicas-y-medidas/factores_emision_co2.html',
     color: '#fffbeb',
     border: '#fbbf24',
-    icon: '⚡',
-    nota: 'Factor oficial del Ministerio para la Transición Ecológica. Aplicable a la energía consumida por la maquinaria de reenvasado.',
+    nota: 'Factor oficial del Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO). Aplicable a la energía consumida por la maquinaria de reenvasado.',
     fiabilidad: 'OFICIAL',
   },
 ];
@@ -55,13 +52,13 @@ const OPCIONES = [
     pros: [
       'Cero material nuevo generado en el hospital',
       'No requiere energía adicional de reenvasado',
-      'El HDPE/PP es el plástico con menor huella entre los comunes',
+      'El polietileno de alta densidad (HDPE) y el polipropileno (PP) tienen la menor huella entre los plásticos comunes',
     ],
     contras: [
-      'No siempre viable en SDMDU (Sistemas de Dispensación en Dosis Unitaria)',
+      'No siempre viable en los Sistemas de Dispensación en Dosis Unitaria (SDMDU)',
       'Puede requerir reetiquetado de la dosis individual',
     ],
-    referencia: 'Alfred Health/Monash University LCA, 2023 (peer-reviewed)',
+    referencia: 'Alfred Health/Monash University — Análisis de Ciclo de Vida (LCA), 2023 (revisión por pares)',
   },
   {
     id: 'reetiquetado',
@@ -71,17 +68,17 @@ const OPCIONES = [
     bg: '#eff6ff',
     border: '#93c5fd',
     descripcion:
-      'Añadir una etiqueta adhesiva sobre el blíster comercial intacto (sin abrirlo ni reenvasan). Mínima intervención, máxima preservación del envase original.',
+      'Añadir una etiqueta adhesiva sobre el blíster comercial intacto (sin abrirlo ni reenvasarlo). Mínima intervención, máxima preservación del envase original.',
     pros: [
       'Solo se añade el peso de la etiqueta adhesiva (< 1 g)',
-      'Se conserva la integridad del blíster fabricante',
+      'Se conserva la integridad del blíster del fabricante',
       'Menor generación de residuos hospitalarios',
     ],
     contras: [
       'Puede no adaptarse a todos los formatos de blíster',
       'Requiere control estricto de la legibilidad de la etiqueta',
     ],
-    referencia: 'ILAPHAR, SEFH — Proyecto "No reenvases sin necesidad", 2024',
+    referencia: 'ILAPHAR, Sociedad Española de Farmacia Hospitalaria (SEFH) — Proyecto "No reenvases sin necesidad", 2024',
   },
   {
     id: 'bolsa-zip',
@@ -91,7 +88,7 @@ const OPCIONES = [
     bg: '#f5f3ff',
     border: '#c4b5fd',
     descripcion:
-      'Dispensar en bolsas de polietileno con cierre zip junto con una etiqueta identificativa. Menor consumo de material que el reenvasado en lámina aluminio.',
+      'Dispensar en bolsas de polietileno (PE) con cierre zip junto con una etiqueta identificativa. Menor consumo de material que el reenvasado en lámina de aluminio.',
     pros: [
       'Menos material por unidad que el reenvasado en Al/PVC',
       'Sin necesidad de maquinaria termoselladora',
@@ -102,7 +99,7 @@ const OPCIONES = [
       'Aumenta el riesgo de contaminación si no se manipula correctamente',
       'No válido para todos los fármacos (fotosensibles, higroscópicos)',
     ],
-    referencia: 'Estimación basada en perfil HDPE PlasticsEurope',
+    referencia: 'Estimación basada en eco-perfil HDPE de PlasticsEurope',
   },
   {
     id: 'reenvasado',
@@ -112,28 +109,28 @@ const OPCIONES = [
     bg: '#fffbeb',
     border: '#fcd34d',
     descripcion:
-      'Reenvasado manual o automático en lámina de aluminio + film PVC termosellable. Es el proceso de mayor impacto porque consume material nuevo y energía eléctrica de la maquinaria.',
+      'Reenvasado manual o automático en lámina de aluminio (Al) + film de policloruro de vinilo (PVC) termosellable. Es el proceso de mayor impacto porque consume material nuevo y energía eléctrica de la maquinaria.',
     pros: [
       'Permite la dispensación en dosis unitarias estandarizadas',
       'Compatible con la mayoría de sistemas automatizados de SDMDU',
       'Estabilidad y trazabilidad garantizadas',
     ],
     contras: [
-      'Consume lámina de Al (6.3 kg CO₂e/kg, EAA 2024) + PVC termosellable',
-      'Requiere energía eléctrica de la reenvasadora (factor MITECO: 0.258 kg CO₂e/kWh)',
+      'Consume lámina de Al (6,3 kg CO₂e/kg, European Aluminium Association 2024) + PVC termosellable',
+      'Requiere energía eléctrica de la reenvasadora (factor MITECO: 0,258 kg CO₂e/kWh)',
       'Genera residuos de materiales mixtos (Al + plástico) difíciles de reciclar',
     ],
-    referencia: 'EAA 2024, MITECO 2025, Alfred Health LCA 2023',
+    referencia: 'European Aluminium Association 2024, MITECO 2025, Alfred Health LCA 2023',
   },
 ];
 
 /* ─── Estudio SEFH ─────────────────────────────────────────────────────────── */
 const SEFH_DATA = {
   hospitales: 15,
-  comprimidosNoRenvasados: '1.27 millones',
+  comprimidosNoRenvasados: '1,27 millones',
   materialEvitado: '17 km',
   residuosEvitados: '866 kg',
-  fuente: 'Proyecto "No reenvases sin necesidad" – Revista Farmacia Hospitalaria, 2026',
+  fuente: 'Proyecto "No reenvases sin necesidad" — Revista Farmacia Hospitalaria, 2026',
 };
 
 /* ─── Referencias bibliográficas ─────────────────────────────────────────── */
@@ -142,49 +139,49 @@ const REFERENCIAS = [
     autores: 'Alfred Health Pharmacy / University of Melbourne',
     titulo: 'The carbon footprint of different medication packaging items at an Australian tertiary hospital',
     anio: '2023',
-    tipo: '📄 Peer-reviewed',
+    tipo: 'Revisión por pares',
     url: 'https://www.researchgate.net',
-    hallazgo: 'Los blísteres con menor huella emiten hasta un 76% menos CO₂e que los de mayor impacto dentro de la misma categoría.',
+    hallazgo: 'Los blísteres con menor huella emiten hasta un 76 % menos CO₂e que los de mayor impacto dentro de la misma categoría.',
   },
   {
     autores: 'European Aluminium Association',
     titulo: 'Environmental Profile Report 2024',
     anio: '2024',
-    tipo: '🔶 Sectorial Oficial',
+    tipo: 'Sectorial oficial',
     url: 'https://european-aluminium.eu/resource/environmental-profile-report/',
-    hallazgo: 'Aluminio primario europeo: 6.3 kg CO₂e/kg (dato cuna a puerta, producción europea media).',
+    hallazgo: 'Aluminio primario europeo: 6,3 kg CO₂e/kg (dato cuna a puerta, producción europea media).',
   },
   {
     autores: 'PlasticsEurope',
     titulo: 'Eco-profiles de plásticos (HDPE, PVC, PE)',
     anio: '2022–2026',
-    tipo: '🔶 Sectorial Oficial',
+    tipo: 'Sectorial oficial',
     url: 'https://www.plasticseurope.org/en/resources/eco-profiles',
-    hallazgo: 'Eco-profiles LCI cuna a puerta para polímeros europeos. HDPE: rango 1.9–3.1 kg CO₂e/kg según versión.',
+    hallazgo: 'Eco-profiles de Inventario de Ciclo de Vida (LCI) cuna a puerta para polímeros europeos. HDPE: rango 1,9–3,1 kg CO₂e/kg según versión.',
   },
   {
-    autores: 'MITECO (Ministerio para la Transición Ecológica)',
+    autores: 'MITECO (Ministerio para la Transición Ecológica y el Reto Demográfico)',
     titulo: 'Factores de emisión de CO₂ para el sector eléctrico español',
     anio: '2025',
-    tipo: '✅ Regulador oficial',
+    tipo: 'Regulador oficial',
     url: 'https://www.miteco.gob.es/es/cambio-climatico/temas/mitigacion-politicas-y-medidas/factores_emision_co2.html',
-    hallazgo: 'Factor de emisión mix eléctrico nacional España 2025: 0.258 kg CO₂e/kWh.',
+    hallazgo: 'Factor de emisión mix eléctrico nacional España 2025: 0,258 kg CO₂e/kWh.',
   },
   {
-    autores: 'SEFH – Sociedad Española de Farmacia Hospitalaria',
-    titulo: 'No reenvases sin necesidad – Evaluación del impacto en 15 hospitales',
+    autores: 'SEFH — Sociedad Española de Farmacia Hospitalaria',
+    titulo: 'No reenvases sin necesidad — Evaluación del impacto en 15 hospitales',
     anio: '2026',
-    tipo: '📄 Peer-reviewed',
+    tipo: 'Revisión por pares',
     url: 'https://www.sefh.es',
-    hallazgo: '1,27M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales.',
+    hallazgo: '1,27 M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales.',
   },
   {
     autores: 'SIGRE Medicamento y Medio Ambiente',
     titulo: 'Informe anual de ecodiseño de envases farmacéuticos',
     anio: '2024',
-    tipo: '✅ Sectorial Oficial',
+    tipo: 'Sectorial oficial',
     url: 'https://www.sigre.es',
-    hallazgo: '>3.900 medidas de ecodiseño, peso medio de envase reducido >25% desde 2000, >85.000 t CO₂e acumuladas evitadas.',
+    hallazgo: 'Más de 3.900 medidas de ecodiseño, peso medio de envase reducido más de un 25 % desde 2000, más de 85.000 t CO₂e acumuladas evitadas.',
   },
 ];
 
@@ -227,20 +224,6 @@ export default function SostenibilidadPage() {
         </div>
       </div>
 
-      {/* ── AVISO METODOLÓGICO ────────────────────────────────────────── */}
-      <div className="eco-disclaimer">
-        <AlertTriangle size={18} className="eco-disclaimer__icon" />
-        <div>
-          <strong>Nota metodológica:</strong> Los datos de huella de carbono
-          presentados proceden de fuentes oficiales y estudios peer-reviewed. No
-          existe actualmente un estudio LCA específico sobre el reenvasado
-          hospitalario español; las comparaciones se realizan sobre la base de
-          los factores de emisión por material (fuente a puerta). Esta
-          información es orientativa y no debe utilizarse como base de cálculo
-          regulatorio sin un análisis LCA completo.
-        </div>
-      </div>
-
       {/* ── TABS ──────────────────────────────────────────────────────── */}
       <div className="eco-tabs">
         {tabs.map(tab => (
@@ -265,7 +248,7 @@ export default function SostenibilidadPage() {
                 ¿Por qué importa el envase farmacéutico?
               </h2>
               <p className="eco-body">
-                El sector sanitario representa aproximadamente el <strong>4-5% de las emisiones
+                El sector sanitario representa aproximadamente el <strong>4-5 % de las emisiones
                 globales de CO₂e</strong>. Dentro de este sector, los medicamentos y su ciclo de
                 vida —incluyendo su envase— son una parte significativa de esa huella.
                 En el ámbito hospitalario, la farmacia tiene un rol decisivo: la elección de
@@ -273,14 +256,17 @@ export default function SostenibilidadPage() {
                 ambientales directas.
               </p>
               <p className="eco-body">
-                El reenvasado hospitalario —necesario en muchos contextos de SDMDU— implica
-                la generación de un <strong>nuevo envase</strong> de aluminio y plástico PVC
-                que se suma al envase original del laboratorio. Cuando esto no es estrictamente
-                necesario, supone un incremento evitable de la huella de carbono.
+                El reenvasado hospitalario —necesario en muchos contextos de los Sistemas de
+                Dispensación en Dosis Unitaria (SDMDU)— implica la generación de un{' '}
+                <strong>nuevo envase</strong> de aluminio y plástico PVC que se suma al envase
+                original del laboratorio. Cuando esto no es estrictamente necesario, supone un
+                incremento evitable de la huella de carbono.
               </p>
 
               <div className="eco-highlight-box">
-                <div className="eco-highlight-box__icon">🏥</div>
+                <div className="eco-highlight-box__icon-wrap">
+                  <Leaf size={20} />
+                </div>
                 <div>
                   <strong>Proyecto "No reenvases sin necesidad" (SEFH, 2026)</strong>
                   <p>
@@ -310,10 +296,10 @@ export default function SostenibilidadPage() {
                 Comparativa de huella de carbono por acondicionamiento
               </h2>
               <p className="eco-body">
-                El siguiente gráfico, basado en datos de un estudio LCA hospitalario realizado
-                en el Alfred Health (Australia, ~2023) junto con factores de emisión oficiales
-                europeos, ilustra la diferencia relativa entre los distintos modos de
-                acondicionamiento:
+                El siguiente gráfico, basado en datos de un estudio de Análisis de Ciclo de Vida
+                (LCA) hospitalario realizado en el Alfred Health (Australia, 2023) junto con
+                factores de emisión oficiales europeos, ilustra la diferencia relativa entre los
+                distintos modos de acondicionamiento:
               </p>
               <div className="eco-img-wrap">
                 <img
@@ -331,7 +317,7 @@ export default function SostenibilidadPage() {
                 <CheckCircle size={18} />
                 <div>
                   <strong>La evidencia disponible señala que:</strong> el reenvasado hospitalario
-                  en lámina aluminio + PVC genera la mayor huella de carbono por dosis. Mantener
+                  en lámina de aluminio y PVC genera la mayor huella de carbono por dosis. Mantener
                   el blíster comercial intacto (reetiquetando si es necesario) es la opción de
                   menor impacto cuando el blíster original es apto para SDMDU.
                 </div>
@@ -360,8 +346,8 @@ export default function SostenibilidadPage() {
                 className="eco-img"
               />
               <p className="eco-img-caption">
-                Factores de emisión oficiales (EAA, PlasticsEurope, MITECO). Los valores corresponden
-                al mix de producción europeo/español.
+                Factores de emisión oficiales (European Aluminium Association, PlasticsEurope,
+                MITECO). Los valores corresponden al mix de producción europeo/español.
               </p>
             </div>
 
@@ -373,7 +359,6 @@ export default function SostenibilidadPage() {
                   style={{ background: mat.color, borderColor: mat.border }}
                 >
                   <div className="eco-material-card__header">
-                    <span className="eco-material-card__icon">{mat.icon}</span>
                     <div>
                       <div className="eco-material-card__name">{mat.nombre}</div>
                       <div className="eco-material-card__factor">{mat.factor}</div>
@@ -381,7 +366,7 @@ export default function SostenibilidadPage() {
                     <span
                       className={`eco-badge eco-badge--${mat.fiabilidad === 'OFICIAL' ? 'green' : 'blue'}`}
                     >
-                      {mat.fiabilidad === 'OFICIAL' ? '✅' : '🔶'} {mat.fiabilidad}
+                      {mat.fiabilidad}
                     </span>
                   </div>
                   <p className="eco-material-card__nota">{mat.nota}</p>
@@ -397,30 +382,30 @@ export default function SostenibilidadPage() {
               ))}
             </div>
 
-            <div className="eco-callout eco-callout--yellow">
-              <AlertTriangle size={18} />
-              <div>
-                <strong>Limitación importante:</strong> PlasticsEurope actualiza sus eco-perfiles
-                periódicamente. Los valores de HDPE/PVC pueden variar entre versiones. Para un
-                cálculo de huella corporativo, se debe consultar la versión vigente directamente en
-                su base de datos pública.
-              </div>
-            </div>
-
-            <h3 className="eco-subsection-title">Ciclo del blíster comercial vs. hospitalario</h3>
+            <h3 className="eco-subsection-title">Ciclo del blíster comercial frente al hospitalario</h3>
             <p className="eco-body">
-              Un blíster comercial de aluminio + PVC contiene ya todo el material necesario para
+              Un blíster comercial de aluminio y PVC contiene ya todo el material necesario para
               proteger el medicamento. Cuando se reenvasas en el hospital:
             </p>
             <ol className="eco-list eco-list--ordered">
               <li>Se rompe el blíster original (residuo Al+PVC).</li>
               <li>Se genera un <strong>segundo blíster nuevo</strong> de lámina Al + film PVC termosellado.</li>
-              <li>La reenvasadora consume electricidad (0.258 kg CO₂e/kWh — MITECO 2025).</li>
+              <li>La reenvasadora consume electricidad (0,258 kg CO₂e/kWh — MITECO 2025).</li>
               <li>
                 El estudio del Alfred Health (Australia, 2023) encontró que reciclar el aluminio del
-                blíster puede reducir hasta un <strong>81% la huella</strong> asociada a ese material.
+                blíster puede reducir hasta un <strong>81 % la huella</strong> asociada a ese material.
               </li>
             </ol>
+
+            <h3 className="eco-subsection-title" style={{ marginTop: '2rem' }}>Eficiencia de los frascos de plástico (HDPE)</h3>
+            <p className="eco-body">
+              Aunque el plástico tiene un impacto ambiental asociado, los frascos comerciales
+              (generalmente de HDPE) presentan una <strong>excelente relación envase/medicamento</strong>.
+              Al albergar múltiples dosis en un único receptáculo, la cantidad de material —y por tanto, 
+              la huella de carbono— asignada a <strong>cada dosis individual</strong> es considerablemente menor 
+              en comparación con los blísteres, donde cada comprimido requiere su propia cavidad de plástico 
+              y lámina de aluminio sellada.
+            </p>
           </div>
         )}
 
@@ -455,13 +440,13 @@ export default function SostenibilidadPage() {
                     <p className="eco-option-card__desc">{op.descripcion}</p>
                     <div className="eco-option-card__cols">
                       <div>
-                        <div className="eco-option-card__col-title eco-option-card__col-title--green">✅ Ventajas</div>
+                        <div className="eco-option-card__col-title eco-option-card__col-title--green">Ventajas</div>
                         <ul className="eco-list">
                           {op.pros.map((p, i) => <li key={i}>{p}</li>)}
                         </ul>
                       </div>
                       <div>
-                        <div className="eco-option-card__col-title eco-option-card__col-title--red">⚠️ Limitaciones</div>
+                        <div className="eco-option-card__col-title eco-option-card__col-title--red">Limitaciones</div>
                         <ul className="eco-list">
                           {op.contras.map((c, i) => <li key={i}>{c}</li>)}
                         </ul>
@@ -535,22 +520,39 @@ export default function SostenibilidadPage() {
                 </div>
               ))}
             </div>
-
-            <div className="eco-callout eco-callout--yellow" style={{ marginTop: '1.5rem' }}>
-              <AlertTriangle size={18} />
-              <div>
-                <strong>Transparencia sobre las limitaciones:</strong> No existe actualmente
-                un estudio de Análisis de Ciclo de Vida (LCA) específicamente realizado sobre
-                el proceso de reenvasado hospitalario en España. Los datos de esta página
-                se construyen combinando factores de emisión de materiales con las conclusiones
-                del estudio australiano más próximo en contexto (Alfred Health, 2023).
-                Cualquier uso de esta información para comunicaciones externas debe mencionar
-                explícitamente estas limitaciones.
-              </div>
-            </div>
           </div>
         )}
       </div>
+
+      {/* ── NOTA METODOLÓGICA Y LIMITACIONES (al final, fuera de las pestañas) ── */}
+      <div className="eco-footer-notes">
+        <div className="eco-disclaimer">
+          <AlertTriangle size={18} className="eco-disclaimer__icon" />
+          <div>
+            <strong>Nota metodológica:</strong> Los datos de huella de carbono
+            presentados proceden de fuentes oficiales y estudios con revisión por pares. No
+            existe actualmente un estudio de Análisis de Ciclo de Vida (LCA) específico sobre el reenvasado
+            hospitalario español; las comparaciones se realizan sobre la base de
+            los factores de emisión por material (fuente a puerta). Esta
+            información es orientativa y no debe utilizarse como base de cálculo
+            regulatorio sin un análisis LCA completo.
+          </div>
+        </div>
+
+        <div className="eco-disclaimer eco-disclaimer--secondary">
+          <AlertTriangle size={18} className="eco-disclaimer__icon" />
+          <div>
+            <strong>Transparencia sobre las limitaciones:</strong> No existe actualmente
+            un estudio de LCA específicamente realizado sobre
+            el proceso de reenvasado hospitalario en España. Los datos de esta página
+            se construyen combinando factores de emisión de materiales con las conclusiones
+            del estudio australiano más próximo en contexto (Alfred Health, 2023).
+            Cualquier uso de esta información para comunicaciones externas debe mencionar
+            explícitamente estas limitaciones.
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
