@@ -301,14 +301,30 @@ export async function getClasificacion(cn) {
  * Guarda o actualiza la clasificación.
  * Actualiza la BD Global para criterios SDMDU (Apto, Reenvasado, Reetiquetado, EC)
  * y la BD Privada para stock del hospital (en_mi_farmacia) y notas.
+ *
+ * @param {string} cn - Código nacional del medicamento.
+ * @param {object} clasificacion - Nuevos valores a guardar.
+ * @param {object|null} clasificacionAnterior - Valores previos (opcional).
+ *   Si se proporciona, `updated_at` de la BD Global sólo se actualiza cuando
+ *   alguno de los campos SDMDU (reenvasado, reetiquetado, sdmdu, EC) ha cambiado.
+ *   Cambios en `en_mi_farmacia` o `notas` NO afectan la fecha de actualización global.
  */
-export async function saveClasificacion(cn, clasificacion) {
+export async function saveClasificacion(cn, clasificacion, clasificacionAnterior = null) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Debe iniciar sesión para guardar clasificaciones.");
 
   const cnStr = String(cn);
 
+  // Determinar si algún campo SDMDU (global) ha cambiado respecto al valor anterior
+  const sdmduCambiado = clasificacionAnterior === null || (
+    clasificacion.requiere_reenvasado   !== (clasificacionAnterior.requiere_reenvasado   ?? null) ||
+    clasificacion.requiere_reetiquetado !== (clasificacionAnterior.requiere_reetiquetado ?? null) ||
+    clasificacion.apto_sdmdu_blister    !== (clasificacionAnterior.apto_sdmdu_blister    ?? null) ||
+    clasificacion.solo_envase_clinico   !== (clasificacionAnterior.solo_envase_clinico   ?? false)
+  );
+
   // 1. Guardar en la base de datos GLOBAL COMPARTIDA (SDMDU)
+  //    Sólo se actualiza `updated_at` si realmente han cambiado los campos clínicos.
   const globalPayload = {
     cn:                     cnStr,
     requiere_reenvasado:   clasificacion.requiere_reenvasado   ?? null,
@@ -316,7 +332,7 @@ export async function saveClasificacion(cn, clasificacion) {
     apto_sdmdu_blister:    clasificacion.apto_sdmdu_blister    ?? null,
     solo_envase_clinico:   clasificacion.solo_envase_clinico   ?? false,
     updated_by:            user.id,
-    updated_at:            new Date().toISOString(),
+    ...(sdmduCambiado && { updated_at: new Date().toISOString() }),
   };
 
   // 2. Guardar en los datos PRIVADOS DEL HOSPITAL

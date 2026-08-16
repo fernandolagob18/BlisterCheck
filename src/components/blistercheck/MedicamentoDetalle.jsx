@@ -129,7 +129,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
   const handleGuardar = useCallback(async () => {
     setSaving(true);
     try {
-      const saved = await saveClasificacion(medicamento.cn, form);  // clasificación por CN
+      const saved = await saveClasificacion(medicamento.cn, form, clasificacion);  // clasificación por CN
       setSavedOk(true);
       const newDate = saved?.updated_at || saved?.fecha_clasificacion;
       if (newDate) setUltimaActualizacion(newDate);
@@ -147,7 +147,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
     } finally {
       setSaving(false);
     }
-  }, [medicamento.cn, form, onClasificacionGuardada]);
+  }, [medicamento.cn, form, clasificacion, onClasificacionGuardada]);
 
   const fotoEnvase = medicamento.foto_envase_url;
   const fotoForma = medicamento.foto_forma_url;
