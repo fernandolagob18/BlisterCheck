@@ -1,4 +1,4 @@
-import { CheckCircle, AlertTriangle, Circle, Home, XCircle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Circle, Home, XCircle, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getClasificacion } from '../../services/blistercheckService';
 import { isCriticalShortage } from '../../utils/shortageUtils';
@@ -120,6 +120,11 @@ function MedicamentoCard({ medicamento, onClick, desabastecimiento, clasificacio
             )}
           </div>
           <div className="bc-med-card__badges">
+            {medicamento.fotosensible && (
+              <span className="bc-badge" style={{ background: 'rgba(234,179,8,0.1)', color: '#ca8a04', borderColor: 'rgba(234,179,8,0.2)' }} title="Fotosensible: Proteger de la luz">
+                <Sun size={11} /> Fotosensible
+              </span>
+            )}
             {clasificacion !== undefined && <ClasificacionBadge clasificacion={clasificacion} />}
             {clasificacion?.en_mi_farmacia && (
               <span className="bc-badge bc-badge--farmacia">

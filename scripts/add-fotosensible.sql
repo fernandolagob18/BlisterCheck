@@ -1,0 +1,1 @@
+ALTER TABLE blistercheck_catalogo ADD COLUMN IF NOT EXISTS fotosensible BOOLEAN DEFAULT NULL;

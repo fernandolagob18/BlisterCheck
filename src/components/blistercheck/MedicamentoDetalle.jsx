@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, ExternalLink, Home, FileText, BookOpen, CheckCircle, XCircle, Circle, Save, Package, RefreshCw, Clock, HelpCircle, AlertTriangle, Calendar } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Home, FileText, BookOpen, CheckCircle, XCircle, Circle, Save, Package, RefreshCw, Clock, HelpCircle, AlertTriangle, Calendar, Sun } from 'lucide-react';
 import { saveClasificacion, getAlternativasSDMDU } from '../../services/blistercheckService';
 import { isCriticalShortage } from '../../utils/shortageUtils';
 import { formatDate } from '../../utils/dateUtils';
@@ -191,6 +191,26 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
           {esCandidatoSDMDU && (
             <div className="bc-candidate-hint">
               💊 Candidato para SDMDU por forma farmacéutica
+            </div>
+          )}
+
+          {medicamento.fotosensible && (
+            <div className="bc-fotosensible-panel" style={{
+              background: 'rgba(234,179,8,0.1)',
+              border: '1px solid rgba(234,179,8,0.2)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              color: '#ca8a04'
+            }}>
+              <Sun size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '4px' }}>Medicamento Fotosensible</strong>
+                <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Este medicamento es sensible a la luz. Debe mantenerse en su envase original y proteger de la luz directa.</span>
+              </div>
             </div>
           )}
 

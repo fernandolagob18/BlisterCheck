@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
   foto_forma_url         TEXT,
   url_ficha_tecnica      TEXT,
   url_prospecto          TEXT,
+  fotosensible           BOOLEAN DEFAULT NULL,
   last_sync              TIMESTAMPTZ DEFAULT NOW()
 );
 

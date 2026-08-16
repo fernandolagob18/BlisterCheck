@@ -1,0 +1,34 @@
+name: BlisterCheck — Identificación Fotosensibles (Bimensual)
+
+on:
+  schedule:
+    # Día 1 de cada mes par (Feb, Abr, Jun, Ago, Oct, Dic) a las 04:00 UTC
+    - cron: '0 4 1 2,4,6,8,10,12 *'
+  workflow_dispatch: # Permite ejecución manual para pruebas o sync forzado
+
+jobs:
+  sync-fotosensibles:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install script dependencies
+        run: |
+          cd scripts
+          npm init -y
+          npm install @supabase/supabase-js
+
+      - name: Run BlisterCheck Fotosensibles sync
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_KEY }}
+        run: node scripts/sync-fotosensibles.js
