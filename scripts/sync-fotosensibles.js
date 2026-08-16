@@ -116,30 +116,34 @@ async function main() {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   try {
-    // 1. Obtener medicamentos sin clasificar (fotosensible IS NULL) y que tengan url_ficha_tecnica
-    console.log(`🔍 Buscando medicamentos pendientes de analizar...`);
+    let totalProcessed = 0;
     
-    const { data: pendientes, error } = await supabase
-      .from('blistercheck_catalogo')
-      .select('cn, url_ficha_tecnica')
-      .is('fotosensible', null)
-      .not('url_ficha_tecnica', 'is', null);
+    while (true) {
+      console.log(`🔍 Buscando lote de medicamentos pendientes de analizar...`);
+      
+      const { data: pendientes, error } = await supabase
+        .from('blistercheck_catalogo')
+        .select('cn, url_ficha_tecnica')
+        .is('fotosensible', null)
+        .not('url_ficha_tecnica', 'is', null)
+        .limit(1000);
 
-    if (error) {
-      throw new Error(`Error consultando base de datos: ${error.message}`);
+      if (error) {
+        throw new Error(`Error consultando base de datos: ${error.message}`);
+      }
+
+      if (!pendientes || pendientes.length === 0) {
+        console.log('✅ No quedan más medicamentos pendientes de analizar.');
+        break;
+      }
+
+      console.log(`📦 Analizando lote de ${pendientes.length} medicamentos...`);
+      
+      const count = await processBatch(supabase, pendientes);
+      totalProcessed += count;
     }
 
-    if (!pendientes || pendientes.length === 0) {
-      console.log('✅ No hay medicamentos pendientes de analizar.');
-      console.log('═══════════════════════════════════════════════════');
-      return;
-    }
-
-    console.log(`📦 Encontrados ${pendientes.length} medicamentos para analizar.`);
-    
-    await processBatch(supabase, pendientes);
-
-    console.log('🎉 Proceso completado.');
+    console.log(`🎉 Proceso completado. Total de medicamentos analizados en esta sesión: ${totalProcessed}`);
     console.log('═══════════════════════════════════════════════════');
 
   } catch (err) {
