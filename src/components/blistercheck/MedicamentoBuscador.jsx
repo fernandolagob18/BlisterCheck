@@ -334,7 +334,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
                 style={{ width: '18px', height: '18px', accentColor: '#eab308', cursor: 'pointer' }}
               />
               <label htmlFor="solo-fotosensibles" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 600 }}>
-                Mostrar únicamente medicamentos fotosensibles ☀️
+                Mostrar únicamente medicamentos fotosensibles
               </label>
             </div>
 
