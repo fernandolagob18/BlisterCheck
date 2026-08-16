@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Sparkles,
   Upload,
-  LogOut
+  LogOut,
+  Leaf
 } from 'lucide-react';
 import MedicamentoBuscador from './MedicamentoBuscador';
 import MedicamentoDetalle from './MedicamentoDetalle';
@@ -20,6 +21,7 @@ import BlisterCheckStats from './BlisterCheckStats';
 import BlisterCheckExport from './BlisterCheckExport';
 import BlisterCheckUploadMeds from './BlisterCheckUploadMeds';
 import GuiaOptimizer from './GuiaOptimizer';
+import SostenibilidadPage from './SostenibilidadPage';
 import { getCatalogInfo, getClasificacion, getDesabastecimientoByCN } from '../../services/blistercheckService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -114,6 +116,7 @@ function BlisterCheckApp({ onGoToProfile }) {
       case 'search': return 'Catálogo de Medicamentos';
       case 'optimizer': return 'Optimizador de Guía Terapéutica';
       case 'stats': return 'Panel de Estadísticas';
+      case 'eco': return 'Sostenibilidad del Reenvasado';
       case 'detail': return medicamentoSeleccionado?.nombre || 'Detalle del Medicamento';
       default: return 'BlisterCheck';
     }
@@ -215,6 +218,15 @@ function BlisterCheckApp({ onGoToProfile }) {
           </button>
 
           <div className="bc-sidebar__group-title" style={{ marginTop: '0.75rem' }}>Herramientas</div>
+
+          <button
+            className={`bc-nav-item ${vistaActiva === 'eco' ? 'active' : ''}`}
+            onClick={() => handleNavClick('eco')}
+            title="Sostenibilidad del Reenvasado"
+          >
+            <span className="bc-nav-item__icon"><Leaf size={18} /></span>
+            <span className="bc-nav-item__label">Sostenibilidad</span>
+          </button>
 
           <button
             className="bc-nav-item"
@@ -331,6 +343,10 @@ function BlisterCheckApp({ onGoToProfile }) {
 
           {vistaActiva === 'stats' && (
             <BlisterCheckStats />
+          )}
+
+          {vistaActiva === 'eco' && (
+            <SostenibilidadPage />
           )}
         </main>
       </div>
