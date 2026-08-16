@@ -181,16 +181,39 @@ export async function searchAvanzado(filtros = {}) {
   }
 
   if (filtros.soloFotosensibles) {
-    let query = supabase.from(CATALOG_TABLE).select('*').eq('fotosensible', true);
-    if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
-    if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
-    if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
-    if (filtros.laboratorio?.trim()) query = query.ilike('laboratorio', `%${filtros.laboratorio.trim()}%`);
-    if (filtros.formaFarmaceutica?.trim()) query = query.eq('forma_farmaceutica', filtros.formaFarmaceutica.trim());
-    if (filtros.viaAdministracion?.trim()) query = query.eq('via_administracion', filtros.viaAdministracion.trim());
-    const { data: fData, error: fErr } = await query.limit(1000);
-    data = fData;
-    error = fErr;
+    let allFData = [];
+    let fPage = 0;
+    let keepFetching = true;
+
+    while (keepFetching) {
+      let query = supabase.from(CATALOG_TABLE).select('*').eq('fotosensible', true);
+      if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
+      if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
+      if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
+      if (filtros.laboratorio?.trim()) query = query.ilike('laboratorio', `%${filtros.laboratorio.trim()}%`);
+      if (filtros.formaFarmaceutica?.trim()) query = query.eq('forma_farmaceutica', filtros.formaFarmaceutica.trim());
+      if (filtros.viaAdministracion?.trim()) query = query.eq('via_administracion', filtros.viaAdministracion.trim());
+      
+      const { data: fData, error: fErr } = await query.range(fPage * 1000, (fPage + 1) * 1000 - 1);
+      
+      if (fErr) {
+        error = fErr;
+        break;
+      }
+      
+      if (fData && fData.length > 0) {
+        allFData.push(...fData);
+      }
+      
+      if (!fData || fData.length < 1000) {
+        keepFetching = false;
+      }
+      fPage++;
+    }
+    
+    if (!error) {
+      data = allFData;
+    }
   } else {
     try {
       const res = await supabase.rpc('bc_search_avanzado', {
