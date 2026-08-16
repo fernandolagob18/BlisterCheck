@@ -150,6 +150,7 @@ export async function searchAvanzado(filtros = {}) {
       const chunk = cnsFarmacia.slice(i, i+900);
       let query = supabase.from(CATALOG_TABLE).select('*').in('cn', chunk);
       // Aplicar filtros de busqueda al query (nombre, principio_activo, etc)
+      if (filtros.soloFotosensibles) query = query.eq('fotosensible', true);
       if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
       if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
       if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
@@ -179,20 +180,33 @@ export async function searchAvanzado(filtros = {}) {
     return results;
   }
 
-  try {
-    const res = await supabase.rpc('bc_search_avanzado', {
-      p_cn:                 filtros.cn?.trim()                || null,
-      p_nombre:             filtros.nombre?.trim()            || null,
-      p_principio_activo:   filtros.principioActivo?.trim()   || null,
-      p_laboratorio:        filtros.laboratorio?.trim()       || null,
-      p_forma_farmaceutica: filtros.formaFarmaceutica?.trim() || null,
-      p_via_administracion: filtros.viaAdministracion?.trim() || null,
-      p_solo_clasificados:  requiereEstarClasificado          ?? false,
-    });
-    data = res.data;
-    error = res.error;
-  } catch (err) {
-    error = err;
+  if (filtros.soloFotosensibles) {
+    let query = supabase.from(CATALOG_TABLE).select('*').eq('fotosensible', true);
+    if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
+    if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
+    if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
+    if (filtros.laboratorio?.trim()) query = query.ilike('laboratorio', `%${filtros.laboratorio.trim()}%`);
+    if (filtros.formaFarmaceutica?.trim()) query = query.eq('forma_farmaceutica', filtros.formaFarmaceutica.trim());
+    if (filtros.viaAdministracion?.trim()) query = query.eq('via_administracion', filtros.viaAdministracion.trim());
+    const { data: fData, error: fErr } = await query.limit(1000);
+    data = fData;
+    error = fErr;
+  } else {
+    try {
+      const res = await supabase.rpc('bc_search_avanzado', {
+        p_cn:                 filtros.cn?.trim()                || null,
+        p_nombre:             filtros.nombre?.trim()            || null,
+        p_principio_activo:   filtros.principioActivo?.trim()   || null,
+        p_laboratorio:        filtros.laboratorio?.trim()       || null,
+        p_forma_farmaceutica: filtros.formaFarmaceutica?.trim() || null,
+        p_via_administracion: filtros.viaAdministracion?.trim() || null,
+        p_solo_clasificados:  requiereEstarClasificado          ?? false,
+      });
+      data = res.data;
+      error = res.error;
+    } catch (err) {
+      error = err;
+    }
   }
 
   if (error) {
