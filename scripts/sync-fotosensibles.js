@@ -117,14 +117,13 @@ async function main() {
 
   try {
     // 1. Obtener medicamentos sin clasificar (fotosensible IS NULL) y que tengan url_ficha_tecnica
-    console.log(`🔍 Buscando medicamentos pendientes de analizar (Límite: ${BATCH_SIZE})...`);
+    console.log(`🔍 Buscando medicamentos pendientes de analizar...`);
     
     const { data: pendientes, error } = await supabase
       .from('blistercheck_catalogo')
       .select('cn, url_ficha_tecnica')
       .is('fotosensible', null)
-      .not('url_ficha_tecnica', 'is', null)
-      .limit(BATCH_SIZE);
+      .not('url_ficha_tecnica', 'is', null);
 
     if (error) {
       throw new Error(`Error consultando base de datos: ${error.message}`);
