@@ -151,6 +151,7 @@ export async function searchAvanzado(filtros = {}) {
       let query = supabase.from(CATALOG_TABLE).select('*').in('cn', chunk);
       // Aplicar filtros de busqueda al query (nombre, principio_activo, etc)
       if (filtros.soloFotosensibles) query = query.eq('fotosensible', true);
+      if (filtros.soloHigroscopicos) query = query.eq('higroscopico', true);
       if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
       if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
       if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
@@ -180,13 +181,18 @@ export async function searchAvanzado(filtros = {}) {
     return results;
   }
 
-  if (filtros.soloFotosensibles) {
+  const isBypassingRPC = filtros.soloFotosensibles || filtros.soloHigroscopicos;
+
+  if (isBypassingRPC) {
     let allFData = [];
     let fPage = 0;
     let keepFetching = true;
 
     while (keepFetching) {
-      let query = supabase.from(CATALOG_TABLE).select('*').eq('fotosensible', true);
+      let query = supabase.from(CATALOG_TABLE).select('*');
+      if (filtros.soloFotosensibles) query = query.eq('fotosensible', true);
+      if (filtros.soloHigroscopicos) query = query.eq('higroscopico', true);
+
       if (filtros.cn?.trim()) query = query.ilike('cn', `${filtros.cn.trim()}%`);
       if (filtros.nombre?.trim()) query = query.ilike('nombre', `%${filtros.nombre.trim()}%`);
       if (filtros.principioActivo?.trim()) query = query.ilike('principio_activo', `%${filtros.principioActivo.trim()}%`);
@@ -249,6 +255,10 @@ export async function searchAvanzado(filtros = {}) {
 
   if (filtros.soloFotosensibles) {
     results = results.filter(med => med.fotosensible === true);
+  }
+
+  if (filtros.soloHigroscopicos) {
+    results = results.filter(med => med.higroscopico === true);
   }
 
   if (filtros.soloEnMiFarmacia || (filtros.estadoAcondicionamiento && filtros.estadoAcondicionamiento !== 'todos')) {

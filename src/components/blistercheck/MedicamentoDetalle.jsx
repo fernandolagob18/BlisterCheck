@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, ExternalLink, Home, FileText, BookOpen, CheckCircle, XCircle, Circle, Save, Package, RefreshCw, Clock, HelpCircle, AlertTriangle, Calendar, Sun } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Home, FileText, BookOpen, CheckCircle, XCircle, Circle, Save, Package, RefreshCw, Clock, HelpCircle, AlertTriangle, Calendar, Sun, Droplet } from 'lucide-react';
 import { saveClasificacion, getAlternativasSDMDU } from '../../services/blistercheckService';
 import { isCriticalShortage } from '../../utils/shortageUtils';
 import { formatDate } from '../../utils/dateUtils';
@@ -210,6 +210,26 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
               <div>
                 <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '4px' }}>Medicamento Fotosensible</strong>
                 <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Este medicamento es sensible a la luz. Debe mantenerse en su envase original y proteger de la luz directa.</span>
+              </div>
+            </div>
+          )}
+
+          {medicamento.higroscopico && (
+            <div className="bc-higroscopico-panel" style={{
+              background: 'rgba(59,130,246,0.1)',
+              border: '1px solid rgba(59,130,246,0.2)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              color: '#2563eb'
+            }}>
+              <Droplet size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ display: 'block', fontSize: '0.95rem', marginBottom: '4px' }}>Medicamento Higroscópico</strong>
+                <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Este medicamento es sensible a la humedad. Debe reenvasarse en un envase cerrado protegido de la humedad.</span>
               </div>
             </div>
           )}

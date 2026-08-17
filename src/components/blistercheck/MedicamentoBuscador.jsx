@@ -39,6 +39,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
     soloClasificados: false,
     soloEnMiFarmacia: false,
     soloFotosensibles: false,
+    soloHigroscopicos: false,
     estadoAcondicionamiento: 'todos',
   });
   const [formas, setFormas] = useState([]);
@@ -160,7 +161,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   }, [filtros, fetchShortages]);
 
   const handleLimpiarAvanzado = () => {
-    setFiltros({ cn: '', nombre: '', principioActivo: '', laboratorio: '', formaFarmaceutica: '', viaAdministracion: '', soloClasificados: false, soloEnMiFarmacia: false, soloFotosensibles: false, estadoAcondicionamiento: 'todos' });
+    setFiltros({ cn: '', nombre: '', principioActivo: '', laboratorio: '', formaFarmaceutica: '', viaAdministracion: '', soloClasificados: false, soloEnMiFarmacia: false, soloFotosensibles: false, soloHigroscopicos: false, estadoAcondicionamiento: 'todos' });
     setResultados([]);
     setShortageMap(new Map());
     setClasificacionMap(new Map());
@@ -335,6 +336,19 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
               />
               <label htmlFor="solo-fotosensibles" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 600 }}>
                 Mostrar únicamente medicamentos fotosensibles
+              </label>
+            </div>
+
+            <div className="bc-filtro-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem', padding: '1rem', background: 'var(--color-card-bg)', border: '1px solid var(--color-card-border)', borderRadius: '8px', marginBottom: '1rem' }}>
+              <input
+                type="checkbox"
+                id="solo-higroscopicos"
+                checked={filtros.soloHigroscopicos}
+                onChange={e => handleFiltroChange('soloHigroscopicos', e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: '#3b82f6', cursor: 'pointer' }}
+              />
+              <label htmlFor="solo-higroscopicos" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 600 }}>
+                Mostrar únicamente medicamentos higroscópicos 💧
               </label>
             </div>
 

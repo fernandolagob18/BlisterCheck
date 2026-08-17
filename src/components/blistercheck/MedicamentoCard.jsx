@@ -1,4 +1,4 @@
-import { CheckCircle, AlertTriangle, Circle, Home, XCircle, Sun } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Circle, Home, XCircle, Sun, Droplet } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getClasificacion } from '../../services/blistercheckService';
 import { isCriticalShortage } from '../../utils/shortageUtils';
@@ -123,6 +123,11 @@ function MedicamentoCard({ medicamento, onClick, desabastecimiento, clasificacio
             {medicamento.fotosensible && (
               <span className="bc-badge" style={{ background: 'rgba(234,179,8,0.1)', color: '#ca8a04', borderColor: 'rgba(234,179,8,0.2)' }} title="Fotosensible: Proteger de la luz">
                 <Sun size={11} /> Fotosensible
+              </span>
+            )}
+            {medicamento.higroscopico && (
+              <span className="bc-badge" style={{ background: 'rgba(59,130,246,0.1)', color: '#2563eb', borderColor: 'rgba(59,130,246,0.2)' }} title="Higroscópico: Proteger de la humedad">
+                <Droplet size={11} /> Higroscópico
               </span>
             )}
             {clasificacion !== undefined && <ClasificacionBadge clasificacion={clasificacion} />}

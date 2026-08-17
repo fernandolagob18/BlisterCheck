@@ -1,0 +1,29 @@
+name: Bimonthly Higroscopicos Update
+
+on:
+  schedule:
+    # Corre el dia 15 de los meses pares (Febrero, Abril, Junio, Agosto, Octubre, Diciembre) a las 04:00 UTC
+    - cron: '0 4 15 2,4,6,8,10,12 *'
+  workflow_dispatch: # Permite ejecución manual
+
+jobs:
+  update-higroscopicos:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install @supabase/supabase-js
+
+    - name: Run sync-higroscopicos.js
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      run: node scripts/sync-higroscopicos.js
