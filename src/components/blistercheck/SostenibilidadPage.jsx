@@ -301,16 +301,43 @@ export default function SostenibilidadPage() {
                 factores de emisión oficiales europeos, ilustra la diferencia relativa entre los
                 distintos modos de acondicionamiento:
               </p>
-              <div className="eco-img-wrap">
-                <img
-                  src="/eco_packaging_comparison_illustration.jpg"
-                  alt="Ilustración comparativa de huella de carbono por tipo de envase farmacéutico"
-                  className="eco-img"
-                />
-                <p className="eco-img-caption">
-                  Comparativa orientativa por modo de acondicionamiento. Las barras
-                  representan la huella relativa, no valores absolutos validados por LCA.
-                </p>
+              <div className="eco-chart">
+                <div className="eco-chart-bar-wrap">
+                  <div className="eco-chart-label">
+                    <span>1. Frasco original comercial</span>
+                    <span style={{color: '#10b981'}}>Muy baja huella (Solo envase lab.)</span>
+                  </div>
+                  <div className="eco-chart-bar-bg">
+                    <div className="eco-chart-bar-fill" style={{width: '15%', background: '#10b981'}}></div>
+                  </div>
+                </div>
+                <div className="eco-chart-bar-wrap">
+                  <div className="eco-chart-label">
+                    <span>2. Reetiquetado del blíster comercial</span>
+                    <span style={{color: '#3b82f6'}}>Baja huella (+ Etiqueta)</span>
+                  </div>
+                  <div className="eco-chart-bar-bg">
+                    <div className="eco-chart-bar-fill" style={{width: '25%', background: '#3b82f6'}}></div>
+                  </div>
+                </div>
+                <div className="eco-chart-bar-wrap">
+                  <div className="eco-chart-label">
+                    <span>3. Reenvasado en bolsa zip PE</span>
+                    <span style={{color: '#8b5cf6'}}>Huella moderada (+ Bolsa plástico)</span>
+                  </div>
+                  <div className="eco-chart-bar-bg">
+                    <div className="eco-chart-bar-fill" style={{width: '50%', background: '#8b5cf6'}}></div>
+                  </div>
+                </div>
+                <div className="eco-chart-bar-wrap">
+                  <div className="eco-chart-label">
+                    <span>4. Reenvasado hospitalario (Aluminio + PVC)</span>
+                    <span style={{color: '#f59e0b'}}>Alta huella (+ Material nuevo y + Energía)</span>
+                  </div>
+                  <div className="eco-chart-bar-bg">
+                    <div className="eco-chart-bar-fill" style={{width: '100%', background: '#f59e0b'}}></div>
+                  </div>
+                </div>
               </div>
 
               <div className="eco-callout eco-callout--green">
