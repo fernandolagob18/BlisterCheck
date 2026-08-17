@@ -303,8 +303,8 @@ export default function SostenibilidadPage() {
               </p>
               <div className="eco-img-wrap">
                 <img
-                  src="/eco_packaging_comparison.jpg"
-                  alt="Comparativa de huella de carbono por tipo de envase farmacéutico"
+                  src="/eco_packaging_comparison_illustration.jpg"
+                  alt="Ilustración comparativa de huella de carbono por tipo de envase farmacéutico"
                   className="eco-img"
                 />
                 <p className="eco-img-caption">
@@ -341,8 +341,8 @@ export default function SostenibilidadPage() {
 
             <div className="eco-img-wrap" style={{ marginBottom: '2rem' }}>
               <img
-                src="/eco_materials_factors.jpg"
-                alt="Factores de emisión oficiales de los principales materiales de envase farmacéutico"
+                src="/eco_materials_factors_illustration.jpg"
+                alt="Ilustración vectorial de los factores de emisión oficiales de los principales materiales de envase farmacéutico"
                 className="eco-img"
               />
               <p className="eco-img-caption">
