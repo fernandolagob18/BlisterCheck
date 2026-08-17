@@ -624,7 +624,8 @@ export async function getExportData(modo = 'clasificados') {
         updated_at,
         blistercheck_catalogo (
           cn, nregistro, nombre, laboratorio, dosis, principio_activo,
-          forma_farmaceutica, forma_simplificada, via_administracion, tipo_prescripcion
+          forma_farmaceutica, forma_simplificada, via_administracion, tipo_prescripcion,
+          fotosensible, higroscopico
         )
       `)
       .order('updated_at', { ascending: false })

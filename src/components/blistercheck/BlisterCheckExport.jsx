@@ -45,6 +45,8 @@ function generateCsv(data) {
     'apto_sdmdu_blister',
     'solo_envase_clinico',
     'en_mi_farmacia',
+    'fotosensible',
+    'higroscopico',
     'notas',
     'fecha_clasificacion',
     'updated_at',
@@ -68,6 +70,8 @@ function generateCsv(data) {
       boolToStr(row.apto_sdmdu_blister),
       boolToStr(row.solo_envase_clinico),
       boolToStr(row.en_mi_farmacia),
+      boolToStr(cat.fotosensible),
+      boolToStr(cat.higroscopico),
       row.notas || '',
       formatFecha(row.fecha_clasificacion),
       formatFecha(row.updated_at),
@@ -199,7 +203,8 @@ function BlisterCheckExport({ onClose }) {
                 'principio_activo', 'forma_farmaceutica', 'forma_simplificada',
                 'via_administracion', 'tipo_prescripcion',
                 'requiere_reenvasado', 'requiere_reetiquetado', 'apto_sdmdu_blister',
-                'solo_envase_clinico', 'en_mi_farmacia', 'notas', 'fecha_clasificacion', 'updated_at'
+                'solo_envase_clinico', 'en_mi_farmacia', 'fotosensible', 'higroscopico',
+                'notas', 'fecha_clasificacion', 'updated_at'
               ].map(col => (
                 <span key={col} className="bc-col-pill">{col}</span>
               ))}
