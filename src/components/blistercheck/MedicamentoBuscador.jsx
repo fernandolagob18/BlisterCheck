@@ -348,7 +348,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
                 style={{ width: '18px', height: '18px', accentColor: '#3b82f6', cursor: 'pointer' }}
               />
               <label htmlFor="solo-higroscopicos" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--color-text)', fontWeight: 600 }}>
-                Mostrar únicamente medicamentos higroscópicos 💧
+                Mostrar únicamente medicamentos higroscópicos
               </label>
             </div>
 
