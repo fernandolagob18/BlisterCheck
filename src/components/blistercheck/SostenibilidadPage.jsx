@@ -305,7 +305,7 @@ export default function SostenibilidadPage() {
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
                     <span>1. Frasco original comercial</span>
-                    <span style={{color: '#10b981'}}>Muy baja huella (Solo envase lab.)</span>
+                    <span style={{color: '#10b981'}}>Muy baja huella (solo envase original)</span>
                   </div>
                   <div className="eco-chart-bar-bg">
                     <div className="eco-chart-bar-fill" style={{width: '15%', background: '#10b981'}}></div>
@@ -314,7 +314,7 @@ export default function SostenibilidadPage() {
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
                     <span>2. Reetiquetado del blíster comercial</span>
-                    <span style={{color: '#3b82f6'}}>Baja huella (+ Etiqueta)</span>
+                    <span style={{color: '#3b82f6'}}>Baja huella (etiqueta añadida)</span>
                   </div>
                   <div className="eco-chart-bar-bg">
                     <div className="eco-chart-bar-fill" style={{width: '25%', background: '#3b82f6'}}></div>
@@ -323,7 +323,7 @@ export default function SostenibilidadPage() {
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
                     <span>3. Reenvasado en bolsa zip PE</span>
-                    <span style={{color: '#8b5cf6'}}>Huella moderada (+ Bolsa plástico)</span>
+                    <span style={{color: '#8b5cf6'}}>Huella moderada (bolsa añadida)</span>
                   </div>
                   <div className="eco-chart-bar-bg">
                     <div className="eco-chart-bar-fill" style={{width: '50%', background: '#8b5cf6'}}></div>
@@ -332,7 +332,7 @@ export default function SostenibilidadPage() {
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
                     <span>4. Reenvasado hospitalario (Aluminio + PVC)</span>
-                    <span style={{color: '#f59e0b'}}>Alta huella (+ Material nuevo y + Energía)</span>
+                    <span style={{color: '#f59e0b'}}>Alta huella (aluminio, plástico y energía)</span>
                   </div>
                   <div className="eco-chart-bar-bg">
                     <div className="eco-chart-bar-fill" style={{width: '100%', background: '#f59e0b'}}></div>
@@ -340,15 +340,12 @@ export default function SostenibilidadPage() {
                 </div>
               </div>
 
-              <div className="eco-callout eco-callout--green">
-                <CheckCircle size={18} />
-                <div>
-                  <strong>La evidencia disponible señala que:</strong> el reenvasado hospitalario
-                  en lámina de aluminio y PVC genera la mayor huella de carbono por dosis. Mantener
-                  el blíster comercial intacto (reetiquetando si es necesario) es la opción de
-                  menor impacto cuando el blíster original es apto para SDMDU.
-                </div>
-              </div>
+              <p className="eco-body">
+                <strong>La evidencia disponible señala que:</strong> el reenvasado hospitalario
+                en lámina de aluminio y PVC genera la mayor huella de carbono por dosis. Mantener
+                el blíster comercial intacto (reetiquetando si es necesario) es la opción de
+                menor impacto cuando el blíster original es apto para SDMDU.
+              </p>
             </div>
           </div>
         )}
