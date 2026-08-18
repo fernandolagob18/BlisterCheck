@@ -3575,21 +3575,24 @@
 
 /* ── Materials grid ───────────────────────────────────────────────────────── */
 .eco-materials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1rem;
-  margin: 1.25rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
 }
 
 .eco-material-card {
+  flex: 1 1 280px;
+  max-width: 450px;
   border: 1px solid;
   border-radius: var(--radius-lg);
-  padding: 1.1rem 1.25rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .eco-material-card:hover { box-shadow: var(--shadow-md); }
