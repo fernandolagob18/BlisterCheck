@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { getMisLaboratoriosData, savePedidoMinimo } from '../../services/blistercheckService';
+import { 
+  getMisLaboratoriosData, 
+  savePedidoMinimo,
+  createCustomPlatform,
+  addMedicationToPlatform,
+  removeMedicationFromPlatform,
+  deleteCustomPlatform,
+  searchSimple
+} from '../../services/blistercheckService';
 import MedicamentoCard from './MedicamentoCard';
-import { Building2, Save, ChevronLeft, ArrowLeft, Percent, Search } from 'lucide-react';
+import { Building2, Save, ChevronLeft, ArrowLeft, Percent, Search, Plus, Trash2, X } from 'lucide-react';
 
 function MisLaboratorios({ onSelectMedicamento }) {
   const [laboratorios, setLaboratorios] = useState([]);
@@ -28,6 +36,17 @@ function MisLaboratorios({ onSelectMedicamento }) {
   const [labSeleccionado, setLabSeleccionado] = useState(null);
   const [pedidoMinimoInput, setPedidoMinimoInput] = useState('');
   const [guardandoPedido, setGuardandoPedido] = useState(false);
+
+  // Estados para creación de plataforma
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newPlatformName, setNewPlatformName] = useState('');
+  const [newPlatformPedido, setNewPlatformPedido] = useState('');
+
+  // Estados para buscar medicamentos
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     cargarDatos();
@@ -79,6 +98,71 @@ function MisLaboratorios({ onSelectMedicamento }) {
     }
   };
 
+  const handleCreatePlatform = async () => {
+    if (!newPlatformName.trim()) return;
+    try {
+      await createCustomPlatform(newPlatformName, newPlatformPedido);
+      setShowCreateModal(false);
+      setNewPlatformName('');
+      setNewPlatformPedido('');
+      await cargarDatos();
+    } catch (err) {
+      console.error(err);
+      alert('Error al crear la plataforma.');
+    }
+  };
+
+  const handleDeletePlatform = async () => {
+    if (!labSeleccionado) return;
+    if (!window.confirm(`¿Seguro que deseas eliminar la plataforma ${labSeleccionado.laboratorio}?`)) return;
+    try {
+      await deleteCustomPlatform(labSeleccionado.laboratorio);
+      setLabSeleccionado(null);
+      await cargarDatos();
+    } catch (err) {
+      console.error(err);
+      alert('Error al eliminar la plataforma.');
+    }
+  };
+
+  const handleSearchMeds = async () => {
+    if (searchQuery.trim().length < 2) return;
+    setIsSearching(true);
+    try {
+      const res = await searchSimple(searchQuery);
+      setSearchResults(res);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleAddMedToPlatform = async (cn) => {
+    try {
+      await addMedicationToPlatform(labSeleccionado.laboratorio, cn);
+      setShowSearchModal(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      await cargarDatos();
+      handleVolver(); // Forzamos recarga visual sencilla
+    } catch (err) {
+      console.error(err);
+      alert('Error al añadir medicamento.');
+    }
+  };
+
+  const handleRemoveMedFromPlatform = async (cn) => {
+    try {
+      await removeMedicationFromPlatform(labSeleccionado.laboratorio, cn);
+      await cargarDatos();
+      handleVolver(); // Forzamos recarga visual sencilla
+    } catch (err) {
+      console.error(err);
+      alert('Error al quitar medicamento.');
+    }
+  };
+
   const getColorClass = (pedidoMinimo) => {
     const val = parseFloat(pedidoMinimo) || 0;
     if (val === 0) return 'pedido-zero';
@@ -108,10 +192,15 @@ function MisLaboratorios({ onSelectMedicamento }) {
   if (labSeleccionado) {
     return (
       <div className="bc-laboratorios-detalle">
-        <div className="bc-laboratorios-detalle__header">
+        <div className="bc-laboratorios-detalle__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button className="bc-detalle-back" onClick={handleVolver}>
             <ArrowLeft size={16} /> Volver a laboratorios
           </button>
+          {labSeleccionado.is_plataforma && (
+            <button className="bc-btn" onClick={handleDeletePlatform} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '6px 12px', fontSize: '0.9rem' }}>
+              <Trash2 size={16} /> Eliminar plataforma
+            </button>
+          )}
         </div>
 
         <div className={`bc-lab-hero glass-panel bc-lab-hero--${getColorClass(labSeleccionado.pedido_minimo)}`}>
@@ -166,8 +255,13 @@ function MisLaboratorios({ onSelectMedicamento }) {
             <>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', marginTop: '2.5rem' }}>
                 <h3 className="bc-section-subtitle" style={{ margin: 0 }}>
-                  Medicamentos en mi farmacia ({labSeleccionado.total})
+                  Medicamentos asociados ({labSeleccionado.total})
                 </h3>
+                {labSeleccionado.is_plataforma && (
+                  <button className="bc-btn bc-btn--primary" onClick={() => setShowSearchModal(true)} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+                    <Plus size={14} /> Añadir medicamento
+                  </button>
+                )}
                 {totalMedPaginas > 1 && (
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); scrollToTop(); }}>Anterior</button>
@@ -201,12 +295,22 @@ function MisLaboratorios({ onSelectMedicamento }) {
                    }
 
                    return (
-                    <MedicamentoCard
-                      key={med.cn}
-                      medicamento={med}
-                      clasificacion={clasificacion}
-                      onClick={() => onSelectMedicamento(med)}
-                    />
+                    <div key={med.cn} style={{ position: 'relative' }}>
+                      <MedicamentoCard
+                        medicamento={med}
+                        clasificacion={clasificacion}
+                        onClick={() => onSelectMedicamento(med)}
+                      />
+                      {med.is_manual_link && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleRemoveMedFromPlatform(med.cn); }}
+                          style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
+                          title="Quitar de esta plataforma"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -237,11 +341,17 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   return (
     <div className="bc-laboratorios-container">
-      <div className="bc-laboratorios-header">
-        <h2>Mis Laboratorios</h2>
-        <p className="bc-laboratorios-subtitle">
-          Laboratorios de los productos configurados como "En mi farmacia".
-        </p>
+      <div className="bc-laboratorios-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h2>Mis Laboratorios</h2>
+          <p className="bc-laboratorios-subtitle" style={{ margin: 0 }}>
+            Laboratorios y Plataformas de distribución.
+          </p>
+        </div>
+        <button className="bc-btn bc-btn--primary" onClick={() => setShowCreateModal(true)}>
+          <Plus size={16} /> Crear plataforma de distribución
+        </button>
+      </div>
         
         {laboratorios.length > 0 && (
           <div style={{ marginTop: '1.5rem', maxWidth: '400px', display: 'flex', alignItems: 'center', background: 'var(--color-surface, #fff)', border: '1px solid var(--color-border, #e2e8f0)', borderRadius: 'var(--radius-md, 8px)', padding: '0 12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -349,6 +459,77 @@ function MisLaboratorios({ onSelectMedicamento }) {
             </div>
           )}
         </>
+      )}
+
+      {/* MODAL CREAR PLATAFORMA */}
+      {showCreateModal && (
+        <div className="bc-modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="bc-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="bc-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>Crear plataforma de distribución</h3>
+              <button className="bc-btn" style={{ padding: '4px', background: 'transparent', border: 'none' }} onClick={() => setShowCreateModal(false)}><X size={20} /></button>
+            </div>
+            <div className="bc-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Nombre de la plataforma</label>
+                <input type="text" className="bc-filtro-input" style={{ width: '100%' }} value={newPlatformName} onChange={e => setNewPlatformName(e.target.value)} placeholder="Ej. Cofares, Bidafarma, Unnefar..." />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Pedido mínimo inicial (€)</label>
+                <input type="number" className="bc-filtro-input" style={{ width: '100%' }} value={newPlatformPedido} onChange={e => setNewPlatformPedido(e.target.value)} placeholder="Ej. 150" />
+              </div>
+            </div>
+            <div className="bc-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1.5rem' }}>
+              <button className="bc-btn" onClick={() => setShowCreateModal(false)}>Cancelar</button>
+              <button className="bc-btn bc-btn--primary" onClick={handleCreatePlatform}>Crear</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL BUSCAR MEDICAMENTO */}
+      {showSearchModal && (
+        <div className="bc-modal-overlay" onClick={() => setShowSearchModal(false)}>
+          <div className="bc-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+            <div className="bc-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>Buscar y añadir medicamento</h3>
+              <button className="bc-btn" style={{ padding: '4px', background: 'transparent', border: 'none' }} onClick={() => setShowSearchModal(false)}><X size={20} /></button>
+            </div>
+            <div className="bc-modal-body">
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
+                <input 
+                  type="text" 
+                  className="bc-filtro-input" 
+                  style={{ flex: 1 }} 
+                  placeholder="Buscar por CN, nombre o activo..." 
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSearchMeds()}
+                />
+                <button className="bc-btn bc-btn--primary" onClick={handleSearchMeds}>Buscar</button>
+              </div>
+              {isSearching ? (
+                <p style={{ textAlign: 'center', padding: '1rem' }}>Buscando...</p>
+              ) : (
+                <div style={{ maxHeight: '350px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+                  {searchResults.map(res => (
+                    <div key={res.cn} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
+                      <div>
+                        <strong>{res.cn}</strong> - {res.nombre}
+                      </div>
+                      <button className="bc-btn bc-btn--primary" style={{ padding: '4px 12px', fontSize: '0.85rem' }} onClick={() => handleAddMedToPlatform(res.cn)}>
+                        Añadir
+                      </button>
+                    </div>
+                  ))}
+                  {searchResults.length === 0 && searchQuery.trim() !== '' && (
+                    <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-muted)' }}>No se encontraron resultados.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

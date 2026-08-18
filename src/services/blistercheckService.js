@@ -916,7 +916,34 @@ export async function getMisLaboratoriosData() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // 1. Obtener todos los medicamentos en la farmacia del usuario
+  // 1. Obtener configuraciones de laboratorios/plataformas del usuario
+  const { data: userLabs, error: labsError } = await supabase
+    .from(USER_LABORATORIOS_TABLE)
+    .select('laboratorio, pedido_minimo, is_plataforma')
+    .eq('user_id', user.id);
+  
+  if (labsError) throw labsError;
+
+  const userLabsMap = new Map();
+  (userLabs || []).forEach(l => userLabsMap.set(l.laboratorio, {
+    pedido_minimo: l.pedido_minimo || 0,
+    is_plataforma: l.is_plataforma || false
+  }));
+
+  // 2. Obtener medicamentos vinculados manualmente a plataformas
+  const { data: platMedsData, error: platMedsError } = await supabase
+    .from('blistercheck_user_plataforma_medicamentos')
+    .select('laboratorio_nombre, cn')
+    .eq('user_id', user.id);
+  if (platMedsError) throw platMedsError;
+
+  const platformMedsMap = new Map(); // cn -> array of platform names
+  (platMedsData || []).forEach(pm => {
+    if (!platformMedsMap.has(pm.cn)) platformMedsMap.set(pm.cn, []);
+    platformMedsMap.get(pm.cn).push(pm.laboratorio_nombre);
+  });
+
+  // 3. Obtener medicamentos nativos de la farmacia del usuario
   let userFarmiaCNs = [];
   let uPage = 0;
   const PAGE_SIZE = 1000;
@@ -934,12 +961,13 @@ export async function getMisLaboratoriosData() {
     uPage++;
   }
 
-  if (userFarmiaCNs.length === 0) return [];
+  // 4. Obtener cat√°logo para TODOS los CNs involucrados
+  const allNeededCNs = [...new Set([...userFarmiaCNs, ...Array.from(platformMedsMap.keys())])];
+  if (allNeededCNs.length === 0 && userLabsMap.size === 0) return [];
 
-  // 2. Obtener el detalle de cat√°logo y clasificaci√≥n global para esos CNs
   let allMeds = [];
-  for (let i = 0; i < userFarmiaCNs.length; i += 900) {
-    const chunk = userFarmiaCNs.slice(i, i + 900);
+  for (let i = 0; i < allNeededCNs.length; i += 900) {
+    const chunk = allNeededCNs.slice(i, i + 900);
     const { data, error } = await supabase
       .from(CATALOG_TABLE)
       .select(`
@@ -956,52 +984,79 @@ export async function getMisLaboratoriosData() {
     allMeds = allMeds.concat(data || []);
   }
 
-  // 3. Obtener las configuraciones de laboratorios del usuario
-  const { data: userLabs, error: labsError } = await supabase
-    .from(USER_LABORATORIOS_TABLE)
-    .select('laboratorio, pedido_minimo')
-    .eq('user_id', user.id);
-  
-  if (labsError) throw labsError;
-
-  const userLabsMap = new Map();
-  (userLabs || []).forEach(l => userLabsMap.set(l.laboratorio, l.pedido_minimo));
-
-  // 4. Agrupar por laboratorio y calcular stats
+  // 5. Agrupar por laboratorio / plataforma
   const labMap = new Map();
+  
+  // 5.1 Inicializar plataformas/laboratorios configurados manualmente para que aparezcan aunque est√©n vac√≠os
+  for (const [labName, config] of userLabsMap.entries()) {
+    labMap.set(labName, {
+      laboratorio: labName,
+      medicamentos: [],
+      total: 0,
+      aptos_sdmdu: 0,
+      pedido_minimo: config.pedido_minimo,
+      is_plataforma: config.is_plataforma
+    });
+  }
+
+  // 5.2 Distribuir los medicamentos en sus respectivos grupos
   allMeds.forEach(med => {
-    const labName = med.laboratorio || 'Sin laboratorio';
-    if (!labMap.has(labName)) {
-      labMap.set(labName, {
-        laboratorio: labName,
-        medicamentos: [],
-        total: 0,
-        aptos_sdmdu: 0,
-        pedido_minimo: userLabsMap.get(labName) || 0,
-      });
+    const isPlatformMed = platformMedsMap.has(med.cn);
+    const isPharmacyMed = userFarmiaCNs.includes(med.cn);
+
+    const targetLabs = [];
+    
+    // Si est√° en mi farmacia, pertenece a su laboratorio nativo
+    if (isPharmacyMed) {
+        targetLabs.push(med.laboratorio || 'Sin laboratorio');
+    }
+    
+    // Si lo vincul√© a plataformas manuales, pertenece a esas plataformas
+    if (isPlatformMed) {
+        targetLabs.push(...platformMedsMap.get(med.cn));
     }
 
-    const lab = labMap.get(labName);
-    lab.medicamentos.push(med);
-    lab.total++;
-    
-    const clas = Array.isArray(med.blistercheck_clasificacion_global) ? med.blistercheck_clasificacion_global[0] : med.blistercheck_clasificacion_global;
-    if (clas && clas.apto_sdmdu_blister === true) {
-      lab.aptos_sdmdu++;
-    }
+    // Evitar duplicados (por si una plataforma se llama igual que el laboratorio original, aunque es raro)
+    const uniqueLabs = [...new Set(targetLabs)];
+
+    uniqueLabs.forEach(labName => {
+      if (!labMap.has(labName)) {
+        labMap.set(labName, {
+          laboratorio: labName,
+          medicamentos: [],
+          total: 0,
+          aptos_sdmdu: 0,
+          pedido_minimo: 0,
+          is_plataforma: false
+        });
+      }
+
+      const lab = labMap.get(labName);
+      
+      // Marcar si este medicamento fue a√±adido manualmente a esta plataforma
+      // Clonamos el objeto para no modificar el base si pertenece a varios grupos
+      const medCopy = { ...med, is_manual_link: isPlatformMed && platformMedsMap.get(med.cn).includes(labName) };
+      
+      lab.medicamentos.push(medCopy);
+      lab.total++;
+      
+      const clas = Array.isArray(med.blistercheck_clasificacion_global) ? med.blistercheck_clasificacion_global[0] : med.blistercheck_clasificacion_global;
+      if (clas && clas.apto_sdmdu_blister === true) {
+        lab.aptos_sdmdu++;
+      }
+    });
   });
 
-  // Convertir a array y ordenar
+  // 6. Convertir a array y calcular porcentajes
   const result = Array.from(labMap.values()).map(lab => {
-    // Ordenar los medicamentos alfab√©ticamente
     lab.medicamentos.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-    
     return {
       ...lab,
       porcentaje_sdmdu: lab.total > 0 ? Math.round((lab.aptos_sdmdu / lab.total) * 100) : 0,
     };
   });
 
+  // Ordenar alfab√©ticamente
   result.sort((a, b) => a.laboratorio.localeCompare(b.laboratorio));
   return result;
 }
@@ -1026,3 +1081,83 @@ export async function savePedidoMinimo(laboratorio, pedidoMinimo) {
   if (error) throw error;
   return data;
 }
+e x p o r t   a s y n c   f u n c t i o n   c r e a t e C u s t o m P l a t f o r m ( l a b o r a t o r i o _ n o m b r e ,   p e d i d o M i n i m o )   {  
+     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
+     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i √ ≥ n . " ) ;  
+  
+     c o n s t   p a y l o a d   =   {  
+         u s e r _ i d :   u s e r . i d ,  
+         l a b o r a t o r i o :   l a b o r a t o r i o _ n o m b r e ,  
+         p e d i d o _ m i n i m o :   p a r s e F l o a t ( p e d i d o M i n i m o )   | |   0 ,  
+         i s _ p l a t a f o r m a :   t r u e ,  
+         u p d a t e d _ a t :   n e w   D a t e ( ) . t o I S O S t r i n g ( )  
+     } ;  
+  
+     c o n s t   {   d a t a ,   e r r o r   }   =   a w a i t   s u p a b a s e  
+         . f r o m ( U S E R _ L A B O R A T O R I O S _ T A B L E )  
+         . u p s e r t ( p a y l o a d ,   {   o n C o n f l i c t :   ' u s e r _ i d , l a b o r a t o r i o '   } )  
+         . s e l e c t ( )  
+         . s i n g l e ( ) ;  
+  
+     i f   ( e r r o r )   t h r o w   e r r o r ;  
+     r e t u r n   d a t a ;  
+ }  
+  
+ e x p o r t   a s y n c   f u n c t i o n   d e l e t e C u s t o m P l a t f o r m ( l a b o r a t o r i o _ n o m b r e )   {  
+     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
+     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i √ ≥ n . " ) ;  
+  
+     / /   D e l e t e   f r o m   u s e r _ l a b o r a t o r i o s  
+     c o n s t   {   e r r o r :   e r r 1   }   =   a w a i t   s u p a b a s e  
+         . f r o m ( U S E R _ L A B O R A T O R I O S _ T A B L E )  
+         . d e l e t e ( )  
+         . e q ( ' u s e r _ i d ' ,   u s e r . i d )  
+         . e q ( ' l a b o r a t o r i o ' ,   l a b o r a t o r i o _ n o m b r e )  
+         . e q ( ' i s _ p l a t a f o r m a ' ,   t r u e ) ;  
+          
+     i f   ( e r r 1 )   t h r o w   e r r 1 ;  
+  
+     / /   M e d s   l i n k e d   a r e   d e l e t e d   v i a   c a s c a d e   o r   w e   c a n   d e l e t e   t h e m   e x p l i c i t l y :  
+     c o n s t   {   e r r o r :   e r r 2   }   =   a w a i t   s u p a b a s e  
+         . f r o m ( ' b l i s t e r c h e c k _ u s e r _ p l a t a f o r m a _ m e d i c a m e n t o s ' )  
+         . d e l e t e ( )  
+         . e q ( ' u s e r _ i d ' ,   u s e r . i d )  
+         . e q ( ' l a b o r a t o r i o _ n o m b r e ' ,   l a b o r a t o r i o _ n o m b r e ) ;  
+  
+     i f   ( e r r 2 )   t h r o w   e r r 2 ;  
+     r e t u r n   t r u e ;  
+ }  
+  
+ e x p o r t   a s y n c   f u n c t i o n   a d d M e d i c a t i o n T o P l a t f o r m ( l a b o r a t o r i o _ n o m b r e ,   c n )   {  
+     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
+     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i √ ≥ n . " ) ;  
+  
+     c o n s t   {   d a t a ,   e r r o r   }   =   a w a i t   s u p a b a s e  
+         . f r o m ( ' b l i s t e r c h e c k _ u s e r _ p l a t a f o r m a _ m e d i c a m e n t o s ' )  
+         . i n s e r t ( {  
+             u s e r _ i d :   u s e r . i d ,  
+             l a b o r a t o r i o _ n o m b r e :   l a b o r a t o r i o _ n o m b r e ,  
+             c n :   c n  
+         } )  
+         . s e l e c t ( )  
+         . s i n g l e ( ) ;  
+  
+     i f   ( e r r o r )   t h r o w   e r r o r ;  
+     r e t u r n   d a t a ;  
+ }  
+  
+ e x p o r t   a s y n c   f u n c t i o n   r e m o v e M e d i c a t i o n F r o m P l a t f o r m ( l a b o r a t o r i o _ n o m b r e ,   c n )   {  
+     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
+     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i √ ≥ n . " ) ;  
+  
+     c o n s t   {   e r r o r   }   =   a w a i t   s u p a b a s e  
+         . f r o m ( ' b l i s t e r c h e c k _ u s e r _ p l a t a f o r m a _ m e d i c a m e n t o s ' )  
+         . d e l e t e ( )  
+         . e q ( ' u s e r _ i d ' ,   u s e r . i d )  
+         . e q ( ' l a b o r a t o r i o _ n o m b r e ' ,   l a b o r a t o r i o _ n o m b r e )  
+         . e q ( ' c n ' ,   c n ) ;  
+  
+     i f   ( e r r o r )   t h r o w   e r r o r ;  
+     r e t u r n   t r u e ;  
+ }  
+ 
