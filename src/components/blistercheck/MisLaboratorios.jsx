@@ -54,6 +54,21 @@ function MisLaboratorios({ onSelectMedicamento }) {
     cargarDatos();
   }, []);
 
+  // Efecto para autocompletado en tiempo real con debounce
+  useEffect(() => {
+    if (!showSearchModal) return;
+    if (searchQuery.trim().length < 3) {
+      if (searchQuery.trim().length === 0) setSearchResults([]);
+      return;
+    }
+    
+    const timeoutId = setTimeout(() => {
+      handleSearchMeds();
+    }, 500);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, showSearchModal]);
+
   const cargarDatos = async () => {
     setLoading(true);
     try {
@@ -367,6 +382,91 @@ function MisLaboratorios({ onSelectMedicamento }) {
             </>
           );
         })()}
+
+      {/* MODAL BUSCAR MEDICAMENTO (DUPLICADO PARA LA VISTA DE DETALLE) */}
+      {showSearchModal && (
+        <div className="bc-modal-overlay" onClick={() => setShowSearchModal(false)}>
+          <div className="bc-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '650px', width: '95%' }}>
+            <div className="bc-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div className="bc-modal-title">
+                <Search size={20} />
+                <h3 style={{ margin: 0 }}>Vincular medicamento manual</h3>
+              </div>
+              <button className="bc-modal-close" onClick={() => setShowSearchModal(false)}><X size={20} /></button>
+            </div>
+            <div className="bc-modal-body" style={{ paddingTop: 0 }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
+                <div className="bc-search-bar" style={{ flex: 1 }}>
+                  <Search size={18} className="bc-search-icon" />
+                  <input 
+                    type="text" 
+                    className="bc-search-input" 
+                    placeholder="Buscar por código nacional (CN) o nombre..." 
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearchMeds()}
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button className="bc-search-clear" onClick={() => setSearchQuery('')}>
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                <button className="bc-btn-primary" onClick={handleSearchMeds}>Buscar</button>
+              </div>
+              {isSearching ? (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--color-text-muted)' }}>
+                  <div className="bc-spinner" style={{ margin: '0 auto 1rem auto' }}></div>
+                  <p>Buscando en el catálogo global...</p>
+                </div>
+              ) : searchError ? (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--color-error)' }}>
+                  <p><strong>Error de búsqueda:</strong> {searchError}</p>
+                </div>
+              ) : (
+                <div style={{ maxHeight: '350px', overflowY: 'auto', borderRadius: 'var(--radius-md)' }}>
+                  {searchResults.length > 0 && (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+                      Se encontraron {searchResults.length} resultados:
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {searchResults.map(res => (
+                      <div key={res.cn} className="bc-export-option" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0, border: '1px solid var(--color-card-border)' }}>
+                        <div>
+                          <strong>{res.cn}</strong>
+                          <span>{res.nombre}</span>
+                        </div>
+                        <button 
+                          className="bc-btn-primary" 
+                          style={{ padding: '6px 14px', fontSize: '0.85rem' }} 
+                          onClick={() => handleAddMedToPlatform(res)}
+                          disabled={addingMedCn === res.cn}
+                        >
+                          {addingMedCn === res.cn ? (
+                            <div className="bc-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px', marginRight: '4px' }}></div>
+                          ) : (
+                            <Plus size={14} style={{ marginRight: '4px' }} />
+                          )}
+                          {addingMedCn === res.cn ? 'Añadiendo...' : 'Añadir'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {searchResults.length === 0 && searchQuery.trim() !== '' && (
+                    <div className="bc-empty-state glass-panel" style={{ padding: '2rem 1rem', marginTop: 0 }}>
+                      <Search size={32} className="bc-empty-state__icon" style={{ opacity: 0.5 }} />
+                      <p style={{ margin: 0 }}>No se encontraron medicamentos que coincidan con la búsqueda.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     );
   }
