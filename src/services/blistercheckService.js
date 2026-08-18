@@ -1081,83 +1081,82 @@ export async function savePedidoMinimo(laboratorio, pedidoMinimo) {
   if (error) throw error;
   return data;
 }
-e x p o r t   a s y n c   f u n c t i o n   c r e a t e C u s t o m P l a t f o r m ( l a b o r a t o r i o _ n o m b r e ,   p e d i d o M i n i m o )   {  
-     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
-     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i Ã ³ n . " ) ;  
-  
-     c o n s t   p a y l o a d   =   {  
-         u s e r _ i d :   u s e r . i d ,  
-         l a b o r a t o r i o :   l a b o r a t o r i o _ n o m b r e ,  
-         p e d i d o _ m i n i m o :   p a r s e F l o a t ( p e d i d o M i n i m o )   | |   0 ,  
-         i s _ p l a t a f o r m a :   t r u e ,  
-         u p d a t e d _ a t :   n e w   D a t e ( ) . t o I S O S t r i n g ( )  
-     } ;  
-  
-     c o n s t   {   d a t a ,   e r r o r   }   =   a w a i t   s u p a b a s e  
-         . f r o m ( U S E R _ L A B O R A T O R I O S _ T A B L E )  
-         . u p s e r t ( p a y l o a d ,   {   o n C o n f l i c t :   ' u s e r _ i d , l a b o r a t o r i o '   } )  
-         . s e l e c t ( )  
-         . s i n g l e ( ) ;  
-  
-     i f   ( e r r o r )   t h r o w   e r r o r ;  
-     r e t u r n   d a t a ;  
- }  
-  
- e x p o r t   a s y n c   f u n c t i o n   d e l e t e C u s t o m P l a t f o r m ( l a b o r a t o r i o _ n o m b r e )   {  
-     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
-     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i Ã ³ n . " ) ;  
-  
-     / /   D e l e t e   f r o m   u s e r _ l a b o r a t o r i o s  
-     c o n s t   {   e r r o r :   e r r 1   }   =   a w a i t   s u p a b a s e  
-         . f r o m ( U S E R _ L A B O R A T O R I O S _ T A B L E )  
-         . d e l e t e ( )  
-         . e q ( ' u s e r _ i d ' ,   u s e r . i d )  
-         . e q ( ' l a b o r a t o r i o ' ,   l a b o r a t o r i o _ n o m b r e )  
-         . e q ( ' i s _ p l a t a f o r m a ' ,   t r u e ) ;  
-          
-     i f   ( e r r 1 )   t h r o w   e r r 1 ;  
-  
-     / /   M e d s   l i n k e d   a r e   d e l e t e d   v i a   c a s c a d e   o r   w e   c a n   d e l e t e   t h e m   e x p l i c i t l y :  
-     c o n s t   {   e r r o r :   e r r 2   }   =   a w a i t   s u p a b a s e  
-         . f r o m ( ' b l i s t e r c h e c k _ u s e r _ p l a t a f o r m a _ m e d i c a m e n t o s ' )  
-         . d e l e t e ( )  
-         . e q ( ' u s e r _ i d ' ,   u s e r . i d )  
-         . e q ( ' l a b o r a t o r i o _ n o m b r e ' ,   l a b o r a t o r i o _ n o m b r e ) ;  
-  
-     i f   ( e r r 2 )   t h r o w   e r r 2 ;  
-     r e t u r n   t r u e ;  
- }  
-  
- e x p o r t   a s y n c   f u n c t i o n   a d d M e d i c a t i o n T o P l a t f o r m ( l a b o r a t o r i o _ n o m b r e ,   c n )   {  
-     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
-     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i Ã ³ n . " ) ;  
-  
-     c o n s t   {   d a t a ,   e r r o r   }   =   a w a i t   s u p a b a s e  
-         . f r o m ( ' b l i s t e r c h e c k _ u s e r _ p l a t a f o r m a _ m e d i c a m e n t o s ' )  
-         . i n s e r t ( {  
-             u s e r _ i d :   u s e r . i d ,  
-             l a b o r a t o r i o _ n o m b r e :   l a b o r a t o r i o _ n o m b r e ,  
-             c n :   c n  
-         } )  
-         . s e l e c t ( )  
-         . s i n g l e ( ) ;  
-  
-     i f   ( e r r o r )   t h r o w   e r r o r ;  
-     r e t u r n   d a t a ;  
- }  
-  
- e x p o r t   a s y n c   f u n c t i o n   r e m o v e M e d i c a t i o n F r o m P l a t f o r m ( l a b o r a t o r i o _ n o m b r e ,   c n )   {  
-     c o n s t   {   d a t a :   {   u s e r   }   }   =   a w a i t   s u p a b a s e . a u t h . g e t U s e r ( ) ;  
-     i f   ( ! u s e r )   t h r o w   n e w   E r r o r ( " D e b e   i n i c i a r   s e s i Ã ³ n . " ) ;  
-  
-     c o n s t   {   e r r o r   }   =   a w a i t   s u p a b a s e  
-         . f r o m ( ' b l i s t e r c h e c k _ u s e r _ p l a t a f o r m a _ m e d i c a m e n t o s ' )  
-         . d e l e t e ( )  
-         . e q ( ' u s e r _ i d ' ,   u s e r . i d )  
-         . e q ( ' l a b o r a t o r i o _ n o m b r e ' ,   l a b o r a t o r i o _ n o m b r e )  
-         . e q ( ' c n ' ,   c n ) ;  
-  
-     i f   ( e r r o r )   t h r o w   e r r o r ;  
-     r e t u r n   t r u e ;  
- }  
- 
+export async function createCustomPlatform(laboratorio_nombre, pedidoMinimo) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesiÃƒÂ³n.");
+
+  const payload = {
+    user_id: user.id,
+    laboratorio: laboratorio_nombre,
+    pedido_minimo: parseFloat(pedidoMinimo) || 0,
+    is_plataforma: true,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from(USER_LABORATORIOS_TABLE)
+    .upsert(payload, { onConflict: 'user_id,laboratorio' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteCustomPlatform(laboratorio_nombre) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesiÃƒÂ³n.");
+
+  // Delete from user_laboratorios
+  const { error: err1 } = await supabase
+    .from(USER_LABORATORIOS_TABLE)
+    .delete()
+    .eq('user_id', user.id)
+    .eq('laboratorio', laboratorio_nombre)
+    .eq('is_plataforma', true);
+    
+  if (err1) throw err1;
+
+  // Meds linked are deleted via cascade or we can delete them explicitly:
+  const { error: err2 } = await supabase
+    .from('blistercheck_user_plataforma_medicamentos')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('laboratorio_nombre', laboratorio_nombre);
+
+  if (err2) throw err2;
+  return true;
+}
+
+export async function addMedicationToPlatform(laboratorio_nombre, cn) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesiÃƒÂ³n.");
+
+  const { data, error } = await supabase
+    .from('blistercheck_user_plataforma_medicamentos')
+    .insert({
+      user_id: user.id,
+      laboratorio_nombre: laboratorio_nombre,
+      cn: cn
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function removeMedicationFromPlatform(laboratorio_nombre, cn) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesiÃƒÂ³n.");
+
+  const { error } = await supabase
+    .from('blistercheck_user_plataforma_medicamentos')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('laboratorio_nombre', laboratorio_nombre)
+    .eq('cn', cn);
+
+  if (error) throw error;
+  return true;
+}
