@@ -140,20 +140,42 @@ function MisLaboratorios({ onSelectMedicamento }) {
     }
   };
 
-  const handleAddMedToPlatform = async (cn) => {
-    setAddingMedCn(cn);
+  const handleAddMedToPlatform = async (med) => {
+    setAddingMedCn(med.cn);
     setSearchError(null);
     try {
-      await addMedicationToPlatform(labSeleccionado.laboratorio, cn);
-      setShowSearchModal(false);
-      setSearchQuery('');
-      setSearchResults([]);
+      await addMedicationToPlatform(labSeleccionado.laboratorio, med.cn);
       
-      // Recargar datos en segundo plano sin interrumpir la vista
-      const data = await getMisLaboratoriosData();
-      setLaboratorios(data);
-      const updatedLab = data.find(l => l.laboratorio === labSeleccionado.laboratorio);
-      if (updatedLab) setLabSeleccionado(updatedLab);
+      // OPTIMISTIC UPDATE: Añadir el medicamento instantáneamente a la vista sin recargar
+      const medCopy = { 
+        ...med, 
+        is_manual_link: true,
+        blistercheck_clasificacion_global: {
+          apto_sdmdu_blister: null,
+          requiere_reenvasado: null,
+          requiere_reetiquetado: null,
+          solo_envase_clinico: false
+        }
+      };
+      
+      setLabSeleccionado(prev => {
+        if (!prev) return prev;
+        const newMeds = [...prev.medicamentos, medCopy].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        return {
+          ...prev,
+          medicamentos: newMeds,
+          total: prev.total + 1
+        };
+      });
+
+      // NO cerramos el modal, permitiendo añadir varios medicamentos de golpe
+      // setShowSearchModal(false);
+      
+      // Recargar datos en segundo plano silenciosamente
+      getMisLaboratoriosData().then(data => {
+        setLaboratorios(data);
+      }).catch(console.error);
+
     } catch (err) {
       console.error('Error in handleAddMedToPlatform:', err);
       setSearchError('Error al añadir medicamento. Es posible que ya esté añadido a esta plataforma.');
@@ -566,7 +588,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                         <button 
                           className="bc-btn-primary" 
                           style={{ padding: '6px 14px', fontSize: '0.85rem' }} 
-                          onClick={() => handleAddMedToPlatform(res.cn)}
+                          onClick={() => handleAddMedToPlatform(res)}
                           disabled={addingMedCn === res.cn}
                         >
                           {addingMedCn === res.cn ? (
