@@ -209,7 +209,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
             <ArrowLeft size={16} /> Volver a laboratorios
           </button>
           {labSeleccionado.is_plataforma && (
-            <button className="bc-btn" onClick={handleDeletePlatform} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '6px 12px', fontSize: '0.9rem' }}>
+            <button className="bc-btn-danger" onClick={handleDeletePlatform} style={{ padding: '6px 12px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Trash2 size={16} /> Eliminar plataforma
             </button>
           )}
@@ -270,7 +270,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                   Medicamentos asociados ({labSeleccionado.total})
                 </h3>
                 {labSeleccionado.is_plataforma && (
-                  <button className="bc-btn bc-btn--primary" onClick={() => setShowSearchModal(true)} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>
+                  <button className="bc-btn-primary" onClick={() => setShowSearchModal(true)} style={{ padding: '6px 12px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Plus size={14} /> Añadir medicamento
                   </button>
                 )}
