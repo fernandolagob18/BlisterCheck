@@ -353,17 +353,18 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   return (
     <div className="bc-laboratorios-container">
-      <div className="bc-laboratorios-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2>Mis Laboratorios</h2>
-          <p className="bc-laboratorios-subtitle" style={{ margin: 0 }}>
-            Laboratorios y Plataformas de distribución.
-          </p>
+      <div className="bc-laboratorios-header">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h2>Mis Laboratorios</h2>
+            <p className="bc-laboratorios-subtitle" style={{ margin: 0 }}>
+              Laboratorios y Plataformas de distribución.
+            </p>
+          </div>
+          <button className="bc-btn bc-btn--primary" onClick={() => setShowCreateModal(true)}>
+            <Plus size={16} /> Crear plataforma de distribución
+          </button>
         </div>
-        <button className="bc-btn bc-btn--primary" onClick={() => setShowCreateModal(true)}>
-          <Plus size={16} /> Crear plataforma de distribución
-        </button>
-      </div>
         
         {laboratorios.length > 0 && (
           <div style={{ marginTop: '1.5rem', maxWidth: '400px', display: 'flex', alignItems: 'center', background: 'var(--color-surface, #fff)', border: '1px solid var(--color-border, #e2e8f0)', borderRadius: 'var(--radius-md, 8px)', padding: '0 12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
