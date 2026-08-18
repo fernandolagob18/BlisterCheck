@@ -144,19 +144,31 @@ function MisLaboratorios({ onSelectMedicamento }) {
       setShowSearchModal(false);
       setSearchQuery('');
       setSearchResults([]);
-      await cargarDatos();
-      handleVolver(); // Forzamos recarga visual sencilla
+      
+      // Recargar datos en segundo plano sin interrumpir la vista
+      const data = await getMisLaboratoriosData();
+      setLaboratorios(data);
+      const updatedLab = data.find(l => l.laboratorio === labSeleccionado.laboratorio);
+      if (updatedLab) setLabSeleccionado(updatedLab);
     } catch (err) {
       console.error(err);
-      alert('Error al añadir medicamento.');
+      alert('Error al añadir medicamento. Es posible que ya esté añadido.');
     }
   };
 
   const handleRemoveMedFromPlatform = async (cn) => {
     try {
       await removeMedicationFromPlatform(labSeleccionado.laboratorio, cn);
-      await cargarDatos();
-      handleVolver(); // Forzamos recarga visual sencilla
+      
+      // Recargar datos en segundo plano
+      const data = await getMisLaboratoriosData();
+      setLaboratorios(data);
+      const updatedLab = data.find(l => l.laboratorio === labSeleccionado.laboratorio);
+      if (updatedLab) {
+        setLabSeleccionado(updatedLab);
+      } else {
+        handleVolver(); // Si por algún motivo desaparece por completo (no debería si is_plataforma = true)
+      }
     } catch (err) {
       console.error(err);
       alert('Error al quitar medicamento.');
