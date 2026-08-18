@@ -366,7 +366,7 @@ export default function SostenibilidadPage() {
             </h2>
             <p className="eco-body">
               Los siguientes datos provienen de los principales organismos sectoriales y reguladores
-              europeos. Son valores <em>cuna a puerta</em> (cradle-to-gate): incluyen la extracción
+              europeos. Son valores medidos <strong>desde el origen hasta la salida de fábrica</strong>: incluyen la extracción
               de materias primas y la fabricación del material, pero no la distribución, el uso
               ni el fin de vida.
             </p>
