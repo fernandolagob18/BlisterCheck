@@ -44,83 +44,73 @@ const OPCIONES = [
     id: 'frasco',
     label: 'Frasco original comercial (HDPE/PP)',
     rank: 1,
+    color: '#059669',
+    bg: '#ecfdf5',
+    border: '#6ee7b7',
+    descripcion: 'Utilizar el frasco comercial sin intervención hospitalaria. El acondicionamiento primario ya está optimizado por el laboratorio fabricante.',
+    pros: ['Cero material nuevo generado en el hospital', 'No requiere energía adicional de reenvasado', 'El polietileno de alta densidad (HDPE) tiene la menor huella por dosis debido al formato granel'],
+    contras: ['No siempre viable en los Sistemas de Dispensación en Dosis Unitaria (SDMDU)', 'Puede requerir reetiquetado de la dosis individual'],
+    referencia: 'Impacto estimado: ~ 1.5 g CO₂e/dosis (PlasticsEurope 2022)',
+  },
+  {
+    id: 'zip-frasco',
+    label: 'Reenvasado en bolsa zip PE (desde frasco)',
+    rank: 2,
     color: '#10b981',
     bg: '#f0fdf4',
-    border: '#6ee7b7',
-    descripcion:
-      'Utilizar el frasco comercial sin intervención hospitalaria. El acondicionamiento primario ya está optimizado por el laboratorio fabricante.',
-    pros: [
-      'Cero material nuevo generado en el hospital',
-      'No requiere energía adicional de reenvasado',
-      'El polietileno de alta densidad (HDPE) y el polipropileno (PP) tienen la menor huella entre los plásticos comunes',
-    ],
-    contras: [
-      'No siempre viable en los Sistemas de Dispensación en Dosis Unitaria (SDMDU)',
-      'Puede requerir reetiquetado de la dosis individual',
-    ],
-    referencia: 'Alfred Health/Monash University — Análisis de Ciclo de Vida (LCA), 2023 (revisión por pares)',
+    border: '#a7f3d0',
+    descripcion: 'Dispensar dosis individuales en bolsas de polietileno (PE) partiendo de un frasco a granel. Suma el frasco desechado/reciclado más la nueva bolsa.',
+    pros: ['Menor material por unidad que el reenvasado en Alu/PVC', 'Sin necesidad de maquinaria termoselladora', 'Aprovecha la baja huella inicial del frasco comercial'],
+    contras: ['No garantiza la misma estabilidad original', 'Aumenta el riesgo de contaminación', 'No válido para fármacos fotosensibles/higroscópicos'],
+    referencia: 'Impacto acumulado estimado: ~ 2.5 g CO₂e/dosis',
+  },
+  {
+    id: 'blister-comercial',
+    label: 'Blíster comercial (Aluminio + PVC/PVdC)',
+    rank: 3,
+    color: '#3b82f6',
+    bg: '#eff6ff',
+    border: '#93c5fd',
+    descripcion: 'Mantener el blíster comercial original sin modificar. Tiene mayor huella que el frasco por dosis al contener lámina de aluminio intensiva en energía.',
+    pros: ['Máxima protección garantizada por el fabricante', 'Mantiene la vida útil y caducidad oficial intactas', 'Cero residuos hospitalarios añadidos'],
+    contras: ['No siempre está troquelado para SDMDU unitario', 'Mayor impacto original que el formato frasco granel'],
+    referencia: 'Impacto estimado: ~ 4.0 g CO₂e/dosis (European Aluminium Association / PlasticsEurope)',
   },
   {
     id: 'reetiquetado',
     label: 'Reetiquetado del blíster comercial',
-    rank: 2,
-    color: '#3b82f6',
-    bg: '#eff6ff',
-    border: '#93c5fd',
-    descripcion:
-      'Añadir una etiqueta adhesiva sobre el blíster comercial intacto (sin abrirlo ni reenvasarlo). Mínima intervención, máxima preservación del envase original.',
-    pros: [
-      'Solo se añade el peso de la etiqueta adhesiva (< 1 g)',
-      'Se conserva la integridad del blíster del fabricante',
-      'Menor generación de residuos hospitalarios',
-    ],
-    contras: [
-      'Puede no adaptarse a todos los formatos de blíster',
-      'Requiere control estricto de la legibilidad de la etiqueta',
-    ],
-    referencia: 'ILAPHAR, Sociedad Española de Farmacia Hospitalaria (SEFH) — Proyecto "No reenvases sin necesidad", 2024',
-  },
-  {
-    id: 'bolsa-zip',
-    label: 'Reenvasado en bolsa zip PE',
-    rank: 3,
+    rank: 4,
     color: '#8b5cf6',
     bg: '#f5f3ff',
     border: '#c4b5fd',
-    descripcion:
-      'Dispensar en bolsas de polietileno (PE) con cierre zip junto con una etiqueta identificativa. Menor consumo de material que el reenvasado en lámina de aluminio.',
-    pros: [
-      'Menos material por unidad que el reenvasado en Al/PVC',
-      'Sin necesidad de maquinaria termoselladora',
-      'El PE tiene una huella de producción moderada',
-    ],
-    contras: [
-      'No garantiza la misma estabilidad del medicamento que el blíster original',
-      'Aumenta el riesgo de contaminación si no se manipula correctamente',
-      'No válido para todos los fármacos (fotosensibles, higroscópicos)',
-    ],
-    referencia: 'Estimación basada en eco-perfil HDPE de PlasticsEurope',
+    descripcion: 'Añadir una etiqueta adhesiva sobre el blíster comercial intacto (sin abrirlo ni reenvasarlo).',
+    pros: ['Solo se añade el peso de la etiqueta adhesiva (< 1 g)', 'Se conserva la integridad del blíster del fabricante', 'Menor generación de residuos hospitalarios respecto a reenvasar'],
+    contras: ['Puede no adaptarse a todos los formatos de blíster', 'Requiere control estricto de la legibilidad de la etiqueta original'],
+    referencia: 'Impacto acumulado estimado: ~ 4.5 g CO₂e/dosis',
   },
   {
-    id: 'reenvasado',
-    label: 'Reenvasado hospitalario (lámina Al + PVC termosellado)',
-    rank: 4,
+    id: 'zip-blister',
+    label: 'Reenvasado en bolsa zip PE (desde blíster)',
+    rank: 5,
     color: '#f59e0b',
     bg: '#fffbeb',
     border: '#fcd34d',
-    descripcion:
-      'Reenvasado manual o automático en lámina de aluminio (Al) + film de policloruro de vinilo (PVC) termosellable. Es el proceso de mayor impacto porque consume material nuevo y energía eléctrica de la maquinaria.',
-    pros: [
-      'Permite la dispensación en dosis unitarias estandarizadas',
-      'Compatible con la mayoría de sistemas automatizados de SDMDU',
-      'Estabilidad y trazabilidad garantizadas',
-    ],
-    contras: [
-      'Consume lámina de Al (6,3 kg CO₂e/kg, European Aluminium Association 2024) + PVC termosellable',
-      'Requiere energía eléctrica de la reenvasadora (factor MITECO: 0,258 kg CO₂e/kWh)',
-      'Genera residuos de materiales mixtos (Al + plástico) difíciles de reciclar',
-    ],
-    referencia: 'European Aluminium Association 2024, MITECO 2025, Alfred Health LCA 2023',
+    descripcion: 'Desblistar un medicamento comercial y meterlo en una bolsa zip. Destruye la protección térmica de alto impacto inicial para sustituirla por plástico de bajo impacto.',
+    pros: ['Puede facilitar la logística interna en sistemas automatizados simples'],
+    contras: ['Desperdicia totalmente la huella climática del envase primario comercial', 'Degrada la estabilidad y protección frente a humedad/luz'],
+    referencia: 'Impacto acumulado estimado: ~ 5.0 g CO₂e/dosis (Blíster desechado + Bolsa PE)',
+  },
+  {
+    id: 'reenvasado-hosp',
+    label: 'Reenvasado hospitalario (Aluminio + PVC)',
+    rank: 6,
+    color: '#ef4444',
+    bg: '#fef2f2',
+    border: '#fca5a5',
+    descripcion: 'Reenvasado en lámina de aluminio + PVC termosellable partiendo de blíster o frasco. Suma el envase comercial original desechado, el nuevo material y la energía de la máquina.',
+    pros: ['Permite la dispensación unitaria perfecta y estandarizada', 'Compatible con armarios dispensadores'],
+    contras: ['Doble impacto: desperdicia el envase comercial original + requiere nuevo material intensivo', 'Consume electricidad (factor MITECO 0,258 kg CO₂e/kWh)', 'Genera residuos de materiales mixtos (Al+Plástico) muy difíciles de reciclar'],
+    referencia: 'Impacto acumulado estimado: ~ 7.0 a 9.5 g CO₂e/dosis (según envase de origen)',
   },
 ];
 
@@ -141,7 +131,7 @@ const REFERENCIAS = [
     anio: '2023',
     tipo: 'Revisión por pares',
     url: 'https://www.researchgate.net',
-    hallazgo: 'Los blísteres con menor huella emiten hasta un 76 % menos CO₂e que los de mayor impacto dentro de la misma categoría.',
+    hallazgo: 'Estudio LCA detallado que cuantifica las emisiones CO₂e por dosis unitaria. Concluye que los frascos (bottles) presentan una huella de carbono significativamente inferior a los blísteres por dosis, y destaca el impacto de evitar material innecesario.',
   },
   {
     autores: 'European Aluminium Association',
@@ -304,38 +294,56 @@ export default function SostenibilidadPage() {
               <div className="eco-chart">
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
-                    <span>1. Frasco original comercial</span>
-                    <span style={{color: '#10b981'}}>Muy baja huella (solo envase original)</span>
+                    <span>1. Frasco original comercial (HDPE)</span>
+                    <span style={{color: '#059669'}}>~ 1.5 g CO₂e/dosis</span>
                   </div>
                   <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '15%', background: '#10b981'}}></div>
+                    <div className="eco-chart-bar-fill" style={{width: '15%', background: '#059669'}}></div>
                   </div>
                 </div>
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
-                    <span>2. Reetiquetado del blíster comercial</span>
-                    <span style={{color: '#3b82f6'}}>Baja huella (etiqueta añadida)</span>
+                    <span>2. Reenvasado en bolsa zip PE (desde frasco)</span>
+                    <span style={{color: '#10b981'}}>~ 2.5 g CO₂e/dosis (Frasco + Bolsa)</span>
                   </div>
                   <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '25%', background: '#3b82f6'}}></div>
+                    <div className="eco-chart-bar-fill" style={{width: '26%', background: '#10b981'}}></div>
                   </div>
                 </div>
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
-                    <span>3. Reenvasado en bolsa zip PE</span>
-                    <span style={{color: '#8b5cf6'}}>Huella moderada (bolsa añadida)</span>
+                    <span>3. Blíster comercial (Aluminio + PVC)</span>
+                    <span style={{color: '#3b82f6'}}>~ 4.0 g CO₂e/dosis</span>
                   </div>
                   <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '50%', background: '#8b5cf6'}}></div>
+                    <div className="eco-chart-bar-fill" style={{width: '42%', background: '#3b82f6'}}></div>
                   </div>
                 </div>
                 <div className="eco-chart-bar-wrap">
                   <div className="eco-chart-label">
-                    <span>4. Reenvasado hospitalario (Aluminio + PVC)</span>
-                    <span style={{color: '#f59e0b'}}>Alta huella (aluminio, plástico y energía)</span>
+                    <span>4. Reetiquetado del blíster comercial</span>
+                    <span style={{color: '#8b5cf6'}}>~ 4.5 g CO₂e/dosis (Blíster + Etiqueta)</span>
                   </div>
                   <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '100%', background: '#f59e0b'}}></div>
+                    <div className="eco-chart-bar-fill" style={{width: '47%', background: '#8b5cf6'}}></div>
+                  </div>
+                </div>
+                <div className="eco-chart-bar-wrap">
+                  <div className="eco-chart-label">
+                    <span>5. Reenvasado en bolsa zip PE (desde blíster)</span>
+                    <span style={{color: '#f59e0b'}}>~ 5.0 g CO₂e/dosis (Blíster desechado + Bolsa)</span>
+                  </div>
+                  <div className="eco-chart-bar-bg">
+                    <div className="eco-chart-bar-fill" style={{width: '52%', background: '#f59e0b'}}></div>
+                  </div>
+                </div>
+                <div className="eco-chart-bar-wrap">
+                  <div className="eco-chart-label">
+                    <span>6. Reenvasado hospitalario (Aluminio + PVC)</span>
+                    <span style={{color: '#ef4444'}}>~ 9.5 g CO₂e/dosis (Blíster desechado + Nuevo Alu/PVC)</span>
+                  </div>
+                  <div className="eco-chart-bar-bg">
+                    <div className="eco-chart-bar-fill" style={{width: '100%', background: '#ef4444'}}></div>
                   </div>
                 </div>
               </div>
@@ -363,17 +371,7 @@ export default function SostenibilidadPage() {
               ni el fin de vida.
             </p>
 
-            <div className="eco-img-wrap" style={{ marginBottom: '2rem' }}>
-              <img
-                src="/eco_materials_factors_illustration.jpg"
-                alt="Ilustración vectorial de los factores de emisión oficiales de los principales materiales de envase farmacéutico"
-                className="eco-img"
-              />
-              <p className="eco-img-caption">
-                Factores de emisión oficiales (European Aluminium Association, PlasticsEurope,
-                MITECO). Los valores corresponden al mix de producción europeo/español.
-              </p>
-            </div>
+
 
             <div className="eco-materials-grid">
               {MATERIALES.map(mat => (
