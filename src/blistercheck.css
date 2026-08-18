@@ -4001,6 +4001,20 @@
   min-width: 0; /* flex bug fix */
 }
 
+.bc-lab-med-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .bc-lab-med-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+}
+
+@media (max-width: 900px) {
+  .bc-lab-med-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
   .bc-lab-hero {
     flex-direction: column;

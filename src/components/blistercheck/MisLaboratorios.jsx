@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getMisLaboratoriosData, savePedidoMinimo } from '../../services/blistercheckService';
 import MedicamentoCard from './MedicamentoCard';
-import { Building2, Save, ChevronLeft, Percent, Search } from 'lucide-react';
+import { Building2, Save, ChevronLeft, ArrowLeft, Percent, Search } from 'lucide-react';
 
 function MisLaboratorios({ onSelectMedicamento }) {
   const [laboratorios, setLaboratorios] = useState([]);
@@ -100,8 +100,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
     return (
       <div className="bc-laboratorios-detalle">
         <div className="bc-laboratorios-detalle__header">
-          <button className="bc-btn bc-btn--outline" onClick={handleVolver}>
-            <ChevronLeft size={18} /> Volver
+          <button className="bc-detalle-back" onClick={handleVolver}>
+            <ArrowLeft size={16} /> Volver a laboratorios
           </button>
         </div>
 
@@ -136,11 +136,12 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 placeholder="Ej. 150"
               />
               <button 
-                className="bc-btn bc-btn--primary" 
+                className={`bc-guardar-btn ${guardandoPedido ? 'saved' : ''}`}
                 onClick={handleGuardarPedido}
                 disabled={guardandoPedido}
+                style={{ padding: '0 16px', borderRadius: 'var(--radius-md)' }}
               >
-                <Save size={18} /> {guardandoPedido ? 'Guardando...' : 'Guardar'}
+                <Save size={16} /> {guardandoPedido ? 'Guardando...' : 'Guardar'}
               </button>
             </div>
           </div>
@@ -150,7 +151,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
           Medicamentos en mi farmacia ({labSeleccionado.total})
         </h3>
 
-        <div className="bc-med-grid">
+        <div className="bc-lab-med-grid">
           {labSeleccionado.medicamentos.map(med => {
              // Adaptar la clasificación global que viene en el join
              let clasificacion = undefined;
@@ -265,9 +266,10 @@ function MisLaboratorios({ onSelectMedicamento }) {
           </div>
 
           {totalPaginas > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '2.5rem' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', marginTop: '2rem' }}>
               <button 
-                className="bc-btn bc-btn--outline" 
+                className="bc-btn-secondary" 
+                style={{ padding: '6px 16px' }}
                 disabled={paginaActual === 1}
                 onClick={() => {
                   setPaginaActual(p => p - 1);
@@ -276,11 +278,12 @@ function MisLaboratorios({ onSelectMedicamento }) {
               >
                 Anterior
               </button>
-              <span style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+              <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>
                 Página {paginaActual} de {totalPaginas}
               </span>
               <button 
-                className="bc-btn bc-btn--outline"
+                className="bc-btn-secondary"
+                style={{ padding: '6px 16px' }}
                 disabled={paginaActual === totalPaginas}
                 onClick={() => {
                   setPaginaActual(p => p + 1);
