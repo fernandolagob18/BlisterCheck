@@ -6,8 +6,15 @@ import { Building2, Save, ChevronLeft, Percent, Search } from 'lucide-react';
 function MisLaboratorios({ onSelectMedicamento }) {
   const [laboratorios, setLaboratorios] = useState([]);
   const [filtroTexto, setFiltroTexto] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const ITEMS_POR_PAGINA = 120;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Resetear paginación al buscar
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [filtroTexto]);
   
   // Estado para la vista de detalle
   const [labSeleccionado, setLabSeleccionado] = useState(null);
@@ -93,52 +100,53 @@ function MisLaboratorios({ onSelectMedicamento }) {
     return (
       <div className="bc-laboratorios-detalle">
         <div className="bc-laboratorios-detalle__header">
-          <button className="bc-btn bc-btn--outline bc-btn--icon" onClick={handleVolver}>
+          <button className="bc-btn bc-btn--outline" onClick={handleVolver}>
             <ChevronLeft size={18} /> Volver
           </button>
-          <h2 className="bc-laboratorios-detalle__title">
-            <Building2 size={24} />
-            {labSeleccionado.laboratorio}
-          </h2>
         </div>
 
-        <div className="bc-laboratorios-detalle__stats grid-2">
-          <div className="bc-stat-card">
-            <div className="bc-stat-card__icon"><Percent size={24} /></div>
-            <div className="bc-stat-card__content">
-              <span className="bc-stat-card__label">Aptos para SDMDU</span>
-              <span className="bc-stat-card__value">
-                {labSeleccionado.porcentaje_sdmdu}%
-                <small className="bc-stat-card__subtext"> ({labSeleccionado.aptos_sdmdu} de {labSeleccionado.total})</small>
+        <div className={`bc-lab-hero glass-panel bc-lab-hero--${getColorClass(labSeleccionado.pedido_minimo)}`}>
+          <div className="bc-lab-hero__content">
+            <h2 className="bc-lab-hero__title">
+              <Building2 size={28} style={{ color: 'var(--color-primary)' }} />
+              {labSeleccionado.laboratorio}
+            </h2>
+            
+            <div className="bc-lab-hero__badges">
+              <span className="bc-badge bc-badge--blue" style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
+                <Percent size={14} style={{ marginRight: '4px' }} />
+                {labSeleccionado.porcentaje_sdmdu}% Aptos SDMDU
+              </span>
+              <span className="bc-badge" style={{ background: 'var(--color-bg)', color: 'var(--color-text-muted)', fontSize: '0.85rem', padding: '6px 12px' }}>
+                {labSeleccionado.aptos_sdmdu} de {labSeleccionado.total} productos
               </span>
             </div>
           </div>
 
-          <div className={`bc-stat-card bc-stat-card--${getColorClass(labSeleccionado.pedido_minimo)}`}>
-            <div className="bc-stat-card__content" style={{ flex: 1 }}>
-              <span className="bc-stat-card__label">Pedido Mínimo (€)</span>
-              <div className="bc-pedido-input-group">
-                <input 
-                  type="number" 
-                  className="bc-input"
-                  value={pedidoMinimoInput}
-                  onChange={(e) => setPedidoMinimoInput(e.target.value)}
-                  min="0"
-                  step="0.01"
-                />
-                <button 
-                  className="bc-btn bc-btn--primary" 
-                  onClick={handleGuardarPedido}
-                  disabled={guardandoPedido}
-                >
-                  <Save size={18} /> {guardandoPedido ? '...' : 'Guardar'}
-                </button>
-              </div>
+          <div className="bc-lab-hero__actions">
+            <label className="bc-lab-hero__label">Pedido Mínimo (€)</label>
+            <div className="bc-pedido-input-group">
+              <input 
+                type="number" 
+                className="bc-input"
+                value={pedidoMinimoInput}
+                onChange={(e) => setPedidoMinimoInput(e.target.value)}
+                min="0"
+                step="0.01"
+                placeholder="Ej. 150"
+              />
+              <button 
+                className="bc-btn bc-btn--primary" 
+                onClick={handleGuardarPedido}
+                disabled={guardandoPedido}
+              >
+                <Save size={18} /> {guardandoPedido ? 'Guardando...' : 'Guardar'}
+              </button>
             </div>
           </div>
         </div>
 
-        <h3 className="bc-section-subtitle" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+        <h3 className="bc-section-subtitle" style={{ marginTop: '2.5rem', marginBottom: '1.25rem' }}>
           Medicamentos en mi farmacia ({labSeleccionado.total})
         </h3>
 
@@ -179,6 +187,12 @@ function MisLaboratorios({ onSelectMedicamento }) {
     lab.laboratorio.toLowerCase().includes(filtroTexto.toLowerCase())
   );
 
+  const totalPaginas = Math.ceil(laboratoriosFiltrados.length / ITEMS_POR_PAGINA);
+  const laboratoriosPaginados = laboratoriosFiltrados.slice(
+    (paginaActual - 1) * ITEMS_POR_PAGINA,
+    paginaActual * ITEMS_POR_PAGINA
+  );
+
   return (
     <div className="bc-laboratorios-container">
       <div className="bc-laboratorios-header">
@@ -188,15 +202,14 @@ function MisLaboratorios({ onSelectMedicamento }) {
         </p>
         
         {laboratorios.length > 0 && (
-          <div className="bc-search-bar" style={{ marginTop: '1.5rem', maxWidth: '400px', position: 'relative' }}>
-            <Search size={18} className="bc-search-icon" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+          <div style={{ marginTop: '1.5rem', maxWidth: '400px', display: 'flex', alignItems: 'center', background: 'var(--color-surface, #fff)', border: '1px solid var(--color-border, #e2e8f0)', borderRadius: 'var(--radius-md, 8px)', padding: '0 12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <Search size={18} style={{ color: 'var(--color-text-muted, #64748b)', flexShrink: 0 }} />
             <input 
               type="text" 
-              className="bc-input" 
               placeholder="Buscar laboratorio..."
               value={filtroTexto}
               onChange={(e) => setFiltroTexto(e.target.value)}
-              style={{ paddingLeft: '2.5rem', width: '100%' }}
+              style={{ flex: 1, border: 'none', background: 'transparent', padding: '10px 10px', outline: 'none', fontSize: '0.95rem', color: 'var(--color-text, #1e293b)' }}
             />
           </div>
         )}
@@ -215,40 +228,70 @@ function MisLaboratorios({ onSelectMedicamento }) {
           <p>No se encontraron laboratorios que coincidan con "{filtroTexto}".</p>
         </div>
       ) : (
-        <div className="bc-laboratorios-grid">
-          {laboratoriosFiltrados.map(lab => {
-            const colorClass = getColorClass(lab.pedido_minimo);
-            return (
-              <div 
-                key={lab.laboratorio} 
-                className={`bc-lab-card glass-panel ${colorClass}`}
-                onClick={() => handleVerDetalle(lab)}
+        <>
+          <div className="bc-laboratorios-grid">
+            {laboratoriosPaginados.map(lab => {
+              const colorClass = getColorClass(lab.pedido_minimo);
+              return (
+                <div 
+                  key={lab.laboratorio} 
+                  className={`bc-lab-card glass-panel ${colorClass}`}
+                  onClick={() => handleVerDetalle(lab)}
+                >
+                  <div className="bc-lab-card__header">
+                    <h3 className="bc-lab-card__title">{lab.laboratorio}</h3>
+                    <div className="bc-lab-card__indicator"></div>
+                  </div>
+                  
+                  <div className="bc-lab-card__stats">
+                    <div className="bc-lab-stat">
+                      <span className="bc-lab-stat__val">{lab.total}</span>
+                      <span className="bc-lab-stat__lbl">Productos</span>
+                    </div>
+                    <div className="bc-lab-stat">
+                      <span className="bc-lab-stat__val">{lab.porcentaje_sdmdu}%</span>
+                      <span className="bc-lab-stat__lbl">Aptos SDMDU</span>
+                    </div>
+                    <div className="bc-lab-stat bc-lab-stat--highlight">
+                      <span className="bc-lab-stat__val">
+                        {parseFloat(lab.pedido_minimo) > 0 ? `${lab.pedido_minimo} €` : 'Sin pedido mín.'}
+                      </span>
+                      <span className="bc-lab-stat__lbl">Pedido Mín.</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {totalPaginas > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '2.5rem' }}>
+              <button 
+                className="bc-btn bc-btn--outline" 
+                disabled={paginaActual === 1}
+                onClick={() => {
+                  setPaginaActual(p => p - 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
               >
-                <div className="bc-lab-card__header">
-                  <h3 className="bc-lab-card__title">{lab.laboratorio}</h3>
-                  <div className="bc-lab-card__indicator"></div>
-                </div>
-                
-                <div className="bc-lab-card__stats">
-                  <div className="bc-lab-stat">
-                    <span className="bc-lab-stat__val">{lab.total}</span>
-                    <span className="bc-lab-stat__lbl">Productos</span>
-                  </div>
-                  <div className="bc-lab-stat">
-                    <span className="bc-lab-stat__val">{lab.porcentaje_sdmdu}%</span>
-                    <span className="bc-lab-stat__lbl">Aptos SDMDU</span>
-                  </div>
-                  <div className="bc-lab-stat bc-lab-stat--highlight">
-                    <span className="bc-lab-stat__val">
-                      {parseFloat(lab.pedido_minimo) > 0 ? `${lab.pedido_minimo} €` : 'Sin pedido mín.'}
-                    </span>
-                    <span className="bc-lab-stat__lbl">Pedido Mín.</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                Anterior
+              </button>
+              <span style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                Página {paginaActual} de {totalPaginas}
+              </span>
+              <button 
+                className="bc-btn bc-btn--outline"
+                disabled={paginaActual === totalPaginas}
+                onClick={() => {
+                  setPaginaActual(p => p + 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
