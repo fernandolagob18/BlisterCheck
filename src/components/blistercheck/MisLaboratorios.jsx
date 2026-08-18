@@ -181,7 +181,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
               <div className="bc-lab-med-grid">
                 {medsPaginados.map(med => {
                    // Adaptar la clasificación global que viene en el join
-                   let clasificacion = undefined;
+                   let clasificacion = null;
                    if (med.blistercheck_clasificacion_global) {
                      const raw = Array.isArray(med.blistercheck_clasificacion_global) 
                        ? med.blistercheck_clasificacion_global[0] 
