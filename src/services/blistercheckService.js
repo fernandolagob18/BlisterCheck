@@ -992,10 +992,15 @@ export async function getMisLaboratoriosData() {
   });
 
   // Convertir a array y ordenar
-  const result = Array.from(labMap.values()).map(lab => ({
-    ...lab,
-    porcentaje_sdmdu: lab.total > 0 ? Math.round((lab.aptos_sdmdu / lab.total) * 100) : 0,
-  }));
+  const result = Array.from(labMap.values()).map(lab => {
+    // Ordenar los medicamentos alfabéticamente
+    lab.medicamentos.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+    
+    return {
+      ...lab,
+      porcentaje_sdmdu: lab.total > 0 ? Math.round((lab.aptos_sdmdu / lab.total) * 100) : 0,
+    };
+  });
 
   result.sort((a, b) => a.laboratorio.localeCompare(b.laboratorio));
   return result;
