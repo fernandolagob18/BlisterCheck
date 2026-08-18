@@ -89,8 +89,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   if (loading) {
     return (
-      <div className="bc-laboratorios-container loading">
-        <div className="bc-spinner"></div>
+      <div className="bc-laboratorios-container loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--color-text-muted)' }}>
+        <div className="bc-spinner" style={{ marginBottom: '1rem' }}></div>
         <p>Cargando laboratorios...</p>
       </div>
     );
@@ -123,7 +123,6 @@ function MisLaboratorios({ onSelectMedicamento }) {
             
             <div className="bc-lab-hero__badges">
               <span className="bc-badge bc-badge--blue" style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
-                <Percent size={14} style={{ marginRight: '4px' }} />
                 {labSeleccionado.porcentaje_sdmdu}% Aptos SDMDU
               </span>
               <span className="bc-badge" style={{ background: 'var(--color-bg)', color: 'var(--color-text-muted)', fontSize: '0.85rem', padding: '6px 12px' }}>
