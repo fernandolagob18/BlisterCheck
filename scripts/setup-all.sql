@@ -242,7 +242,7 @@ AS $$
   ORDER BY 
     CASE WHEN cn ILIKE q || '%' THEN 1 ELSE 2 END,
     nombre ASC
-  LIMIT 100;
+  LIMIT 3000;
 $$;
 
 -- RPC: Búsqueda avanzada
@@ -274,7 +274,7 @@ AS $$
       (cl.requiere_reenvasado IS NOT NULL OR cl.requiere_reetiquetado IS NOT NULL OR cl.apto_sdmdu_blister IS NOT NULL)
     )
   ORDER BY c.nombre ASC
-  LIMIT 200;
+  LIMIT 3000;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.bc_search_simple(text) TO anon, authenticated, service_role;

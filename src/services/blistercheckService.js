@@ -246,7 +246,7 @@ export async function searchAvanzado(filtros = {}) {
     if (filtros.laboratorio?.trim()) query = query.ilike('laboratorio', `%${filtros.laboratorio.trim()}%`);
     if (filtros.formaFarmaceutica?.trim()) query = query.eq('forma_farmaceutica', filtros.formaFarmaceutica.trim());
     if (filtros.viaAdministracion?.trim()) query = query.eq('via_administracion', filtros.viaAdministracion.trim());
-    const { data: fbData, error: fbErr } = await query.limit(200);
+    const { data: fbData, error: fbErr } = await query.limit(3000);
     if (fbErr) throw fbErr;
     data = fbData;
   }
