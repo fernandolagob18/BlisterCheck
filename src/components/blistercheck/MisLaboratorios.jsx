@@ -47,6 +47,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [addingMedCn, setAddingMedCn] = useState(null);
+  const [searchError, setSearchError] = useState(null);
 
   useEffect(() => {
     cargarDatos();
@@ -139,6 +141,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
   };
 
   const handleAddMedToPlatform = async (cn) => {
+    setAddingMedCn(cn);
+    setSearchError(null);
     try {
       await addMedicationToPlatform(labSeleccionado.laboratorio, cn);
       setShowSearchModal(false);
@@ -151,8 +155,10 @@ function MisLaboratorios({ onSelectMedicamento }) {
       const updatedLab = data.find(l => l.laboratorio === labSeleccionado.laboratorio);
       if (updatedLab) setLabSeleccionado(updatedLab);
     } catch (err) {
-      console.error(err);
-      alert('Error al añadir medicamento. Es posible que ya esté añadido.');
+      console.error('Error in handleAddMedToPlatform:', err);
+      setSearchError('Error al añadir medicamento. Es posible que ya esté añadido a esta plataforma.');
+    } finally {
+      setAddingMedCn(null);
     }
   };
 
@@ -557,12 +563,27 @@ function MisLaboratorios({ onSelectMedicamento }) {
                           <strong>{res.cn}</strong>
                           <span>{res.nombre}</span>
                         </div>
-                        <button className="bc-btn-primary" style={{ padding: '6px 14px', fontSize: '0.85rem' }} onClick={() => handleAddMedToPlatform(res.cn)}>
-                          <Plus size={14} style={{ marginRight: '4px' }} /> Añadir
+                        <button 
+                          className="bc-btn-primary" 
+                          style={{ padding: '6px 14px', fontSize: '0.85rem' }} 
+                          onClick={() => handleAddMedToPlatform(res.cn)}
+                          disabled={addingMedCn === res.cn}
+                        >
+                          {addingMedCn === res.cn ? (
+                            <div className="bc-spinner" style={{ width: '14px', height: '14px', borderWidth: '2px', marginRight: '4px' }}></div>
+                          ) : (
+                            <Plus size={14} style={{ marginRight: '4px' }} />
+                          )}
+                          {addingMedCn === res.cn ? 'Añadiendo...' : 'Añadir'}
                         </button>
                       </div>
                     ))}
                   </div>
+                  {searchError && (
+                    <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '6px', fontSize: '0.85rem', marginTop: '1rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                      {searchError}
+                    </div>
+                  )}
                   {searchResults.length === 0 && searchQuery.trim() !== '' && (
                     <div className="bc-empty-state glass-panel" style={{ padding: '2rem 1rem', marginTop: 0 }}>
                       <Search size={32} className="bc-empty-state__icon" style={{ opacity: 0.5 }} />
