@@ -907,3 +907,117 @@ export async function bulkMarkEnMiFarmacia(cns) {
 
   return totalUpserted;
 }
+
+// ─── MIS LABORATORIOS ────────────────────────────────────────────────────────
+
+const USER_LABORATORIOS_TABLE = 'blistercheck_user_laboratorios';
+
+export async function getMisLaboratoriosData() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // 1. Obtener todos los medicamentos en la farmacia del usuario
+  let userFarmiaCNs = [];
+  let uPage = 0;
+  const PAGE_SIZE = 1000;
+  while (true) {
+    const { data: uData } = await supabase
+      .from(USER_FARMACIA_TABLE)
+      .select('cn')
+      .eq('user_id', user.id)
+      .eq('en_mi_farmacia', true)
+      .range(uPage * PAGE_SIZE, (uPage + 1) * PAGE_SIZE - 1);
+    
+    const chunkCNs = (uData || []).map(r => String(r.cn));
+    userFarmiaCNs = userFarmiaCNs.concat(chunkCNs);
+    if ((uData || []).length < PAGE_SIZE) break;
+    uPage++;
+  }
+
+  if (userFarmiaCNs.length === 0) return [];
+
+  // 2. Obtener el detalle de catálogo y clasificación global para esos CNs
+  let allMeds = [];
+  for (let i = 0; i < userFarmiaCNs.length; i += 900) {
+    const chunk = userFarmiaCNs.slice(i, i + 900);
+    const { data, error } = await supabase
+      .from(CATALOG_TABLE)
+      .select(`
+        *,
+        blistercheck_clasificacion_global (
+          apto_sdmdu_blister,
+          requiere_reenvasado,
+          requiere_reetiquetado,
+          solo_envase_clinico
+        )
+      `)
+      .in('cn', chunk);
+    if (error) throw error;
+    allMeds = allMeds.concat(data || []);
+  }
+
+  // 3. Obtener las configuraciones de laboratorios del usuario
+  const { data: userLabs, error: labsError } = await supabase
+    .from(USER_LABORATORIOS_TABLE)
+    .select('laboratorio, pedido_minimo')
+    .eq('user_id', user.id);
+  
+  if (labsError) throw labsError;
+
+  const userLabsMap = new Map();
+  (userLabs || []).forEach(l => userLabsMap.set(l.laboratorio, l.pedido_minimo));
+
+  // 4. Agrupar por laboratorio y calcular stats
+  const labMap = new Map();
+  allMeds.forEach(med => {
+    const labName = med.laboratorio || 'Sin laboratorio';
+    if (!labMap.has(labName)) {
+      labMap.set(labName, {
+        laboratorio: labName,
+        medicamentos: [],
+        total: 0,
+        aptos_sdmdu: 0,
+        pedido_minimo: userLabsMap.get(labName) || 0,
+      });
+    }
+
+    const lab = labMap.get(labName);
+    lab.medicamentos.push(med);
+    lab.total++;
+    
+    const clas = Array.isArray(med.blistercheck_clasificacion_global) ? med.blistercheck_clasificacion_global[0] : med.blistercheck_clasificacion_global;
+    if (clas && clas.apto_sdmdu_blister === true) {
+      lab.aptos_sdmdu++;
+    }
+  });
+
+  // Convertir a array y ordenar
+  const result = Array.from(labMap.values()).map(lab => ({
+    ...lab,
+    porcentaje_sdmdu: lab.total > 0 ? Math.round((lab.aptos_sdmdu / lab.total) * 100) : 0,
+  }));
+
+  result.sort((a, b) => a.laboratorio.localeCompare(b.laboratorio));
+  return result;
+}
+
+export async function savePedidoMinimo(laboratorio, pedidoMinimo) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Debe iniciar sesión.");
+
+  const payload = {
+    user_id: user.id,
+    laboratorio: laboratorio,
+    pedido_minimo: parseFloat(pedidoMinimo) || 0,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from(USER_LABORATORIOS_TABLE)
+    .upsert(payload, { onConflict: 'user_id,laboratorio' })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}

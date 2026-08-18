@@ -13,7 +13,8 @@ import {
   Sparkles,
   Upload,
   LogOut,
-  Leaf
+  Leaf,
+  Building2
 } from 'lucide-react';
 import MedicamentoBuscador from './MedicamentoBuscador';
 import MedicamentoDetalle from './MedicamentoDetalle';
@@ -22,6 +23,7 @@ import BlisterCheckExport from './BlisterCheckExport';
 import BlisterCheckUploadMeds from './BlisterCheckUploadMeds';
 import GuiaOptimizer from './GuiaOptimizer';
 import SostenibilidadPage from './SostenibilidadPage';
+import MisLaboratorios from './MisLaboratorios';
 import { getCatalogInfo, getClasificacion, getDesabastecimientoByCN } from '../../services/blistercheckService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -116,6 +118,7 @@ function BlisterCheckApp({ onGoToProfile }) {
       case 'search': return 'Catálogo de Medicamentos';
       case 'optimizer': return 'Optimizador de Guía Terapéutica';
       case 'stats': return 'Panel de Estadísticas';
+      case 'laboratorios': return 'Mis Laboratorios';
       case 'eco': return 'Sostenibilidad del Reenvasado';
       case 'detail': return medicamentoSeleccionado?.nombre || 'Detalle del Medicamento';
       default: return 'BlisterCheck';
@@ -215,6 +218,15 @@ function BlisterCheckApp({ onGoToProfile }) {
           >
             <span className="bc-nav-item__icon"><BarChart2 size={18} /></span>
             <span className="bc-nav-item__label">Estadísticas</span>
+          </button>
+
+          <button
+            className={`bc-nav-item ${vistaActiva === 'laboratorios' ? 'active' : ''}`}
+            onClick={() => handleNavClick('laboratorios')}
+            title="Mis laboratorios"
+          >
+            <span className="bc-nav-item__icon"><Building2 size={18} /></span>
+            <span className="bc-nav-item__label">Mis laboratorios</span>
           </button>
 
           <div className="bc-sidebar__group-title" style={{ marginTop: '0.75rem' }}>Herramientas</div>
@@ -343,6 +355,10 @@ function BlisterCheckApp({ onGoToProfile }) {
 
           {vistaActiva === 'stats' && (
             <BlisterCheckStats />
+          )}
+
+          {vistaActiva === 'laboratorios' && (
+            <MisLaboratorios onSelectMedicamento={handleSelectMedicamento} />
           )}
 
           {vistaActiva === 'eco' && (
