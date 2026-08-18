@@ -549,7 +549,7 @@ export default function SostenibilidadPage() {
       </div>
 
       {(activeTab === 'situacion' || activeTab === 'materiales') && (
-        <div className="eco-footer-notes" style={{ padding: '0 2rem 2rem', color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.6', maxWidth: '1000px', margin: '0 auto', textAlign: 'justify' }}>
+        <div className="eco-footer-notes" style={{ padding: '0 2rem 2rem', color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.6', textAlign: 'justify' }}>
           <p style={{ marginBottom: '1rem' }}>
             Los datos de huella de carbono presentados proceden de fuentes oficiales y estudios con revisión por pares. No existe actualmente un estudio de Análisis de Ciclo de Vida (LCA) específico sobre el reenvasado hospitalario español; las comparaciones se realizan sobre la base de los factores de emisión por material (fuente a puerta). Esta información es orientativa y no debe utilizarse como base de cálculo regulatorio sin un análisis LCA completo.
           </p>
