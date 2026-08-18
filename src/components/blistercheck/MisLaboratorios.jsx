@@ -8,6 +8,11 @@ function MisLaboratorios({ onSelectMedicamento }) {
   const [filtroTexto, setFiltroTexto] = useState('');
   const [paginaActual, setPaginaActual] = useState(1);
   const ITEMS_POR_PAGINA = 120;
+  
+  // Paginación para medicamentos dentro de un laboratorio
+  const [medPaginaActual, setMedPaginaActual] = useState(1);
+  const MEDS_POR_PAGINA = 20;
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -41,6 +46,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
   const handleVerDetalle = (lab) => {
     setLabSeleccionado(lab);
     setPedidoMinimoInput(lab.pedido_minimo?.toString() || '0');
+    setMedPaginaActual(1);
   };
 
   const handleVolver = () => {
@@ -125,7 +131,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
           <div className="bc-lab-hero__actions">
             <label className="bc-lab-hero__label">Pedido Mínimo (€)</label>
-            <div className="bc-pedido-input-group">
+            <div className="bc-pedido-input-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <input 
                 type="number" 
                 className="bc-input"
@@ -139,7 +145,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 className={`bc-guardar-btn ${guardandoPedido ? 'saved' : ''}`}
                 onClick={handleGuardarPedido}
                 disabled={guardandoPedido}
-                style={{ padding: '0 16px', borderRadius: 'var(--radius-md)' }}
+                style={{ padding: '0 16px', borderRadius: 'var(--radius-md)', height: '40px', flexShrink: 0 }}
               >
                 <Save size={16} /> {guardandoPedido ? 'Guardando...' : 'Guardar'}
               </button>
@@ -147,39 +153,68 @@ function MisLaboratorios({ onSelectMedicamento }) {
           </div>
         </div>
 
-        <h3 className="bc-section-subtitle" style={{ marginTop: '2.5rem', marginBottom: '1.25rem' }}>
-          Medicamentos en mi farmacia ({labSeleccionado.total})
-        </h3>
+        {(() => {
+          const totalMedPaginas = Math.ceil(labSeleccionado.medicamentos.length / MEDS_POR_PAGINA);
+          const medsPaginados = labSeleccionado.medicamentos.slice(
+            (medPaginaActual - 1) * MEDS_POR_PAGINA,
+            medPaginaActual * MEDS_POR_PAGINA
+          );
 
-        <div className="bc-lab-med-grid">
-          {labSeleccionado.medicamentos.map(med => {
-             // Adaptar la clasificación global que viene en el join
-             let clasificacion = undefined;
-             if (med.blistercheck_clasificacion_global) {
-               const raw = Array.isArray(med.blistercheck_clasificacion_global) 
-                 ? med.blistercheck_clasificacion_global[0] 
-                 : med.blistercheck_clasificacion_global;
-               if (raw) {
-                 clasificacion = {
-                   apto_sdmdu_blister: raw.apto_sdmdu_blister,
-                   requiere_reenvasado: raw.requiere_reenvasado,
-                   requiere_reetiquetado: raw.requiere_reetiquetado,
-                   solo_envase_clinico: raw.solo_envase_clinico,
-                   en_mi_farmacia: true
-                 };
-               }
-             }
+          return (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', marginTop: '2.5rem' }}>
+                <h3 className="bc-section-subtitle" style={{ margin: 0 }}>
+                  Medicamentos en mi farmacia ({labSeleccionado.total})
+                </h3>
+                {totalMedPaginas > 1 && (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Pág {medPaginaActual} de {totalMedPaginas}</span>
+                    <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === totalMedPaginas} onClick={() => { setMedPaginaActual(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+                  </div>
+                )}
+              </div>
 
-             return (
-              <MedicamentoCard
-                key={med.cn}
-                medicamento={med}
-                clasificacion={clasificacion}
-                onClick={() => onSelectMedicamento(med)}
-              />
-            );
-          })}
-        </div>
+              <div className="bc-lab-med-grid">
+                {medsPaginados.map(med => {
+                   // Adaptar la clasificación global que viene en el join
+                   let clasificacion = undefined;
+                   if (med.blistercheck_clasificacion_global) {
+                     const raw = Array.isArray(med.blistercheck_clasificacion_global) 
+                       ? med.blistercheck_clasificacion_global[0] 
+                       : med.blistercheck_clasificacion_global;
+                     if (raw) {
+                       clasificacion = {
+                         apto_sdmdu_blister: raw.apto_sdmdu_blister,
+                         requiere_reenvasado: raw.requiere_reenvasado,
+                         requiere_reetiquetado: raw.requiere_reetiquetado,
+                         solo_envase_clinico: raw.solo_envase_clinico,
+                         en_mi_farmacia: true
+                       };
+                     }
+                   }
+
+                   return (
+                    <MedicamentoCard
+                      key={med.cn}
+                      medicamento={med}
+                      clasificacion={clasificacion}
+                      onClick={() => onSelectMedicamento(med)}
+                    />
+                  );
+                })}
+              </div>
+
+              {totalMedPaginas > 1 && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', marginTop: '2rem' }}>
+                  <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                  <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Página {medPaginaActual} de {totalMedPaginas}</span>
+                  <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={medPaginaActual === totalMedPaginas} onClick={() => { setMedPaginaActual(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     );
   }
@@ -230,6 +265,19 @@ function MisLaboratorios({ onSelectMedicamento }) {
         </div>
       ) : (
         <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <p className="bc-resultados-count" style={{ margin: 0 }}>
+              {laboratoriosFiltrados.length} laboratorio{laboratoriosFiltrados.length !== 1 ? 's' : ''}
+            </p>
+            {totalPaginas > 1 && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Pág {paginaActual} de {totalPaginas}</span>
+                <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+              </div>
+            )}
+          </div>
+
           <div className="bc-laboratorios-grid">
             {laboratoriosPaginados.map(lab => {
               const colorClass = getColorClass(lab.pedido_minimo);
