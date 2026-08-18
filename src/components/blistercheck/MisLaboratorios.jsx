@@ -354,14 +354,17 @@ function MisLaboratorios({ onSelectMedicamento }) {
   return (
     <div className="bc-laboratorios-container">
       <div className="bc-laboratorios-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h2>Mis Laboratorios</h2>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Building2 size={24} style={{ color: 'var(--color-primary)' }} />
+              Mis Laboratorios
+            </h2>
             <p className="bc-laboratorios-subtitle" style={{ margin: 0 }}>
-              Laboratorios y Plataformas de distribución.
+              Laboratorios nativos y Plataformas de distribución.
             </p>
           </div>
-          <button className="bc-btn bc-btn--primary" onClick={() => setShowCreateModal(true)}>
+          <button className="bc-btn-primary" onClick={() => setShowCreateModal(true)}>
             <Plus size={16} /> Crear plataforma de distribución
           </button>
         </div>
@@ -477,24 +480,27 @@ function MisLaboratorios({ onSelectMedicamento }) {
       {/* MODAL CREAR PLATAFORMA */}
       {showCreateModal && (
         <div className="bc-modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="bc-modal-content" onClick={e => e.stopPropagation()}>
+          <div className="bc-modal" onClick={e => e.stopPropagation()}>
             <div className="bc-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>Crear plataforma de distribución</h3>
-              <button className="bc-btn" style={{ padding: '4px', background: 'transparent', border: 'none' }} onClick={() => setShowCreateModal(false)}><X size={20} /></button>
+              <div className="bc-modal-title">
+                <Building2 size={20} />
+                <h3 style={{ margin: 0 }}>Crear plataforma</h3>
+              </div>
+              <button className="bc-modal-close" onClick={() => setShowCreateModal(false)}><X size={20} /></button>
             </div>
-            <div className="bc-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="bc-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: 0 }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Nombre de la plataforma</label>
+                <label className="bc-filtro-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Nombre de la plataforma</label>
                 <input type="text" className="bc-filtro-input" style={{ width: '100%' }} value={newPlatformName} onChange={e => setNewPlatformName(e.target.value)} placeholder="Ej. Cofares, Bidafarma, Unnefar..." />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Pedido mínimo inicial (€)</label>
+                <label className="bc-filtro-label" style={{ display: 'block', marginBottom: '0.5rem' }}>Pedido mínimo inicial (€)</label>
                 <input type="number" className="bc-filtro-input" style={{ width: '100%' }} value={newPlatformPedido} onChange={e => setNewPlatformPedido(e.target.value)} placeholder="Ej. 150" />
               </div>
             </div>
-            <div className="bc-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '1.5rem' }}>
-              <button className="bc-btn" onClick={() => setShowCreateModal(false)}>Cancelar</button>
-              <button className="bc-btn bc-btn--primary" onClick={handleCreatePlatform}>Crear</button>
+            <div className="bc-modal-footer">
+              <button className="bc-btn-secondary" onClick={() => setShowCreateModal(false)}>Cancelar</button>
+              <button className="bc-btn-primary" onClick={handleCreatePlatform}>Crear Plataforma</button>
             </div>
           </div>
         </div>
@@ -503,40 +509,65 @@ function MisLaboratorios({ onSelectMedicamento }) {
       {/* MODAL BUSCAR MEDICAMENTO */}
       {showSearchModal && (
         <div className="bc-modal-overlay" onClick={() => setShowSearchModal(false)}>
-          <div className="bc-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+          <div className="bc-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '650px', width: '95%' }}>
             <div className="bc-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ margin: 0 }}>Buscar y añadir medicamento</h3>
-              <button className="bc-btn" style={{ padding: '4px', background: 'transparent', border: 'none' }} onClick={() => setShowSearchModal(false)}><X size={20} /></button>
+              <div className="bc-modal-title">
+                <Search size={20} />
+                <h3 style={{ margin: 0 }}>Vincular medicamento manual</h3>
+              </div>
+              <button className="bc-modal-close" onClick={() => setShowSearchModal(false)}><X size={20} /></button>
             </div>
-            <div className="bc-modal-body">
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
-                <input 
-                  type="text" 
-                  className="bc-filtro-input" 
-                  style={{ flex: 1 }} 
-                  placeholder="Buscar por CN, nombre o activo..." 
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSearchMeds()}
-                />
-                <button className="bc-btn bc-btn--primary" onClick={handleSearchMeds}>Buscar</button>
+            <div className="bc-modal-body" style={{ paddingTop: 0 }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
+                <div className="bc-search-bar" style={{ flex: 1 }}>
+                  <Search size={18} className="bc-search-icon" />
+                  <input 
+                    type="text" 
+                    className="bc-search-input" 
+                    placeholder="Buscar por código nacional (CN) o nombre..." 
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearchMeds()}
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button className="bc-search-clear" onClick={() => setSearchQuery('')}>
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                <button className="bc-btn-primary" onClick={handleSearchMeds}>Buscar</button>
               </div>
               {isSearching ? (
-                <p style={{ textAlign: 'center', padding: '1rem' }}>Buscando...</p>
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--color-text-muted)' }}>
+                  <div className="bc-spinner" style={{ margin: '0 auto 1rem auto' }}></div>
+                  <p>Buscando en el catálogo global...</p>
+                </div>
               ) : (
-                <div style={{ maxHeight: '350px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-                  {searchResults.map(res => (
-                    <div key={res.cn} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderBottom: '1px solid var(--color-border)' }}>
-                      <div>
-                        <strong>{res.cn}</strong> - {res.nombre}
+                <div style={{ maxHeight: '350px', overflowY: 'auto', borderRadius: 'var(--radius-md)' }}>
+                  {searchResults.length > 0 && (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+                      Se encontraron {searchResults.length} resultados:
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {searchResults.map(res => (
+                      <div key={res.cn} className="bc-export-option" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0, border: '1px solid var(--color-card-border)' }}>
+                        <div>
+                          <strong>{res.cn}</strong>
+                          <span>{res.nombre}</span>
+                        </div>
+                        <button className="bc-btn-primary" style={{ padding: '6px 14px', fontSize: '0.85rem' }} onClick={() => handleAddMedToPlatform(res.cn)}>
+                          <Plus size={14} style={{ marginRight: '4px' }} /> Añadir
+                        </button>
                       </div>
-                      <button className="bc-btn bc-btn--primary" style={{ padding: '4px 12px', fontSize: '0.85rem' }} onClick={() => handleAddMedToPlatform(res.cn)}>
-                        Añadir
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                   {searchResults.length === 0 && searchQuery.trim() !== '' && (
-                    <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-muted)' }}>No se encontraron resultados.</p>
+                    <div className="bc-empty-state glass-panel" style={{ padding: '2rem 1rem', marginTop: 0 }}>
+                      <Search size={32} className="bc-empty-state__icon" style={{ opacity: 0.5 }} />
+                      <p style={{ margin: 0 }}>No se encontraron medicamentos que coincidan con la búsqueda.</p>
+                    </div>
                   )}
                 </div>
               )}
