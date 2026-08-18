@@ -45,13 +45,8 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   const [formas, setFormas] = useState([]);
   const [vias, setVias] = useState([]);
   
-  const topRef = useRef(null);
   const scrollToTop = () => {
-    if (topRef.current) {
-      topRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const debounceRef = useRef(null);
@@ -190,7 +185,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   };
 
   return (
-    <div className="bc-buscador-container" ref={topRef}>
+    <div className="bc-buscador-container">
       {/* ── Barra de búsqueda ── */}
       <div className="bc-search-header glass-panel">
         <div className="bc-search-row">

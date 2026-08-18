@@ -15,14 +15,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const topRef = useRef(null);
-
   const scrollToTop = () => {
-    if (topRef.current) {
-      topRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Resetear paginación al buscar
@@ -113,7 +107,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   if (labSeleccionado) {
     return (
-      <div className="bc-laboratorios-detalle" ref={topRef}>
+      <div className="bc-laboratorios-detalle">
         <div className="bc-laboratorios-detalle__header">
           <button className="bc-detalle-back" onClick={handleVolver}>
             <ArrowLeft size={16} /> Volver a laboratorios
@@ -154,7 +148,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 className={`bc-guardar-btn ${guardandoPedido ? 'saved' : ''}`}
                 onClick={handleGuardarPedido}
                 disabled={guardandoPedido}
-                style={{ padding: '0 16px', borderRadius: 'var(--radius-md)', height: '40px', flexShrink: 0 }}
+                style={{ padding: '0 16px', borderRadius: 'var(--radius-md)', height: '40px', flexShrink: 0, width: 'auto' }}
               >
                 <Save size={16} /> {guardandoPedido ? 'Guardando...' : 'Guardar'}
               </button>
@@ -239,7 +233,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
   );
 
   return (
-    <div className="bc-laboratorios-container" ref={topRef}>
+    <div className="bc-laboratorios-container">
       <div className="bc-laboratorios-header">
         <h2>Mis Laboratorios</h2>
         <p className="bc-laboratorios-subtitle">
