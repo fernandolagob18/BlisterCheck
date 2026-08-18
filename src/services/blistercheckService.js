@@ -45,7 +45,7 @@ export async function searchSimple(query) {
     .from(CATALOG_TABLE)
     .select('*')
     .or(`nombre.ilike.%${q}%,principio_activo.ilike.%${q}%,laboratorio.ilike.%${q}%`)
-    .limit(100);
+    .limit(3000);
 
   if (fallbackError) throw fallbackError;
   return fallbackData || [];
