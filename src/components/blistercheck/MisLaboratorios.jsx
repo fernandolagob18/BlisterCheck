@@ -130,11 +130,13 @@ function MisLaboratorios({ onSelectMedicamento }) {
   const handleSearchMeds = async () => {
     if (searchQuery.trim().length < 2) return;
     setIsSearching(true);
+    setSearchError(null);
     try {
       const res = await searchSimple(searchQuery);
       setSearchResults(res);
     } catch (err) {
       console.error(err);
+      setSearchError(err.message || 'Error desconocido al buscar en la base de datos.');
     } finally {
       setIsSearching(false);
     }
@@ -570,6 +572,10 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--color-text-muted)' }}>
                   <div className="bc-spinner" style={{ margin: '0 auto 1rem auto' }}></div>
                   <p>Buscando en el catálogo global...</p>
+                </div>
+              ) : searchError ? (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--color-error)' }}>
+                  <p><strong>Error de búsqueda:</strong> {searchError}</p>
                 </div>
               ) : (
                 <div style={{ maxHeight: '350px', overflowY: 'auto', borderRadius: 'var(--radius-md)' }}>
