@@ -180,20 +180,24 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
               <div className="bc-lab-med-grid">
                 {medsPaginados.map(med => {
-                   // Adaptar la clasificación global que viene en el join
-                   let clasificacion = null;
+                   // Todos los medicamentos aquí están en "mi farmacia" por definición
+                   let clasificacion = {
+                     en_mi_farmacia: true,
+                     apto_sdmdu_blister: null,
+                     requiere_reenvasado: null,
+                     requiere_reetiquetado: null,
+                     solo_envase_clinico: false
+                   };
+
                    if (med.blistercheck_clasificacion_global) {
                      const raw = Array.isArray(med.blistercheck_clasificacion_global) 
                        ? med.blistercheck_clasificacion_global[0] 
                        : med.blistercheck_clasificacion_global;
                      if (raw) {
-                       clasificacion = {
-                         apto_sdmdu_blister: raw.apto_sdmdu_blister,
-                         requiere_reenvasado: raw.requiere_reenvasado,
-                         requiere_reetiquetado: raw.requiere_reetiquetado,
-                         solo_envase_clinico: raw.solo_envase_clinico,
-                         en_mi_farmacia: true
-                       };
+                       clasificacion.apto_sdmdu_blister = raw.apto_sdmdu_blister;
+                       clasificacion.requiere_reenvasado = raw.requiere_reenvasado;
+                       clasificacion.requiere_reetiquetado = raw.requiere_reetiquetado;
+                       clasificacion.solo_envase_clinico = raw.solo_envase_clinico;
                      }
                    }
 
