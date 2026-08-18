@@ -1112,8 +1112,7 @@ export async function deleteCustomPlatform(laboratorio_nombre) {
     .from(USER_LABORATORIOS_TABLE)
     .delete()
     .eq('user_id', user.id)
-    .eq('laboratorio', laboratorio_nombre)
-    .eq('is_plataforma', true);
+    .eq('laboratorio', laboratorio_nombre);
     
   if (err1) throw err1;
 
