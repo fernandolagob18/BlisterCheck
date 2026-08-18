@@ -23,7 +23,7 @@ const MATERIALES = [
     url: 'https://lci-plasticseurope.org/',
     color: '#f0fdf4',
     border: '#86efac',
-    nota: 'Rango típico cuna a puerta. Varía según la versión del eco-perfil y la energía del proceso.',
+    nota: 'Rango típico desde la extracción hasta salida de fábrica. Varía según la versión del eco-perfil y la energía del proceso.',
     fiabilidad: 'SECTORIAL',
   },
   {
@@ -139,7 +139,7 @@ const REFERENCIAS = [
     anio: '2024',
     tipo: 'Sectorial oficial',
     url: 'https://european-aluminium.eu/resource/environmental-profile-report/',
-    hallazgo: 'Aluminio primario europeo: 6,3 kg CO₂e/kg (dato cuna a puerta, producción europea media).',
+    hallazgo: 'Aluminio primario europeo: 6,3 kg CO₂e/kg (dato desde origen hasta salida de fábrica, producción europea media).',
   },
   {
     autores: 'PlasticsEurope',
@@ -147,7 +147,7 @@ const REFERENCIAS = [
     anio: '2022–2026',
     tipo: 'Sectorial oficial',
     url: 'https://lci-plasticseurope.org/',
-    hallazgo: 'Eco-profiles de Inventario de Ciclo de Vida (LCI) cuna a puerta para polímeros europeos. HDPE: rango 1,9–3,1 kg CO₂e/kg según versión.',
+    hallazgo: 'Eco-profiles de Inventario de Ciclo de Vida (LCI) desde extracción hasta salida de fábrica para polímeros europeos. HDPE: rango 1,9–3,1 kg CO₂e/kg según versión.',
   },
   {
     autores: 'MITECO (Ministerio para la Transición Ecológica y el Reto Demográfico)',
@@ -162,7 +162,7 @@ const REFERENCIAS = [
     titulo: 'No reenvases sin necesidad — Evaluación del impacto en 15 hospitales',
     anio: '2026',
     tipo: 'Revisión por pares',
-    url: 'https://www.sefh.es',
+    url: 'https://sefh.es/2023-sostenible/',
     hallazgo: '1,27 M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales.',
   },
   {
@@ -170,7 +170,7 @@ const REFERENCIAS = [
     titulo: 'Informe anual de ecodiseño de envases farmacéuticos',
     anio: '2024',
     tipo: 'Sectorial oficial',
-    url: 'https://www.sigre.es',
+    url: 'https://www.sigre.es/ecodiseno/',
     hallazgo: 'Más de 3.900 medidas de ecodiseño, peso medio de envase reducido más de un 25 % desde 2000, más de 85.000 t CO₂e acumuladas evitadas.',
   },
 ];
@@ -480,16 +480,6 @@ export default function SostenibilidadPage() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className="eco-callout eco-callout--blue" style={{ marginTop: '1.5rem' }}>
-              <Info size={18} />
-              <div>
-                <strong>Recuerda:</strong> La decisión de reenvasar o no debe tomarse siempre
-                en base a criterios clínicos y de seguridad del paciente, consultando las
-                clasificaciones de la base de datos de BlisterCheck. Este ranking ambiental
-                es información complementaria para cuando existan opciones clínicamente equivalentes.
-              </div>
             </div>
           </div>
         )}
