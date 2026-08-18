@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getMisLaboratoriosData, savePedidoMinimo } from '../../services/blistercheckService';
 import MedicamentoCard from './MedicamentoCard';
 import { Building2, Save, ChevronLeft, ArrowLeft, Percent, Search } from 'lucide-react';
@@ -15,6 +15,15 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const topRef = useRef(null);
+
+  const scrollToTop = () => {
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Resetear paginación al buscar
   useEffect(() => {
@@ -104,7 +113,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
   if (labSeleccionado) {
     return (
-      <div className="bc-laboratorios-detalle">
+      <div className="bc-laboratorios-detalle" ref={topRef}>
         <div className="bc-laboratorios-detalle__header">
           <button className="bc-detalle-back" onClick={handleVolver}>
             <ArrowLeft size={16} /> Volver a laboratorios
@@ -134,7 +143,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
             <div className="bc-pedido-input-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <input 
                 type="number" 
-                className="bc-input"
+                className="bc-filtro-input"
                 value={pedidoMinimoInput}
                 onChange={(e) => setPedidoMinimoInput(e.target.value)}
                 min="0"
@@ -168,9 +177,9 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 </h3>
                 {totalMedPaginas > 1 && (
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                    <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); scrollToTop(); }}>Anterior</button>
                     <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Pág {medPaginaActual} de {totalMedPaginas}</span>
-                    <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === totalMedPaginas} onClick={() => { setMedPaginaActual(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+                    <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={medPaginaActual === totalMedPaginas} onClick={() => { setMedPaginaActual(p => p + 1); scrollToTop(); }}>Siguiente</button>
                   </div>
                 )}
               </div>
@@ -207,9 +216,9 @@ function MisLaboratorios({ onSelectMedicamento }) {
 
               {totalMedPaginas > 1 && (
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', marginTop: '2rem' }}>
-                  <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                  <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={medPaginaActual === 1} onClick={() => { setMedPaginaActual(p => p - 1); scrollToTop(); }}>Anterior</button>
                   <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Página {medPaginaActual} de {totalMedPaginas}</span>
-                  <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={medPaginaActual === totalMedPaginas} onClick={() => { setMedPaginaActual(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+                  <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={medPaginaActual === totalMedPaginas} onClick={() => { setMedPaginaActual(p => p + 1); scrollToTop(); }}>Siguiente</button>
                 </div>
               )}
             </>
@@ -230,7 +239,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
   );
 
   return (
-    <div className="bc-laboratorios-container">
+    <div className="bc-laboratorios-container" ref={topRef}>
       <div className="bc-laboratorios-header">
         <h2>Mis Laboratorios</h2>
         <p className="bc-laboratorios-subtitle">
@@ -271,9 +280,9 @@ function MisLaboratorios({ onSelectMedicamento }) {
             </p>
             {totalPaginas > 1 && (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={paginaActual === 1} onClick={() => { setPaginaActual(p => p - 1); scrollToTop(); }}>Anterior</button>
                 <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Pág {paginaActual} de {totalPaginas}</span>
-                <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+                <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={paginaActual === totalPaginas} onClick={() => { setPaginaActual(p => p + 1); scrollToTop(); }}>Siguiente</button>
               </div>
             )}
           </div>
@@ -321,7 +330,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 disabled={paginaActual === 1}
                 onClick={() => {
                   setPaginaActual(p => p - 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  scrollToTop();
                 }}
               >
                 Anterior
@@ -335,7 +344,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                 disabled={paginaActual === totalPaginas}
                 onClick={() => {
                   setPaginaActual(p => p + 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  scrollToTop();
                 }}
               >
                 Siguiente

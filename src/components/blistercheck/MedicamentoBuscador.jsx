@@ -44,6 +44,15 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   });
   const [formas, setFormas] = useState([]);
   const [vias, setVias] = useState([]);
+  
+  const topRef = useRef(null);
+  const scrollToTop = () => {
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const debounceRef = useRef(null);
 
@@ -181,7 +190,7 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   };
 
   return (
-    <div className="bc-buscador">
+    <div className="bc-buscador-container" ref={topRef}>
       {/* ── Barra de búsqueda ── */}
       <div className="bc-search-header glass-panel">
         <div className="bc-search-row">
@@ -419,9 +428,9 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
               </p>
               {Math.ceil(resultados.length / itemsPerPage) > 1 && (
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Anterior</button>
+                  <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={currentPage === 1} onClick={() => { setCurrentPage(p => p - 1); scrollToTop(); }}>Anterior</button>
                   <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Pág {currentPage} de {Math.ceil(resultados.length / itemsPerPage)}</span>
-                  <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={currentPage === Math.ceil(resultados.length / itemsPerPage)} onClick={() => setCurrentPage(p => p + 1)}>Siguiente</button>
+                  <button className="bc-btn-secondary" style={{ padding: '4px 12px', fontSize: '0.9rem' }} disabled={currentPage === Math.ceil(resultados.length / itemsPerPage)} onClick={() => { setCurrentPage(p => p + 1); scrollToTop(); }}>Siguiente</button>
                 </div>
               )}
             </div>
@@ -456,9 +465,9 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
 
             {Math.ceil(resultados.length / itemsPerPage) > 1 && (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', marginTop: '2rem' }}>
-                <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={currentPage === 1} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anterior</button>
+                <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={currentPage === 1} onClick={() => { setCurrentPage(p => p - 1); scrollToTop(); }}>Anterior</button>
                 <span style={{ fontSize: '0.9rem', color: 'var(--color-text-body)' }}>Página {currentPage} de {Math.ceil(resultados.length / itemsPerPage)}</span>
-                <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={currentPage === Math.ceil(resultados.length / itemsPerPage)} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Siguiente</button>
+                <button className="bc-btn-secondary" style={{ padding: '6px 16px' }} disabled={currentPage === Math.ceil(resultados.length / itemsPerPage)} onClick={() => { setCurrentPage(p => p + 1); scrollToTop(); }}>Siguiente</button>
               </div>
             )}
           </>
