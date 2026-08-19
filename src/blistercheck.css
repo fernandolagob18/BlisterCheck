@@ -3652,7 +3652,189 @@
 
 .eco-list li { margin-bottom: 0.3rem; }
 
-/* ── Options list ─────────────────────────────────────────────────────────── */
+/* ── Ranking acordeón ─────────────────────────────────────────────────────── */
+
+/* Leyenda de escala */
+.eco-rank-scale {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 1rem;
+}
+.eco-rank-scale__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.eco-rank-scale__bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.eco-rank-scale__gradient {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #059669, #10b981, #3b82f6, #8b5cf6, #f59e0b, #ef4444);
+}
+.eco-rank-scale__ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+/* Lista de filas */
+.eco-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Fila individual */
+.eco-rank-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: white;
+  transition: box-shadow 0.18s ease;
+}
+.eco-rank-row:hover {
+  box-shadow: var(--shadow-sm);
+}
+.eco-rank-row--open {
+  box-shadow: var(--shadow-md);
+}
+
+/* Cabecera clicable */
+.eco-rank-row__header {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 220px auto auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.eco-rank-row__header:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+/* Badge de ranking */
+.eco-rank-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* Nombre de la opción */
+.eco-rank-row__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* Barra de impacto */
+.eco-rank-bar-wrap {
+  min-width: 0;
+}
+.eco-rank-bar-bg {
+  height: 8px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+.eco-rank-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+/* Valor CO₂e */
+.eco-rank-row__value {
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Chevron */
+.eco-rank-row__chevron {
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Panel de detalle expandible */
+.eco-rank-detail {
+  border-top: 1px solid;
+  padding: 1.1rem 1.25rem 1rem;
+  animation: rankDetailIn 0.18s ease;
+}
+@keyframes rankDetailIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+.eco-rank-detail__desc {
+  font-size: 0.85rem;
+  color: var(--color-text-body);
+  line-height: 1.6;
+  margin: 0 0 0.85rem;
+}
+.eco-rank-detail__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.eco-rank-detail__col-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+.eco-rank-detail__col-title--green { color: #16a34a; }
+.eco-rank-detail__col-title--red   { color: #dc2626; }
+.eco-rank-detail__ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.73rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  border-top: 1px solid rgba(0,0,0,0.07);
+  padding-top: 0.65rem;
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+  .eco-rank-row__header {
+    grid-template-columns: 2rem 1fr auto auto;
+    gap: 0.6rem;
+  }
+  .eco-rank-bar-wrap { display: none; }
+  .eco-rank-detail__cols { grid-template-columns: 1fr; }
+}
+
+/* ── Options list (legacy, mantenido por si acaso) ────────────────────────── */
+
 .eco-options-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));

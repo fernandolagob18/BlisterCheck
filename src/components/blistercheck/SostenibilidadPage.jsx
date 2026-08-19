@@ -10,7 +10,7 @@ const MATERIALES = [
     nombre: 'Aluminio (lámina blíster)',
     factor: '6,3 kg CO₂e/kg',
     fuente: 'European Aluminium Association (2024)',
-    url: 'https://european-aluminium.eu/resource/environmental-profile-report/',
+    url: 'https://european-aluminium.eu/wp-content/uploads/2025/07/Environmental-Profile-Report_2024-V20.pdf',
     color: '#e8f4f8',
     border: '#7ecae4',
     nota: 'Aluminio primario de producción europea. El aluminio reciclado puede reducir hasta un 95 % esta cifra.',
@@ -20,7 +20,7 @@ const MATERIALES = [
     nombre: 'Plástico HDPE (frascos)',
     factor: '~1,9–3,1 kg CO₂e/kg',
     fuente: 'PlasticsEurope Eco-profiles (2022/2026)',
-    url: 'https://lci-plasticseurope.org/',
+    url: 'https://www.plasticseurope.org/en/resources/eco-profiles',
     color: '#f0fdf4',
     border: '#86efac',
     nota: 'Rango típico desde la extracción hasta salida de fábrica. Varía según la versión del eco-perfil y la energía del proceso.',
@@ -120,7 +120,7 @@ const SEFH_DATA = {
   comprimidosNoRenvasados: '1,27 millones',
   materialEvitado: '17 km',
   residuosEvitados: '866 kg',
-  fuente: 'Proyecto "No reenvases sin necesidad" — Revista Farmacia Hospitalaria, 2026',
+  fuente: 'Proyecto "No reenvases sin necesidad" — Grupo TECNO-SEFH, 2026',
 };
 
 /* ─── Referencias bibliográficas ─────────────────────────────────────────── */
@@ -135,18 +135,18 @@ const REFERENCIAS = [
   },
   {
     autores: 'European Aluminium Association',
-    titulo: 'Environmental Profile Report 2018',
-    anio: '2018',
+    titulo: 'Environmental Profile Report 2024',
+    anio: '2024',
     tipo: 'Sectorial oficial',
-    url: 'https://european-aluminium.eu/resource/environmental-profile-report/',
-    hallazgo: 'Aluminio primario europeo: 6,3 kg CO₂e/kg (dato desde origen hasta salida de fábrica, producción europea media).',
+    url: 'https://european-aluminium.eu/wp-content/uploads/2025/07/Environmental-Profile-Report_2024-V20.pdf',
+    hallazgo: 'Aluminio primario europeo: 6,3 kg CO₂e/kg (dato desde origen hasta salida de fábrica, producción europea media, datos 2023). Reducción del 5 % respecto a 2015; el 78 % de la electricidad usada en 2023 procedió de fuentes renovables.',
   },
   {
     autores: 'PlasticsEurope',
     titulo: 'Eco-profiles de plásticos (HDPE, PVC, PE)',
     anio: '2022–2026',
     tipo: 'Sectorial oficial',
-    url: 'https://lci-plasticseurope.org/',
+    url: 'https://www.plasticseurope.org/en/resources/eco-profiles',
     hallazgo: 'Eco-profiles de Inventario de Ciclo de Vida (LCI) desde extracción hasta salida de fábrica para polímeros europeos. HDPE: rango 1,9–3,1 kg CO₂e/kg según versión. (Requiere registro en el portal para descargar datasets)',
   },
   {
@@ -162,8 +162,8 @@ const REFERENCIAS = [
     titulo: 'Proyecto "No reenvases sin necesidad" — Evaluación de impacto',
     anio: '2026',
     tipo: 'Iniciativa',
-    url: 'https://www.sefh.es',
-    hallazgo: '1,27 M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales.',
+    url: 'https://www.sefh.es/grupos-de-trabajo/tecno',
+    hallazgo: '1,27 M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales (datos internos del grupo TECNO-SEFH, 2026).',
   },
   {
     autores: 'SIGRE Medicamento y Medio Ambiente',
@@ -171,13 +171,28 @@ const REFERENCIAS = [
     anio: '2024',
     tipo: 'Sectorial oficial',
     url: 'https://www.sigre.es/ecodiseno/',
-    hallazgo: 'Más de 3.900 medidas de ecodiseño, peso medio de envase reducido más de un 25 % desde 2000, más de 85.000 t CO₂e acumuladas evitadas.',
+    hallazgo: 'Más de 3.900 medidas de ecodiseño, peso medio de envase reducido más de un 25 % desde 2000, más de 100.000 t CO₂e acumuladas evitadas (Farmaindustria / SIGRE, 2026).',
   },
 ];
+
+/* ─── Constantes de escala para la barra de impacto ──────────────────────── */
+const CO2_MIN = 1.5;   // g CO₂e/dosis — valor mínimo del rango
+const CO2_MAX = 9.5;   // g CO₂e/dosis — valor máximo del rango
+
+// Valor numérico central de cada opción (para la barra proporcional)
+const CO2_VALORES = {
+  'frasco': 1.5,
+  'zip-frasco': 2.5,
+  'blister-comercial': 4.0,
+  'reetiquetado': 4.5,
+  'zip-blister': 5.0,
+  'reenvasado-hosp': 9.5,
+};
 
 /* ─── Componente principal ────────────────────────────────────────────────── */
 export default function SostenibilidadPage() {
   const [expandedRef, setExpandedRef] = useState(null);
+  const [expandedOption, setExpandedOption] = useState(null);
   const [activeTab, setActiveTab] = useState('situacion');
 
   const tabs = [
@@ -445,41 +460,96 @@ export default function SostenibilidadPage() {
               del medicamento.
             </p>
 
-            <div className="eco-options-list">
-              {OPCIONES.map(op => (
-                <div
-                  key={op.id}
-                  className="eco-option-card"
-                  style={{ background: op.bg, borderColor: op.border }}
-                >
-                  <div className="eco-option-card__rank" style={{ background: op.color }}>
-                    #{op.rank}
-                  </div>
-                  <div className="eco-option-card__body">
-                    <h3 className="eco-option-card__title" style={{ color: op.color }}>
-                      {op.label}
-                    </h3>
-                    <p className="eco-option-card__desc">{op.descripcion}</p>
-                    <div className="eco-option-card__cols">
-                      <div>
-                        <div className="eco-option-card__col-title eco-option-card__col-title--green">Ventajas</div>
-                        <ul className="eco-list">
-                          {op.pros.map((p, i) => <li key={i}>{p}</li>)}
-                        </ul>
-                      </div>
-                      <div>
-                        <div className="eco-option-card__col-title eco-option-card__col-title--red">Limitaciones</div>
-                        <ul className="eco-list">
-                          {op.contras.map((c, i) => <li key={i}>{c}</li>)}
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="eco-option-card__ref">
-                      <BookOpen size={12} /> {op.referencia}
-                    </div>
-                  </div>
+            {/* Leyenda de escala */}
+            <div className="eco-rank-scale">
+              <span className="eco-rank-scale__label">Menor impacto</span>
+              <div className="eco-rank-scale__bar">
+                <div className="eco-rank-scale__gradient" />
+                <div className="eco-rank-scale__ticks">
+                  <span>1,5 g</span>
+                  <span>4,0 g</span>
+                  <span>6,5 g</span>
+                  <span>9,5 g CO₂e/dosis</span>
                 </div>
-              ))}
+              </div>
+              <span className="eco-rank-scale__label">Mayor impacto</span>
+            </div>
+
+            <div className="eco-rank-list">
+              {OPCIONES.map(op => {
+                const val = CO2_VALORES[op.id] ?? 0;
+                const pct = Math.round(((val - CO2_MIN) / (CO2_MAX - CO2_MIN)) * 100);
+                const isOpen = expandedOption === op.id;
+
+                return (
+                  <div key={op.id} className={`eco-rank-row${isOpen ? ' eco-rank-row--open' : ''}`}>
+                    {/* ── Cabecera clicable ── */}
+                    <button
+                      className="eco-rank-row__header"
+                      onClick={() => setExpandedOption(isOpen ? null : op.id)}
+                      aria-expanded={isOpen}
+                    >
+                      {/* Badge de ranking */}
+                      <span className="eco-rank-badge" style={{ background: op.color }}>
+                        #{op.rank}
+                      </span>
+
+                      {/* Nombre */}
+                      <span className="eco-rank-row__name" style={{ color: op.color }}>
+                        {op.label}
+                      </span>
+
+                      {/* Barra de impacto */}
+                      <div className="eco-rank-bar-wrap">
+                        <div className="eco-rank-bar-bg">
+                          <div
+                            className="eco-rank-bar-fill"
+                            style={{ width: `${pct}%`, background: op.color }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Valor CO₂e */}
+                      <span className="eco-rank-row__value" style={{ color: op.color }}>
+                        {op.id === 'reenvasado-hosp' ? '7,0 – 9,5 g' : `~ ${String(val).replace('.', ',')} g`} CO₂e
+                      </span>
+
+                      {/* Chevron */}
+                      <span className="eco-rank-row__chevron">
+                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </span>
+                    </button>
+
+                    {/* ── Panel de detalle expandible ── */}
+                    {isOpen && (
+                      <div className="eco-rank-detail" style={{ borderColor: op.border, background: op.bg }}>
+                        <p className="eco-rank-detail__desc">{op.descripcion}</p>
+                        <div className="eco-rank-detail__cols">
+                          <div>
+                            <div className="eco-rank-detail__col-title eco-rank-detail__col-title--green">
+                              ✓ Ventajas
+                            </div>
+                            <ul className="eco-list">
+                              {op.pros.map((p, i) => <li key={i}>{p}</li>)}
+                            </ul>
+                          </div>
+                          <div>
+                            <div className="eco-rank-detail__col-title eco-rank-detail__col-title--red">
+                              ✗ Limitaciones
+                            </div>
+                            <ul className="eco-list">
+                              {op.contras.map((c, i) => <li key={i}>{c}</li>)}
+                            </ul>
+                          </div>
+                        </div>
+                        <div className="eco-rank-detail__ref">
+                          <BookOpen size={12} /> {op.referencia}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
