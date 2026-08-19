@@ -58,6 +58,7 @@ BEGIN
             OR (p_estado_acondicionamiento = 'reetiquetado' AND g.requiere_reetiquetado = true)
             OR (p_estado_acondicionamiento = 'apto_sdmdu' AND g.apto_sdmdu_blister = true)
         )
-    ORDER BY c.nombre ASC;
+    ORDER BY c.nombre ASC
+    LIMIT 3000;
 END;
 $$;

@@ -31,7 +31,8 @@ export async function searchSimple(query) {
     const { data, error } = await supabase
       .from(CATALOG_TABLE)
       .select('*')
-      .ilike('cn', `${q}%`);
+      .ilike('cn', `${q}%`)
+      .limit(3000);
     if (error) throw error;
     return data || [];
   }
