@@ -61,7 +61,7 @@ export async function getClasificacionesByCNs(cns) {
   if (validCNs.length === 0) return new Map();
 
   const { data: { user } } = await supabase.auth.getUser();
-  const CHUNK_SIZE = 900;
+  const CHUNK_SIZE = 200;
 
   let globalResults = [];
   let userResults = [];
@@ -318,8 +318,8 @@ export async function getAllClasificaciones() {
 
   const cns = globalData.map(g => String(g.cn));
   const userMap = new Map();
-  for (let i = 0; i < cns.length; i += 900) {
-    const chunk = cns.slice(i, i + 900);
+  for (let i = 0; i < cns.length; i += 200) {
+    const chunk = cns.slice(i, i + 200);
     const { data: uData } = await supabase
       .from(USER_FARMACIA_TABLE)
       .select('*')
@@ -366,8 +366,8 @@ export async function getEstadisticasPorLaboratorio(soloMiFarmacia = false) {
 
     if (userFarmiaCNs.length === 0) return [];
 
-    for (let i = 0; i < userFarmiaCNs.length; i += 900) {
-      const chunk = userFarmiaCNs.slice(i, i + 900);
+    for (let i = 0; i < userFarmiaCNs.length; i += 200) {
+      const chunk = userFarmiaCNs.slice(i, i + 200);
       const { data, error } = await supabase
         .from(GLOBAL_CLASIFICACION_TABLE)
         .select(`
@@ -515,8 +515,8 @@ export async function getExportData(modo = 'clasificados') {
 
   const cns = globalData.map(g => String(g.cn));
   const userMap = new Map();
-  for (let i = 0; i < cns.length; i += 900) {
-    const chunk = cns.slice(i, i + 900);
+  for (let i = 0; i < cns.length; i += 200) {
+    const chunk = cns.slice(i, i + 200);
     let uQuery = supabase.from(USER_FARMACIA_TABLE).select('*').in('cn', chunk).eq('user_id', user.id);
     if (modo === 'mi_farmacia') uQuery = uQuery.eq('en_mi_farmacia', true);
     const { data: uData } = await uQuery;
@@ -615,7 +615,7 @@ export async function getDesabastecimientosByCNs(cns) {
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
   if (validCNs.length === 0) return new Map();
 
-  const CHUNK_SIZE = 900;
+  const CHUNK_SIZE = 200;
   const map = new Map();
   for (let i = 0; i < validCNs.length; i += CHUNK_SIZE) {
     const chunk = validCNs.slice(i, i + CHUNK_SIZE);
@@ -712,7 +712,7 @@ export async function getExistingCatalogCNs(cns) {
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
   if (validCNs.length === 0) return [];
 
-  const CHUNK_SIZE = 900;
+  const CHUNK_SIZE = 200;
   let existingCNs = [];
 
   for (let i = 0; i < validCNs.length; i += CHUNK_SIZE) {
@@ -747,7 +747,7 @@ export async function bulkMarkEnMiFarmacia(cns) {
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
   if (validCNs.length === 0) return 0;
 
-  const CHUNK_SIZE = 900;
+  const CHUNK_SIZE = 200;
   let totalUpserted = 0;
 
   for (let i = 0; i < validCNs.length; i += CHUNK_SIZE) {
@@ -835,8 +835,8 @@ export async function getMisLaboratoriosData() {
   if (allNeededCNs.length === 0 && userLabsMap.size === 0) return [];
 
   let allMeds = [];
-  for (let i = 0; i < allNeededCNs.length; i += 900) {
-    const chunk = allNeededCNs.slice(i, i + 900);
+  for (let i = 0; i < allNeededCNs.length; i += 200) {
+    const chunk = allNeededCNs.slice(i, i + 200);
     const { data, error } = await supabase
       .from(CATALOG_TABLE)
       .select(`

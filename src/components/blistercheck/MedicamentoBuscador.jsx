@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 import MedicamentoCard from './MedicamentoCard';
@@ -10,6 +10,7 @@ import {
   getDesabastecimientosByCNs,
   getClasificacionesByCNs,
 } from '../../services/blistercheckService';
+import { useRealtimeClasificaciones } from '../../hooks/useRealtimeClasificaciones';
 
 
 function MedicamentoBuscador({ onSelectMedicamento }) {
@@ -50,6 +51,10 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   };
 
   const debounceRef = useRef(null);
+
+  // -- Hook de Realtime --
+  const currentCns = useMemo(() => resultados.map(r => r.cn).filter(Boolean), [resultados]);
+  useRealtimeClasificaciones(currentCns, clasificacionMap, setClasificacionMap);
 
   /**
    * Lanza una única consulta batch a desabastecimientos_activos

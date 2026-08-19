@@ -3,6 +3,8 @@ import { ArrowLeft, ExternalLink, Home, FileText, BookOpen, CheckCircle, XCircle
 import { saveClasificacion, getAlternativasSDMDU } from '../../services/blistercheckService';
 import { isCriticalShortage } from '../../utils/shortageUtils';
 import { formatDate } from '../../utils/dateUtils';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 // ── Componente tristate: Sí / No / Sin clasificar ────────────────────────────
 function TristateToggle({ label, descripcion, value, onChange }) {
@@ -69,6 +71,56 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
       setUltimaActualizacion(clasificacion.updated_at || clasificacion.fecha_clasificacion || null);
     }
   }, [clasificacion]);
+
+  // -- Suscripción en Tiempo Real --
+  const { user } = useAuth();
+  useEffect(() => {
+    if (!medicamento?.cn) return;
+
+    const globalChannel = supabase.channel(`detail-global-${medicamento.cn}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'blistercheck_clasificacion_global', filter: `cn=eq.${medicamento.cn}` },
+        (payload) => {
+          const newData = payload.new;
+          if (newData) {
+            setForm(prev => ({
+              ...prev,
+              requiere_reenvasado: newData.requiere_reenvasado ?? null,
+              requiere_reetiquetado: newData.requiere_reetiquetado ?? null,
+              apto_sdmdu_blister: newData.apto_sdmdu_blister ?? null,
+              solo_envase_clinico: newData.solo_envase_clinico ?? false,
+            }));
+            setUltimaActualizacion(newData.updated_at);
+          }
+        }
+      ).subscribe();
+
+    let userChannel = null;
+    if (user) {
+      userChannel = supabase.channel(`detail-user-${medicamento.cn}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'blistercheck_user_farmacia', filter: `cn=eq.${medicamento.cn}` },
+          (payload) => {
+            const newData = payload.new;
+            if (newData && newData.user_id === user.id) {
+              setForm(prev => ({
+                ...prev,
+                en_mi_farmacia: newData.en_mi_farmacia ?? false,
+                notas: newData.notas ?? '',
+              }));
+              setUltimaActualizacion(newData.updated_at);
+            }
+          }
+        ).subscribe();
+    }
+
+    return () => {
+      supabase.removeChannel(globalChannel);
+      if (userChannel) supabase.removeChannel(userChannel);
+    };
+  }, [medicamento?.cn, user]);
 
   // Cargar alternativas si requiere manipulación
   useEffect(() => {
