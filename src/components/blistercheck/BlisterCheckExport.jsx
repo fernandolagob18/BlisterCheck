@@ -18,10 +18,16 @@ function formatFecha(iso) {
   });
 }
 
-// Escapa un campo para CSV (encierra en comillas si contiene coma, comilla o salto de línea)
+// Escapa un campo para CSV y previene inyección de fórmulas (CSV Injection)
 function escapeCsvField(val) {
   if (val === null || val === undefined) return '';
-  const str = String(val);
+  let str = String(val);
+  
+  // Prevención de CSV Injection (añade comilla simple si empieza con caracteres de fórmula)
+  if (/^[=\-@+]/.test(str)) {
+    str = "'" + str;
+  }
+
   if (str.includes(';') || str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`;
   }

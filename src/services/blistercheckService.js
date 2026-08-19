@@ -158,25 +158,16 @@ export async function searchAvanzado(filtros = {}) {
 // ─── VALORES ÚNICOS PARA FILTROS ──────────────────────────────────────────────
 
 async function fetchAllDistinct(column) {
-  const uniqueVals = new Set();
-  let page = 0;
-  const PAGE_SIZE = 1000;
-
-  while (true) {
-    const { data, error } = await supabase
-      .from(CATALOG_TABLE)
-      .select(column)
-      .not(column, 'is', null)
-      .order(column)
-      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
+  try {
+    const { data, error } = await supabase.rpc('bc_get_distinct_values', { p_column: column });
     if (error) throw error;
-    (data || []).forEach(row => uniqueVals.add(row[column]));
-    if ((data || []).length < PAGE_SIZE) break;
-    page++;
+    
+    // Mapear la respuesta de la base de datos (array de objetos { valor: 'xyz' }) a un array de strings
+    return (data || []).map(row => row.valor);
+  } catch (err) {
+    console.error(`Error obteniendo valores únicos para ${column}:`, err);
+    return [];
   }
-
-  return Array.from(uniqueVals).filter(Boolean).sort((a, b) => a.localeCompare(b));
 }
 
 export async function getFormasFarmaceuticas() {
@@ -620,6 +611,21 @@ export async function bulkMarkEnMiFarmacia(cns) {
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
   if (validCNs.length === 0) return 0;
 
+  // 1. Limpiar el inventario actual (establecer todo a false)
+  // Esto asegura que reemplazamos el inventario en lugar de acumularlo.
+  // Como solo tocamos 'en_mi_farmacia', las 'notas' introducidas previamente SE CONSERVAN intactas.
+  const { error: resetError } = await supabase
+    .from(USER_FARMACIA_TABLE)
+    .update({ en_mi_farmacia: false, updated_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .eq('en_mi_farmacia', true);
+
+  if (resetError) {
+    console.error('Error limpiando el inventario previo:', resetError);
+    throw resetError;
+  }
+
+  // 2. Insertar o actualizar los nuevos medicamentos a true
   const CHUNK_SIZE = 200;
   let totalUpserted = 0;
 
