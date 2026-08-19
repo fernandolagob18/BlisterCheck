@@ -37,7 +37,7 @@ export async function searchSimple(query) {
   }
 
   // Búsqueda por nombre / principio activo usando RPC con unaccent (insensible a tildes)
-  const { data, error } = await supabase.rpc('bc_search_simple', { q });
+  const { data, error } = await supabase.rpc('bc_search_simple', { q }).limit(3000);
   if (!error) return data || [];
 
   // Fallback si la función RPC no está creada en Supabase
@@ -140,7 +140,7 @@ export async function searchAvanzado(filtros = {}) {
       p_solo_fotosensibles:       Boolean(filtros.soloFotosensibles),
       p_solo_higroscopicos:       Boolean(filtros.soloHigroscopicos),
       p_estado_acondicionamiento: filtros.estadoAcondicionamiento   || 'todos'
-    });
+    }).limit(3000);
     
     if (res.error) {
       console.error('Error en RPC bc_search_avanzado:', res.error);
