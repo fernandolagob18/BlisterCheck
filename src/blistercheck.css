@@ -3718,9 +3718,9 @@
   display: grid;
   /*
     badge  | nombre (fijo) | barra (flexible) | valor (fijo) | chevron
-    Nombre y valor fijos → la barra SIEMPRE empieza y termina en la misma columna
+    Nombre a 330px para que no aplaste la barra
   */
-  grid-template-columns: 2.5rem 230px 1fr 108px 1.2rem;
+  grid-template-columns: 2.5rem 330px 1fr 108px 1.2rem;
   align-items: center;
   gap: 0.85rem;
   padding: 0.85rem 1.1rem;
@@ -3984,10 +3984,11 @@
   color: var(--color-text-muted);
   flex-shrink: 0;
   margin-top: 2px;
+  width: 100px;
 }
 
-.eco-ref-title { font-size: 0.85rem; font-weight: 600; color: var(--color-text); line-height: 1.4; }
-.eco-ref-meta { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 2px; }
+.eco-ref-title { font-size: 0.85rem; font-weight: 600; color: var(--color-text); line-height: 1.4; text-align: justify; }
+.eco-ref-meta { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 2px; text-align: justify; }
 
 .eco-ref-body {
   padding: 0.8rem 1.1rem 1rem;
