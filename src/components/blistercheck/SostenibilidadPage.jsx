@@ -298,80 +298,19 @@ export default function SostenibilidadPage() {
               </div>
 
               <h2 className="eco-section-title" style={{ marginTop: '2rem' }}>
-                Comparativa de huella de carbono por acondicionamiento
+                ¿Qué puede hacer la farmacia hospitalaria?
               </h2>
               <p className="eco-body">
-                El siguiente gráfico, basado en datos de un estudio de Análisis de Ciclo de Vida
-                (LCA) hospitalario realizado en el Alfred Health (Australia, 2023) junto con
-                factores de emisión oficiales europeos, ilustra la diferencia relativa entre los
-                distintos modos de acondicionamiento:
-              </p>
-              <div className="eco-chart">
-                <div className="eco-chart-bar-wrap">
-                  <div className="eco-chart-label">
-                    <span>1. Frasco original comercial (HDPE)</span>
-                    <span style={{color: '#059669'}}>~ 1.5 g CO₂e/dosis</span>
-                  </div>
-                  <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '15%', background: '#059669'}}></div>
-                  </div>
-                </div>
-                <div className="eco-chart-bar-wrap">
-                  <div className="eco-chart-label">
-                    <span>2. Reenvasado en bolsa zip PE (desde frasco)</span>
-                    <span style={{color: '#10b981'}}>~ 2.5 g CO₂e/dosis (Frasco + Bolsa)</span>
-                  </div>
-                  <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '26%', background: '#10b981'}}></div>
-                  </div>
-                </div>
-                <div className="eco-chart-bar-wrap">
-                  <div className="eco-chart-label">
-                    <span>3. Blíster comercial (Aluminio + PVC)</span>
-                    <span style={{color: '#3b82f6'}}>~ 4.0 g CO₂e/dosis</span>
-                  </div>
-                  <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '42%', background: '#3b82f6'}}></div>
-                  </div>
-                </div>
-                <div className="eco-chart-bar-wrap">
-                  <div className="eco-chart-label">
-                    <span>4. Reetiquetado del blíster comercial</span>
-                    <span style={{color: '#8b5cf6'}}>~ 4.5 g CO₂e/dosis (Blíster + Etiqueta)</span>
-                  </div>
-                  <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '47%', background: '#8b5cf6'}}></div>
-                  </div>
-                </div>
-                <div className="eco-chart-bar-wrap">
-                  <div className="eco-chart-label">
-                    <span>5. Reenvasado en bolsa zip PE (desde blíster)</span>
-                    <span style={{color: '#f59e0b'}}>~ 5.0 g CO₂e/dosis (Blíster desechado + Bolsa)</span>
-                  </div>
-                  <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '52%', background: '#f59e0b'}}></div>
-                  </div>
-                </div>
-                <div className="eco-chart-bar-wrap">
-                  <div className="eco-chart-label">
-                    <span>6. Reenvasado hospitalario (Aluminio + PVC)</span>
-                    <span style={{color: '#ef4444'}}>~ 9.5 g CO₂e/dosis (Blíster desechado + Nuevo Alu/PVC)</span>
-                  </div>
-                  <div className="eco-chart-bar-bg">
-                    <div className="eco-chart-bar-fill" style={{width: '100%', background: '#ef4444'}}></div>
-                  </div>
-                </div>
-              </div>
-
-              <p className="eco-body">
-                <strong>La evidencia disponible señala que:</strong> el reenvasado hospitalario
-                en lámina de aluminio y PVC genera la mayor huella de carbono por dosis. Mantener
-                el blíster comercial intacto (reetiquetando si es necesario) es la opción de
-                menor impacto cuando el blíster original es apto para SDMDU.
+                La revisión sistemática de los medicamentos que se reenvasan —identificando cuáles ya
+                cumplen los requisitos de SDMDU en su envase comercial— es la intervención con mayor
+                potencial de reducción inmediata de la huella de carbono de la farmacia. Consulta el
+                apartado <strong>Opciones</strong> para ver el ranking ambiental comparativo de cada
+                modalidad de acondicionamiento.
               </p>
             </div>
           </div>
         )}
+
 
         {/* ── TAB: MATERIALES ─────────────────────────────────────────── */}
         {activeTab === 'materiales' && (
@@ -551,6 +490,16 @@ export default function SostenibilidadPage() {
                 );
               })}
             </div>
+
+            <p className="eco-body" style={{ marginTop: '2rem' }}>
+              <strong>La evidencia disponible señala que:</strong> el reenvasado hospitalario en lámina de aluminio y PVC genera la mayor huella de carbono por dosis. Mantener el blíster comercial intacto (reetiquetando si es necesario) es la opción de menor impacto cuando el blíster original es apto para SDMDU.
+            </p>
+            <p className="eco-body">
+              Los datos de huella de carbono presentados proceden de fuentes oficiales y estudios con revisión por pares. No existe actualmente un estudio de Análisis de Ciclo de Vida (LCA) específico sobre el reenvasado hospitalario español; las comparaciones se realizan sobre la base de los factores de emisión por material (fuente a puerta). Esta información es orientativa y no debe utilizarse como base de cálculo regulatorio sin un análisis LCA completo.
+            </p>
+            <p className="eco-body">
+              No existe actualmente un estudio de LCA específicamente realizado sobre el proceso de reenvasado hospitalario en España. Los datos de esta página se construyen combinando factores de emisión de materiales con las conclusiones del estudio australiano más próximo en contexto (Alfred Health, 2023). Cualquier uso de esta información para comunicaciones externas debe mencionar explícitamente estas limitaciones.
+            </p>
           </div>
         )}
 
