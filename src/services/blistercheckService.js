@@ -343,102 +343,29 @@ export async function getAllClasificaciones() {
 export async function getEstadisticasPorLaboratorio(soloMiFarmacia = false) {
   const { data: { user } } = await supabase.auth.getUser();
 
-  let allData = [];
-  let page = 0;
-  const PAGE_SIZE = 1000;
+  try {
+    const res = await supabase.rpc('bc_get_estadisticas_laboratorios', {
+      p_user_id: user?.id || null,
+      p_solo_mi_farmacia: Boolean(soloMiFarmacia && user)
+    });
 
-  if (soloMiFarmacia && user) {
-    let userFarmiaCNs = [];
-    let uPage = 0;
-    while (true) {
-      const { data: uData } = await supabase
-        .from(USER_FARMACIA_TABLE)
-        .select('cn')
-        .eq('user_id', user.id)
-        .eq('en_mi_farmacia', true)
-        .range(uPage * PAGE_SIZE, (uPage + 1) * PAGE_SIZE - 1);
-      
-      const chunkCNs = (uData || []).map(r => String(r.cn));
-      userFarmiaCNs = userFarmiaCNs.concat(chunkCNs);
-      if ((uData || []).length < PAGE_SIZE) break;
-      uPage++;
-    }
+    if (res.error) throw res.error;
 
-    if (userFarmiaCNs.length === 0) return [];
-
-    for (let i = 0; i < userFarmiaCNs.length; i += 200) {
-      const chunk = userFarmiaCNs.slice(i, i + 200);
-      const { data, error } = await supabase
-        .from(GLOBAL_CLASIFICACION_TABLE)
-        .select(`
-          cn,
-          requiere_reenvasado,
-          requiere_reetiquetado,
-          apto_sdmdu_blister,
-          solo_envase_clinico,
-          blistercheck_catalogo ( laboratorio )
-        `)
-        .in('cn', chunk);
-      if (error) throw error;
-      allData = allData.concat(data || []);
-    }
-  } else {
-    while (true) {
-      const { data, error } = await supabase
-        .from(GLOBAL_CLASIFICACION_TABLE)
-        .select(`
-          cn,
-          requiere_reenvasado,
-          requiere_reetiquetado,
-          apto_sdmdu_blister,
-          solo_envase_clinico,
-          blistercheck_catalogo ( laboratorio )
-        `)
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-      if (error) throw error;
-      allData = allData.concat(data || []);
-      if ((data || []).length < PAGE_SIZE) break;
-      page++;
-    }
+    // Convertir BigInts devueltos por Postgres (a menudo strings) en números de JS
+    return (res.data || []).map(row => ({
+      ...row,
+      total_clasificados: Number(row.total_clasificados),
+      aptos_directos: Number(row.aptos_directos),
+      requieren_intervencion: Number(row.requieren_intervencion),
+      pendientes: Number(row.pendientes),
+      score_sdmdu: Number(row.score_sdmdu)
+    }));
+  } catch (err) {
+    console.error('Error calculando estadísticas:', err);
+    throw err;
   }
-
-  const labMap = new Map();
-
-  allData.forEach(row => {
-    const lab = row.blistercheck_catalogo?.laboratorio || 'Sin laboratorio';
-    if (!labMap.has(lab)) {
-      labMap.set(lab, {
-        laboratorio: lab,
-        total_clasificados: 0,
-        aptos_directos: 0,
-        requieren_intervencion: 0,
-        pendientes: 0,
-      });
-    }
-
-    const entry = labMap.get(lab);
-    const sinClasificar = row.apto_sdmdu_blister === null
-      && row.requiere_reenvasado === null
-      && row.requiere_reetiquetado === null;
-
-    if (!sinClasificar) entry.total_clasificados++;
-
-    if (row.apto_sdmdu_blister === true) entry.aptos_directos++;
-    else if (row.requiere_reenvasado === true || row.requiere_reetiquetado === true) entry.requieren_intervencion++;
-    else if (sinClasificar) entry.pendientes++;
-  });
-
-  const result = Array.from(labMap.values()).map(lab => ({
-    ...lab,
-    score_sdmdu: lab.total_clasificados > 0
-      ? Math.round((lab.aptos_directos / lab.total_clasificados) * 100)
-      : 0,
-  }));
-
-  result.sort((a, b) => b.score_sdmdu - a.score_sdmdu || b.total_clasificados - a.total_clasificados);
-  return result;
 }
+
 
 // ─── INFO GENERAL DEL CATÁLOGO ────────────────────────────────────────────────
 
@@ -451,11 +378,11 @@ export async function getCatalogInfo() {
     { count: enMiFarmacia },
     { data: syncData },
   ] = await Promise.all([
-    supabase.from(CATALOG_TABLE).select('*', { count: 'exact', head: true }),
-    supabase.from(GLOBAL_CLASIFICACION_TABLE).select('*', { count: 'exact', head: true })
+    supabase.from(CATALOG_TABLE).select('*', { count: 'estimated', head: true }),
+    supabase.from(GLOBAL_CLASIFICACION_TABLE).select('*', { count: 'estimated', head: true })
       .or('requiere_reenvasado.not.is.null,requiere_reetiquetado.not.is.null,apto_sdmdu_blister.not.is.null,solo_envase_clinico.not.is.null'),
     user
-      ? supabase.from(USER_FARMACIA_TABLE).select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('en_mi_farmacia', true)
+      ? supabase.from(USER_FARMACIA_TABLE).select('*', { count: 'estimated', head: true }).eq('user_id', user.id).eq('en_mi_farmacia', true)
       : Promise.resolve({ count: 0 }),
     supabase.from(CATALOG_TABLE).select('last_sync').order('last_sync', { ascending: false }).limit(1).maybeSingle(),
   ]);
@@ -477,75 +404,21 @@ export async function getCatalogInfo() {
 export async function getExportData(modo = 'clasificados') {
   const { data: { user } } = await supabase.auth.getUser();
 
-  let globalData = [];
-  let page = 0;
-  const PAGE_SIZE = 1000;
+  try {
+    const { data, error } = await supabase.rpc('bc_get_export_data', {
+      p_modo: modo,
+      p_user_id: user?.id || null
+    });
 
-  while (true) {
-    let query = supabase
-      .from(GLOBAL_CLASIFICACION_TABLE)
-      .select(`
-        cn,
-        requiere_reenvasado,
-        requiere_reetiquetado,
-        apto_sdmdu_blister,
-        solo_envase_clinico,
-        updated_at,
-        blistercheck_catalogo (
-          cn, nregistro, nombre, laboratorio, dosis, principio_activo,
-          forma_farmaceutica, forma_simplificada, via_administracion, tipo_prescripcion,
-          fotosensible, higroscopico
-        )
-      `)
-      .order('updated_at', { ascending: false })
-      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-    if (modo === 'clasificados') {
-      query = query.or('requiere_reenvasado.not.is.null,requiere_reetiquetado.not.is.null,apto_sdmdu_blister.not.is.null,solo_envase_clinico.not.is.null');
-    }
-
-    const { data, error } = await query;
     if (error) throw error;
-    globalData = globalData.concat(data || []);
-    if ((data || []).length < PAGE_SIZE) break;
-    page++;
+    
+    return data || [];
+  } catch (err) {
+    console.error('Error exportando datos:', err);
+    throw err;
   }
-
-  if (!user) return globalData;
-
-  const cns = globalData.map(g => String(g.cn));
-  const userMap = new Map();
-  for (let i = 0; i < cns.length; i += 200) {
-    const chunk = cns.slice(i, i + 200);
-    let uQuery = supabase.from(USER_FARMACIA_TABLE).select('*').in('cn', chunk).eq('user_id', user.id);
-    if (modo === 'mi_farmacia') uQuery = uQuery.eq('en_mi_farmacia', true);
-    const { data: uData } = await uQuery;
-    (uData || []).forEach(u => userMap.set(String(u.cn), u));
-  }
-
-  let finalResults = globalData.map(g => {
-    const u = userMap.get(String(g.cn));
-    return {
-      ...g,
-      en_mi_farmacia: u?.en_mi_farmacia ?? false,
-      notas: u?.notas ?? '',
-      fecha_clasificacion: u?.fecha_clasificacion || g.updated_at,
-    };
-  });
-
-  if (modo === 'mi_farmacia') {
-    finalResults = finalResults.filter(r => r.en_mi_farmacia === true);
-  }
-
-  return finalResults;
 }
 
-// ─── ALTERNATIVAS SDMDU ────────────────────────────────────────────────────────
-
-/**
- * Busca alternativas de un medicamento con el mismo principio activo, dosis, forma y vía,
- * y las clasifica en compatibles (apto SDMDU) y pendientes de evaluar.
- */
 export async function getAlternativasSDMDU(medicamento) {
   const { cn, principio_activo, dosis, forma_farmaceutica, via_administracion } = medicamento;
   
@@ -806,57 +679,24 @@ export async function getMisLaboratoriosData() {
     .eq('user_id', user.id);
   if (platMedsError) throw platMedsError;
 
-  const platformMedsMap = new Map(); // cn -> array of platform names
+  const platformMedsMap = new Map();
   (platMedsData || []).forEach(pm => {
     if (!platformMedsMap.has(pm.cn)) platformMedsMap.set(pm.cn, []);
     platformMedsMap.get(pm.cn).push(pm.laboratorio_nombre);
   });
 
-  // 3. Obtener medicamentos nativos de la farmacia del usuario
-  let userFarmiaCNs = [];
-  let uPage = 0;
-  const PAGE_SIZE = 1000;
-  while (true) {
-    const { data: uData } = await supabase
-      .from(USER_FARMACIA_TABLE)
-      .select('cn')
-      .eq('user_id', user.id)
-      .eq('en_mi_farmacia', true)
-      .range(uPage * PAGE_SIZE, (uPage + 1) * PAGE_SIZE - 1);
-    
-    const chunkCNs = (uData || []).map(r => String(r.cn));
-    userFarmiaCNs = userFarmiaCNs.concat(chunkCNs);
-    if ((uData || []).length < PAGE_SIZE) break;
-    uPage++;
-  }
+  const customCNs = Array.from(platformMedsMap.keys());
 
-  // 4. Obtener catálogo para TODOS los CNs involucrados
-  const allNeededCNs = [...new Set([...userFarmiaCNs, ...Array.from(platformMedsMap.keys())])];
-  if (allNeededCNs.length === 0 && userLabsMap.size === 0) return [];
+  // 3. Obtener todo el catálogo cruzado en una sola petición RPC
+  const { data: allMeds, error: medsError } = await supabase.rpc('bc_get_user_catalog_with_custom', {
+    p_user_id: user.id,
+    p_custom_cns: customCNs
+  });
+  if (medsError) throw medsError;
 
-  let allMeds = [];
-  for (let i = 0; i < allNeededCNs.length; i += 200) {
-    const chunk = allNeededCNs.slice(i, i + 200);
-    const { data, error } = await supabase
-      .from(CATALOG_TABLE)
-      .select(`
-        *,
-        blistercheck_clasificacion_global (
-          apto_sdmdu_blister,
-          requiere_reenvasado,
-          requiere_reetiquetado,
-          solo_envase_clinico
-        )
-      `)
-      .in('cn', chunk);
-    if (error) throw error;
-    allMeds = allMeds.concat(data || []);
-  }
-
-  // 5. Agrupar por laboratorio / plataforma
+  // 4. Agrupar por laboratorio / plataforma
   const labMap = new Map();
   
-  // 5.1 Inicializar plataformas/laboratorios configurados manualmente para que aparezcan aunque estén vacíos
   for (const [labName, config] of userLabsMap.entries()) {
     labMap.set(labName, {
       laboratorio: labName,
@@ -868,24 +708,16 @@ export async function getMisLaboratoriosData() {
     });
   }
 
-  // 5.2 Distribuir los medicamentos en sus respectivos grupos
-  allMeds.forEach(med => {
+  (allMeds || []).forEach(med => {
     const isPlatformMed = platformMedsMap.has(med.cn);
-    const isPharmacyMed = userFarmiaCNs.includes(med.cn);
-
     const targetLabs = [];
     
-    // Si está en mi farmacia, pertenece a su laboratorio nativo
-    if (isPharmacyMed) {
-        targetLabs.push(med.laboratorio || 'Sin laboratorio');
-    }
+    targetLabs.push(med.laboratorio || 'Sin laboratorio');
     
-    // Si lo vinculé a plataformas manuales, pertenece a esas plataformas
     if (isPlatformMed) {
         targetLabs.push(...platformMedsMap.get(med.cn));
     }
 
-    // Evitar duplicados (por si una plataforma se llama igual que el laboratorio original, aunque es raro)
     const uniqueLabs = [...new Set(targetLabs)];
 
     uniqueLabs.forEach(labName => {
@@ -901,34 +733,29 @@ export async function getMisLaboratoriosData() {
       }
 
       const lab = labMap.get(labName);
-      
-      // Marcar si este medicamento fue añadido manualmente a esta plataforma
-      // Clonamos el objeto para no modificar el base si pertenece a varios grupos
       const medCopy = { ...med, is_manual_link: isPlatformMed && platformMedsMap.get(med.cn).includes(labName) };
       
       lab.medicamentos.push(medCopy);
       lab.total++;
       
-      const clas = Array.isArray(med.blistercheck_clasificacion_global) ? med.blistercheck_clasificacion_global[0] : med.blistercheck_clasificacion_global;
+      const clas = med.blistercheck_clasificacion_global;
       if (clas && clas.apto_sdmdu_blister === true) {
         lab.aptos_sdmdu++;
       }
     });
   });
 
-  // 6. Convertir a array y calcular porcentajes
+  // 5. Convertir a array y calcular porcentajes
   const result = Array.from(labMap.values()).map(lab => {
-    lab.medicamentos.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-    return {
-      ...lab,
-      porcentaje_sdmdu: lab.total > 0 ? Math.round((lab.aptos_sdmdu / lab.total) * 100) : 0,
-    };
+    const p = lab.total > 0 ? Math.round((lab.aptos_sdmdu / lab.total) * 100) : 0;
+    return { ...lab, porcentaje: p };
   });
 
-  // Ordenar alfabéticamente
   result.sort((a, b) => a.laboratorio.localeCompare(b.laboratorio));
+
   return result;
 }
+
 
 export async function savePedidoMinimo(laboratorio, pedidoMinimo) {
   const { data: { user } } = await supabase.auth.getUser();
