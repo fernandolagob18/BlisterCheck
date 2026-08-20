@@ -61,7 +61,8 @@ export async function getClasificacionesByCNs(cns) {
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
   if (validCNs.length === 0) return new Map();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
   const CHUNK_SIZE = 200;
 
   let globalResults = [];
@@ -125,7 +126,8 @@ export async function searchAvanzado(filtros = {}) {
                                    filtros.soloEnMiFarmacia || 
                                    (filtros.estadoAcondicionamiento && filtros.estadoAcondicionamiento !== 'todos');
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
 
   try {
     const res = await supabase.rpc('bc_search_avanzado', {
@@ -182,12 +184,33 @@ export async function getViasAdministracion() {
 // ─── CLASIFICACIÓN ────────────────────────────────────────────────────────────
 
 /**
+ * Obtiene el perfil público (nombre + hospital) de un usuario dado su ID.
+ * Se usa para mostrar quién realizó la última clasificación global.
+ * Devuelve null si el ID no se proporciona o si hay un error.
+ */
+async function fetchClasificadorProfile(userId) {
+  if (!userId) return null;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('nombre, hospital')
+    .eq('id', userId)
+    .maybeSingle();
+  if (error) {
+    console.warn('No se pudo cargar el perfil del clasificador:', error.message);
+    return null;
+  }
+  return data; // { nombre, hospital } o null
+}
+
+/**
  * Obtiene la clasificación combinada de una presentación.
  * Combina la base global SDMDU con los datos privados del hospital del usuario.
+ * Incluye el perfil del último clasificador global (nombre + hospital).
  */
 export async function getClasificacion(cn) {
   if (!cn) return null;
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
 
   const [{ data: globalData }, { data: userData }] = await Promise.all([
     supabase.from(GLOBAL_CLASIFICACION_TABLE).select('*').eq('cn', String(cn)).maybeSingle(),
@@ -195,6 +218,9 @@ export async function getClasificacion(cn) {
   ]);
 
   if (!globalData && !userData) return null;
+
+  // Obtener el perfil del usuario que hizo la última clasificación global
+  const clasificadoPor = await fetchClasificadorProfile(globalData?.updated_by ?? null);
 
   return {
     cn: String(cn),
@@ -206,6 +232,7 @@ export async function getClasificacion(cn) {
     notas:                 userData?.notas                   ?? '',
     updated_at:            globalData?.updated_at || userData?.updated_at || null,
     fecha_clasificacion:   userData?.fecha_clasificacion || globalData?.updated_at || null,
+    clasificado_por:       clasificadoPor, // { nombre, hospital } | null
   };
 }
 
@@ -222,7 +249,8 @@ export async function getClasificacion(cn) {
  *   Cambios en `en_mi_farmacia` o `notas` NO afectan la fecha de actualización global.
  */
 export async function saveClasificacion(cn, clasificacion, clasificacionAnterior = null) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
   if (!user) throw new Error("Debe iniciar sesión para guardar clasificaciones.");
 
   const cnStr = String(cn);
@@ -264,6 +292,9 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
   if (globalRes.error) throw globalRes.error;
   if (userRes.error) throw userRes.error;
 
+  // Obtener el perfil del usuario actual para devolverlo junto con la clasificación guardada
+  const clasificadoPor = await fetchClasificadorProfile(user.id);
+
   return {
     cn: cnStr,
     requiere_reenvasado:   globalRes.data.requiere_reenvasado,
@@ -273,6 +304,7 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
     en_mi_farmacia:        userRes.data.en_mi_farmacia,
     notas:                 userRes.data.notas,
     updated_at:            globalRes.data.updated_at,
+    clasificado_por:       clasificadoPor, // { nombre, hospital } | null
   };
 }
 
@@ -280,7 +312,8 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
  * Obtiene todas las clasificaciones (para stats y export)
  */
 export async function getAllClasificaciones() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
 
   let globalData = [];
   let page = 0;
@@ -333,7 +366,8 @@ export async function getAllClasificaciones() {
 // ─── ESTADÍSTICAS POR LABORATORIO ─────────────────────────────────────────────
 
 export async function getEstadisticasPorLaboratorio(soloMiFarmacia = false) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
 
   try {
     const res = await supabase.rpc('bc_get_estadisticas_laboratorios', {
@@ -362,7 +396,8 @@ export async function getEstadisticasPorLaboratorio(soloMiFarmacia = false) {
 // ─── INFO GENERAL DEL CATÁLOGO ────────────────────────────────────────────────
 
 export async function getCatalogInfo() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
 
   const [
     { count: totalCatalogo },
@@ -394,7 +429,8 @@ export async function getCatalogInfo() {
  * @param {string} modo 'todos' | 'clasificados' | 'mi_farmacia'
  */
 export async function getExportData(modo = 'clasificados') {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
 
   try {
     const { data, error } = await supabase.rpc('bc_get_export_data', {
@@ -606,7 +642,8 @@ export async function getExistingCatalogCNs(cns) {
  */
 export async function bulkMarkEnMiFarmacia(cns) {
   if (!cns || cns.length === 0) return 0;
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
   if (!user) throw new Error("Debe iniciar sesión para realizar esta acción.");
 
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
@@ -662,7 +699,8 @@ export async function bulkMarkEnMiFarmacia(cns) {
 const USER_LABORATORIOS_TABLE = 'blistercheck_user_laboratorios';
 
 export async function getMisLaboratoriosData() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
   if (!user) return [];
 
   // 1. Obtener configuraciones de laboratorios/plataformas del usuario
@@ -765,7 +803,8 @@ export async function getMisLaboratoriosData() {
 
 
 export async function savePedidoMinimo(laboratorio, pedidoMinimo) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
   if (!user) throw new Error("Debe iniciar sesión.");
 
   const payload = {
@@ -785,8 +824,9 @@ export async function savePedidoMinimo(laboratorio, pedidoMinimo) {
   return data;
 }
 export async function createCustomPlatform(laboratorio_nombre, pedidoMinimo) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Debe iniciar sesiÃ³n.");
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
+  if (!user) throw new Error("Debe iniciar sesión.");
 
   const payload = {
     user_id: user.id,
@@ -807,8 +847,9 @@ export async function createCustomPlatform(laboratorio_nombre, pedidoMinimo) {
 }
 
 export async function deleteCustomPlatform(laboratorio_nombre) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Debe iniciar sesiÃ³n.");
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
+  if (!user) throw new Error("Debe iniciar sesión.");
 
   // Delete from user_laboratorios
   const { error: err1 } = await supabase
@@ -831,8 +872,9 @@ export async function deleteCustomPlatform(laboratorio_nombre) {
 }
 
 export async function addMedicationToPlatform(laboratorio_nombre, cn) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Debe iniciar sesiÃ³n.");
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
+  if (!user) throw new Error("Debe iniciar sesión.");
 
   const { data, error } = await supabase
     .from('blistercheck_user_plataforma_medicamentos')
@@ -849,8 +891,9 @@ export async function addMedicationToPlatform(laboratorio_nombre, cn) {
 }
 
 export async function removeMedicationFromPlatform(laboratorio_nombre, cn) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Debe iniciar sesiÃ³n.");
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
+  if (!user) throw new Error("Debe iniciar sesión.");
 
   const { error } = await supabase
     .from('blistercheck_user_plataforma_medicamentos')

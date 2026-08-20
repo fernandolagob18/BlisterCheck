@@ -1,9 +1,53 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { UploadCloud, FileText, CheckCircle, AlertTriangle, XCircle, Info, RefreshCw, FileDown } from 'lucide-react';
 import { getMedicationStatusByCNs, findAlternatives } from '../../services/blistercheckService';
+
+/**
+ * Extrae el valor primitivo de una celda ExcelJS.
+ */
+function getCellValue(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'object') {
+    if (Array.isArray(val.richText)) return val.richText.map(r => r.text).join('');
+    if (typeof val.text === 'string') return val.text;
+    if (val instanceof Date) return val;
+  }
+  return val;
+}
+
+/**
+ * Lee un archivo .xlsx o .csv y devuelve un array de arrays.
+ */
+async function parseSpreadsheet(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    const text = await file.text();
+    const firstLine = text.split('\n')[0] || '';
+    const sep = (firstLine.split(';').length >= firstLine.split(',').length) ? ';' : ',';
+    return text
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line =>
+        line.split(sep).map(cell =>
+          cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"')
+        )
+      );
+  }
+
+  const data = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(data);
+  const worksheet = workbook.worksheets[0];
+  const json = [];
+  worksheet.eachRow(row => {
+    json.push(row.values.slice(1).map(getCellValue));
+  });
+  return json;
+}
 
 const createPieChartBase64 = (data, title) => {
   const canvas = document.createElement('canvas');
@@ -97,11 +141,18 @@ export default function GuiaOptimizer() {
     setError(null);
 
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      // 1. Validación de seguridad (Magic Bytes)
+      const isXlsx = file.name.toLowerCase().endsWith('.xlsx');
+      if (isXlsx) {
+        const buffer = await file.slice(0, 4).arrayBuffer();
+        const view = new Uint8Array(buffer);
+        const headerHex = Array.from(view).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        if (headerHex !== '504B0304') {
+          throw new Error('El archivo ha sido modificado o no es un documento de Excel (.xlsx) válido.');
+        }
+      }
+
+      const json = await parseSpreadsheet(file);
 
       if (json.length === 0) throw new Error('El archivo está vacío');
 
@@ -339,7 +390,7 @@ export default function GuiaOptimizer() {
           <input 
             type="file" 
             id="excel-upload" 
-            accept=".xlsx, .xls" 
+            accept=".xlsx, .csv" 
             onChange={handleFileUpload} 
             className="file-input-hidden"
           />

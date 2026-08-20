@@ -62,9 +62,9 @@ export const authService = {
 
   // Send password reset email
   async resetPassword(email) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      // redirectTo: 'https://tusitio.com/reset-password', // Update this for production
-    });
+    // redirectTo apunta al origen actual para que funcione tanto en local como en producción
+    const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) throw error;
   },
 

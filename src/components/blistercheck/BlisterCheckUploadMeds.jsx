@@ -1,7 +1,58 @@
 import React, { useState } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { getExistingCatalogCNs, bulkMarkEnMiFarmacia } from '../../services/blistercheckService';
+
+/**
+ * Extrae el valor primitivo de una celda ExcelJS.
+ * Las celdas pueden ser: string, number, Date, { text } (hyperlink), { richText } (rich text).
+ */
+function getCellValue(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'object') {
+    if (Array.isArray(val.richText)) return val.richText.map(r => r.text).join('');
+    if (typeof val.text === 'string') return val.text;
+    if (val instanceof Date) return val;
+  }
+  return val;
+}
+
+/**
+ * Lee un archivo .xlsx o .csv y devuelve un array de arrays (equivalente a
+ * sheet_to_json con { header: 1 }).
+ * - xlsx: parsea con ExcelJS (sin vulnerabilidades conocidas)
+ * - csv:  parsea con texto nativo (sin dependencia adicional)
+ */
+async function parseSpreadsheet(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'csv') {
+    const text = await file.text();
+    // Detectar separador dominante: ';' (europeo) o ',' (inglés)
+    const firstLine = text.split('\n')[0] || '';
+    const sep = (firstLine.split(';').length >= firstLine.split(',').length) ? ';' : ',';
+    return text
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line =>
+        line.split(sep).map(cell =>
+          cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"')
+        )
+      );
+  }
+
+  // .xlsx
+  const data = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(data);
+  const worksheet = workbook.worksheets[0];
+  const json = [];
+  worksheet.eachRow(row => {
+    // row.values es 1-indexed (índice 0 = null), slice(1) lo normaliza a 0-indexed
+    json.push(row.values.slice(1).map(getCellValue));
+  });
+  return json;
+}
 
 export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
   const [loading, setLoading] = useState(false);
@@ -9,7 +60,7 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
   const [matchDetails, setMatchDetails] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -17,22 +68,28 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
     setError(null);
     setMatchDetails(null);
 
-    const reader = new FileReader();
-    reader.onload = async (evt) => {
-      try {
-        const data = evt.target.result;
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
+    try {
+        // 1. Validación de seguridad (Magic Bytes)
+        // Evita que un ejecutable renombrado a .xlsx engañe al parser
+        const isXlsx = file.name.toLowerCase().endsWith('.xlsx');
+        if (isXlsx) {
+          const buffer = await file.slice(0, 4).arrayBuffer();
+          const view = new Uint8Array(buffer);
+          const headerHex = Array.from(view).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+          // 504B0304 es la firma de los archivos ZIP (formato base de .xlsx)
+          if (headerHex !== '504B0304') {
+            throw new Error('El archivo ha sido modificado o no es un documento de Excel (.xlsx) válido.');
+          }
+        }
+
         // Obtener datos como array de arrays para buscar la columna CN flexiblemente
-        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const json = await parseSpreadsheet(file);
         if (!json || json.length < 2) {
           throw new Error('El archivo parece estar vacío o no tiene el formato correcto.');
         }
 
-        const headers = json[0].map(h => String(h).toLowerCase().trim());
-        const cnIndex = headers.findIndex(h => 
+        const headers = json[0].map(h => String(h ?? '').toLowerCase().trim());
+        const cnIndex = headers.findIndex(h =>
           h === 'cn' || h === 'código nacional' || h === 'codigo nacional'
         );
 
@@ -73,14 +130,6 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
       } finally {
         setLoading(false);
       }
-    };
-
-    reader.onerror = () => {
-      setError('Error leyendo el archivo.');
-      setLoading(false);
-    };
-
-    reader.readAsArrayBuffer(file);
   };
 
   const handleConfirm = async () => {
@@ -135,10 +184,10 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
                 <div className="bc-upload-zone" style={{ border: '2px dashed var(--color-border)', borderRadius: '8px', padding: '2.5rem 1rem', textAlign: 'center', background: 'var(--color-surface-hover)', cursor: 'pointer', position: 'relative', transition: 'all 0.2s' }}>
                   <FileSpreadsheet size={40} style={{ color: 'var(--color-primary)', marginBottom: '1rem', opacity: 0.8 }} />
                   <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--color-text)' }}>Arrastra tu archivo aquí o haz clic para subir</p>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Formatos soportados: .xlsx, .xls, .csv</p>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Formatos soportados: .xlsx, .csv</p>
                   <input 
                     type="file" 
-                    accept=".xlsx, .xls, .csv" 
+                    accept=".xlsx, .csv" 
                     onChange={handleFileUpload}
                     style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
                   />

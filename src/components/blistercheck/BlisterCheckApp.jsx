@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   ShieldCheck, 
   BarChart2, 
@@ -48,26 +48,37 @@ function BlisterCheckApp({ onGoToProfile }) {
       .catch(err => console.error('Error cargando info catálogo:', err));
   }, []);
 
+  // Ref-counter para cancelar peticiones obsoletas en handleSelectMedicamento.
+  // Cada clic en un medicamento incrementa el contador; solo la petición cuyo ID
+  // coincide con el valor actual del ref puede hacer setState.
+  // Esto evita que un clic rápido en dos medicamentos distintos muestre
+  // la clasificación del primero sobre el segundo (race condition).
+  const selectRequestRef = useRef(0);
+
   const handleSelectMedicamento = useCallback(async (medicamento) => {
+    // Capturar el ID de esta petición antes de cualquier await
+    const requestId = ++selectRequestRef.current;
+
     setMedicamentoSeleccionado(medicamento);
     setClasificacionActual(null);
     setDesabastecimientoActual(null);
     setVistaActiva('detail');
 
-    let isCurrent = true;
     try {
       const [clas, desab] = await Promise.all([
         getClasificacion(medicamento.cn),
         getDesabastecimientoByCN(medicamento.cn),
       ]);
-      if (isCurrent) {
+      // Solo aplicar si esta sigue siendo la petición más reciente
+      if (requestId === selectRequestRef.current) {
         setClasificacionActual(clas);
         setDesabastecimientoActual(desab);
       }
     } catch (err) {
-      console.error('Error cargando datos del medicamento:', err);
+      if (requestId === selectRequestRef.current) {
+        console.error('Error cargando datos del medicamento:', err);
+      }
     }
-    return () => { isCurrent = false; };
   }, []);
 
   const handleClasificacionGuardada = useCallback((nuevaClasificacion) => {

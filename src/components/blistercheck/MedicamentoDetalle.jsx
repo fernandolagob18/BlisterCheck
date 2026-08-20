@@ -49,9 +49,13 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
   const [saving, setSaving] = useState(false);
   const [savedOk, setSavedOk] = useState(false);
 
-  // Timestamp de la última actualización (viene de Supabase updated_at o fecha_clasificacion)
+  // Timestamp y autor de la última actualización global
   const [ultimaActualizacion, setUltimaActualizacion] = useState(
     clasificacion?.updated_at || clasificacion?.fecha_clasificacion || null
+  );
+  // Perfil del hospital/usuario que realizó la última clasificación global
+  const [clasificadoPor, setClasificadoPor] = useState(
+    clasificacion?.clasificado_por ?? null // { nombre, hospital } | null
   );
 
   const [alternativas, setAlternativas] = useState({ compatibles: [], pendientes: [] });
@@ -69,6 +73,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
         notas:                  clasificacion.notas                  ?? '',
       });
       setUltimaActualizacion(clasificacion.updated_at || clasificacion.fecha_clasificacion || null);
+      setClasificadoPor(clasificacion.clasificado_por ?? null);
     }
   }, [clasificacion]);
 
@@ -81,7 +86,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'blistercheck_clasificacion_global', filter: `cn=eq.${medicamento.cn}` },
-        (payload) => {
+        async (payload) => {
           const newData = payload.new;
           if (newData) {
             setForm(prev => ({
@@ -92,6 +97,16 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
               solo_envase_clinico: newData.solo_envase_clinico ?? false,
             }));
             setUltimaActualizacion(newData.updated_at);
+
+            // Actualizar el badge del clasificador si el cambio viene de otro usuario
+            if (newData.updated_by) {
+              const { data: perfil } = await supabase
+                .from('profiles')
+                .select('nombre, hospital')
+                .eq('id', newData.updated_by)
+                .maybeSingle();
+              setClasificadoPor(perfil ?? null);
+            }
           }
         }
       ).subscribe();
@@ -181,11 +196,13 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
   const handleGuardar = useCallback(async () => {
     setSaving(true);
     try {
-      const saved = await saveClasificacion(medicamento.cn, form, clasificacion);  // clasificación por CN
+      const saved = await saveClasificacion(medicamento.cn, form, clasificacion);
       setSavedOk(true);
       const newDate = saved?.updated_at || saved?.fecha_clasificacion;
       if (newDate) setUltimaActualizacion(newDate);
-      onClasificacionGuardada({ 
+      // Actualizar el badge del clasificador con el perfil propio
+      if (saved?.clasificado_por !== undefined) setClasificadoPor(saved.clasificado_por);
+      onClasificacionGuardada({
         cn: medicamento.cn,
         ...form,
         updated_at: saved?.updated_at,
@@ -194,8 +211,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
       setTimeout(() => setSavedOk(false), 2000);
     } catch (err) {
       console.error('Error guardando clasificación:', err);
-      const msg = err?.message || err?.details || JSON.stringify(err);
-      alert(`Error al guardar: ${msg}`);
+      alert('Hubo un problema al guardar los datos. Por favor, revisa tu conexión e inténtalo de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -420,7 +436,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
               )}
             </button>
 
-            {/* Timestamp de última actualización */}
+            {/* Timestamp de última actualización + hospital clasificador */}
             <div className={`bc-last-update ${ultimaActualizacion ? 'bc-last-update--has-date' : 'bc-last-update--empty'}`}>
               <Clock size={13} className="bc-last-update-icon" />
               {ultimaActualizacion ? (
@@ -432,6 +448,27 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
                       hour: '2-digit', minute: '2-digit'
                     }).format(new Date(ultimaActualizacion))}
                   </strong>
+                  {/* Badge con el hospital o nombre del clasificador */}
+                  {clasificadoPor && (clasificadoPor.hospital || clasificadoPor.nombre) && (
+                    <span
+                      title={`Clasificado por: ${clasificadoPor.nombre || ''}`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        marginLeft: '8px',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        background: 'var(--color-primary-light, #e0f2fe)',
+                        color: 'var(--color-primary-dark, #0369a1)',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      🏥 {clasificadoPor.hospital || clasificadoPor.nombre}
+                    </span>
+                  )}
                 </span>
               ) : (
                 <span>Sin clasificar aún</span>

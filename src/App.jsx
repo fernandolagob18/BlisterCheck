@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -11,6 +11,17 @@ function AppContent() {
   const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState('landing'); // 'landing', 'login', 'register', 'app', 'profile'
 
+  // Redirigir según el estado de autenticación cada vez que cambia el usuario.
+  // Se usa useEffect para evitar llamar a setState durante la fase de render,
+  // lo que viola las reglas de React y provoca bucles en StrictMode.
+  useEffect(() => {
+    if (user && ['landing', 'login', 'register'].includes(currentView)) {
+      setCurrentView('app');
+    } else if (!user && ['app', 'profile'].includes(currentView)) {
+      setCurrentView('landing');
+    }
+  }, [user]); // Solo reacciona al cambio de sesión (login / logout), no a cada navegación manual
+
   // Si está cargando la sesión, mostramos un loader
   if (loading) {
     return (
@@ -18,16 +29,6 @@ function AppContent() {
         <div className="bc-mini-spinner" style={{ width: '40px', height: '40px' }} />
       </div>
     );
-  }
-
-  // Si hay usuario y estábamos en rutas públicas, vamos a la app
-  if (user && (currentView === 'landing' || currentView === 'login' || currentView === 'register')) {
-    setCurrentView('app');
-  }
-
-  // Si no hay usuario y estábamos en app o perfil, vamos al landing
-  if (!user && (currentView === 'app' || currentView === 'profile')) {
-    setCurrentView('landing');
   }
 
   // Router simple basado en estado
