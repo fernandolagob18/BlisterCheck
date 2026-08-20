@@ -158,12 +158,12 @@ const REFERENCIAS = [
     hallazgo: 'Factor de emisión mix eléctrico nacional España 2025: 0,258 kg CO₂e/kWh. (El dato exacto se publica en el interior del archivo Excel de la Calculadora descargable).',
   },
   {
-    autores: 'García Marco, D. (Hospital Nacional de Parapléjicos, SESCAM)',
-    titulo: 'Proyecto "Dale color a tu dosis unitaria" / Reetiquetado vs Reenvasado',
+    autores: 'García Marco, D. et al. (SESCAM)',
+    titulo: 'Proyecto "No reenvases por desconocimiento" / Sostenibilidad en Farmacia Hospitalaria',
     anio: '2023-2026',
     tipo: 'Premio SEFH / Publicación',
     url: 'https://scmfh.es/',
-    hallazgo: 'La sustitución del reenvasado por el reetiquetado de envases comerciales originales en dosis unitarias ha evitado el reenvasado de más de 1,27 millones de comprimidos anuales, ahorrando 17 km de material (plástico/aluminio), 866 kg de peso y más de 113.000 minutos de trabajo, mejorando a su vez la seguridad frente a la isoapariencia.',
+    hallazgo: 'La sustitución de medicamentos reenvasados por presentaciones en dosis unitarias de origen comercial en 15 hospitales públicos de Castilla-La Mancha evitó el reenvasado de más de 1,27 millones de comprimidos anuales, ahorrando 17 km de material de embalaje, 866 kg de peso y más de 113.000 minutos de trabajo, mejorando así la eficiencia y sostenibilidad del servicio.',
   },
   {
     autores: 'SIGRE Medicamento y Medio Ambiente',
@@ -273,11 +273,9 @@ export default function SostenibilidadPage() {
                   <Leaf size={20} />
                 </div>
                 <div>
-                  <strong>Proyecto "Dale color a tu dosis unitaria" (Hospital Nacional de Parapléjicos, SESCAM)</strong>
+                  <strong>Proyecto "No reenvases por desconocimiento" (García Marco, D. et al., SESCAM)</strong>
                   <p>
-                    El análisis de este galardonado proyecto de Farmacia Hospitalaria demostró que,
-                    al sustituir los medicamentos reenvasados por el reetiquetado de las dosis unitarias originales,
-                    fue posible evitar anualmente:
+                    El análisis de este galardonado proyecto de Farmacia Hospitalaria, que evaluó la gestión en 15 hospitales públicos de Castilla-La Mancha, demostró que al priorizar medicamentos comerciales que ya vienen preparados en dosis unitarias aptas para SDMDU, fue posible evitar anualmente:
                   </p>
                   <div className="eco-stats-row">
                     <div className="eco-stat-pill">
@@ -293,7 +291,7 @@ export default function SostenibilidadPage() {
                       <span className="eco-stat-pill__label">de residuos plásticos/aluminio evitados</span>
                     </div>
                   </div>
-                  <p className="eco-ref-small">Fuente: Premio SEFH / D. García Marco (2023-2026)</p>
+                  <p className="eco-ref-small">Fuente: Premio SEFH / Publicación (2023-2026)</p>
                 </div>
               </div>
 
