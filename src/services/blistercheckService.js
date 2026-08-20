@@ -259,31 +259,26 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
   const globalPayload = { cn: cnStr, updated_by: user.id };
   let globalHasChanges = false;
 
-  if (clasificacionAnterior === null) {
-    // Es la primera vez que se clasifica, enviamos todo
-    globalPayload.requiere_reenvasado = clasificacion.requiere_reenvasado ?? null;
-    globalPayload.requiere_reetiquetado = clasificacion.requiere_reetiquetado ?? null;
-    globalPayload.apto_sdmdu_blister = clasificacion.apto_sdmdu_blister ?? null;
-    globalPayload.solo_envase_clinico = clasificacion.solo_envase_clinico ?? false;
+  const antReenvasado = clasificacionAnterior?.requiere_reenvasado ?? null;
+  const antReetiquetado = clasificacionAnterior?.requiere_reetiquetado ?? null;
+  const antApto = clasificacionAnterior?.apto_sdmdu_blister ?? null;
+  const antEC = clasificacionAnterior?.solo_envase_clinico ?? false;
+
+  if (clasificacion.requiere_reenvasado !== antReenvasado) {
+    globalPayload.requiere_reenvasado = clasificacion.requiere_reenvasado;
     globalHasChanges = true;
-  } else {
-    // Comparamos para enviar solo lo que realmente cambió
-    if (clasificacion.requiere_reenvasado !== (clasificacionAnterior.requiere_reenvasado ?? null)) {
-      globalPayload.requiere_reenvasado = clasificacion.requiere_reenvasado;
-      globalHasChanges = true;
-    }
-    if (clasificacion.requiere_reetiquetado !== (clasificacionAnterior.requiere_reetiquetado ?? null)) {
-      globalPayload.requiere_reetiquetado = clasificacion.requiere_reetiquetado;
-      globalHasChanges = true;
-    }
-    if (clasificacion.apto_sdmdu_blister !== (clasificacionAnterior.apto_sdmdu_blister ?? null)) {
-      globalPayload.apto_sdmdu_blister = clasificacion.apto_sdmdu_blister;
-      globalHasChanges = true;
-    }
-    if (clasificacion.solo_envase_clinico !== (clasificacionAnterior.solo_envase_clinico ?? false)) {
-      globalPayload.solo_envase_clinico = clasificacion.solo_envase_clinico;
-      globalHasChanges = true;
-    }
+  }
+  if (clasificacion.requiere_reetiquetado !== antReetiquetado) {
+    globalPayload.requiere_reetiquetado = clasificacion.requiere_reetiquetado;
+    globalHasChanges = true;
+  }
+  if (clasificacion.apto_sdmdu_blister !== antApto) {
+    globalPayload.apto_sdmdu_blister = clasificacion.apto_sdmdu_blister;
+    globalHasChanges = true;
+  }
+  if (clasificacion.solo_envase_clinico !== antEC) {
+    globalPayload.solo_envase_clinico = clasificacion.solo_envase_clinico;
+    globalHasChanges = true;
   }
 
   // 2. Guardar en los datos PRIVADOS DEL HOSPITAL
