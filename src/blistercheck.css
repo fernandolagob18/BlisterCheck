@@ -3441,17 +3441,20 @@
   max-width: 650px;
 }
 
-.eco-highlight-box__icon {
-  font-size: 2rem;
+.eco-highlight-box__icon-wrap {
   flex-shrink: 0;
-  line-height: 1;
+  display: flex;
+  align-items: flex-start;
+  color: var(--color-primary);
+  margin-top: 2px;
 }
 
 .eco-highlight-box strong {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--color-text);
   margin-bottom: 0.4rem;
+  line-height: 1.3;
 }
 
 .eco-highlight-box p {
@@ -3464,8 +3467,9 @@
 .eco-stats-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin: 0.75rem 0 0.5rem;
+  justify-content: flex-start;
 }
 
 .eco-stat-pill {
@@ -3475,14 +3479,15 @@
   background: white;
   border: 1px solid var(--color-primary-pastel);
   border-radius: var(--radius-md);
-  padding: 0.5rem 1rem;
-  min-width: 130px;
+  padding: 0.6rem 0.8rem;
+  min-width: 120px;
+  flex: 1 1 auto;
   text-align: center;
   box-shadow: var(--shadow-sm);
 }
 
 .eco-stat-pill__value {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--color-primary-dark);
   letter-spacing: -0.02em;
