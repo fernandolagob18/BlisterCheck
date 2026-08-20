@@ -981,7 +981,7 @@
 .bc-med-card:hover .bc-med-card__arrow { color: var(--color-primary); }
 
 /* ── Detalle ── */
-.bc-detalle { max-width: 1100px; }
+.bc-detalle { width: 100%; max-width: 1400px; margin: 0 auto; }
 
 .bc-detalle-back {
   display: inline-flex; align-items: center; gap: 0.4rem;
@@ -994,10 +994,10 @@
 
 .bc-detalle-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 2fr 1fr;
   gap: 1.5rem; align-items: start;
 }
-@media (max-width: 800px) { .bc-detalle-layout { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .bc-detalle-layout { grid-template-columns: 1fr; } }
 
 .bc-detalle-info, .bc-detalle-clasificacion { padding: 1.75rem; }
 
