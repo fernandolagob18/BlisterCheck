@@ -119,6 +119,7 @@ export default function GuiaOptimizer() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
+  const [soloConAlternativas, setSoloConAlternativas] = useState(false);
 
   const handleFileUpload = (e) => {
     const uploadedFile = e.target.files[0];
@@ -470,14 +471,29 @@ export default function GuiaOptimizer() {
           </div>
 
           <div className="report-details">
-            <h3><AlertTriangle size={20} className="text-orange" /> Oportunidades de Mejora ({report.problematicos.length})</h3>
-            <p className="subtitle">Estos medicamentos de tu guía requieren reenvasado o reetiquetado. Te sugerimos alternativas viables.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <h3 style={{ margin: 0 }}><AlertTriangle size={20} className="text-orange" /> Oportunidades de Mejora ({report.problematicos.length})</h3>
+                <p className="subtitle" style={{ margin: '0.5rem 0 0' }}>Estos medicamentos de tu guía requieren reenvasado o reetiquetado.</p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', background: 'var(--color-bg-glass)', padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid var(--color-border)' }}>
+                <input 
+                  type="checkbox" 
+                  checked={soloConAlternativas} 
+                  onChange={(e) => setSoloConAlternativas(e.target.checked)}
+                  style={{ cursor: 'pointer' }}
+                />
+                Solo mostrar con alternativas aptas
+              </label>
+            </div>
             
             {report.problematicos.length === 0 ? (
               <div className="empty-state glass-panel">¡Excelente! Ningún medicamento clasificado requiere reenvasado.</div>
             ) : (
               <div className="problematic-list">
-                {report.problematicos.map((item, idx) => (
+                {report.problematicos
+                  .filter(item => !soloConAlternativas || item.alternativas.length > 0)
+                  .map((item, idx) => (
                   <div key={idx} className="problematic-card glass-panel">
                     <div className="med-original">
                       <div className="med-header">
