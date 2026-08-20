@@ -55,6 +55,8 @@ function BlisterCheckApp({ onGoToProfile }) {
   // la clasificación del primero sobre el segundo (race condition).
   const selectRequestRef = useRef(0);
 
+  const [loadingDetalle, setLoadingDetalle] = useState(false);
+
   const handleSelectMedicamento = useCallback(async (medicamento) => {
     // Capturar el ID de esta petición antes de cualquier await
     const requestId = ++selectRequestRef.current;
@@ -62,6 +64,7 @@ function BlisterCheckApp({ onGoToProfile }) {
     setMedicamentoSeleccionado(medicamento);
     setClasificacionActual(null);
     setDesabastecimientoActual(null);
+    setLoadingDetalle(true);
     setVistaActiva('detail');
 
     try {
@@ -77,6 +80,10 @@ function BlisterCheckApp({ onGoToProfile }) {
     } catch (err) {
       if (requestId === selectRequestRef.current) {
         console.error('Error cargando datos del medicamento:', err);
+      }
+    } finally {
+      if (requestId === selectRequestRef.current) {
+        setLoadingDetalle(false);
       }
     }
   }, []);
@@ -358,6 +365,7 @@ function BlisterCheckApp({ onGoToProfile }) {
               medicamento={medicamentoSeleccionado}
               clasificacion={clasificacionActual}
               desabastecimiento={desabastecimientoActual}
+              isLoading={loadingDetalle}
               onClasificacionGuardada={handleClasificacionGuardada}
               onVolver={handleVolverABusqueda}
               onSelectAlternativa={handleSelectMedicamento}

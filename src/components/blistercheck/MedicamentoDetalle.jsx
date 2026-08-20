@@ -36,7 +36,7 @@ function TristateToggle({ label, descripcion, value, onChange }) {
   );
 }
 
-function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardada, onVolver, onSelectAlternativa, desabastecimiento }) {
+function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardada, onVolver, onSelectAlternativa, desabastecimiento, isLoading }) {
   const [form, setForm] = useState({
     requiere_reenvasado:    clasificacion?.requiere_reenvasado    ?? null,
     requiere_reetiquetado:  clasificacion?.requiere_reetiquetado  ?? null,
@@ -316,7 +316,11 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
           </div>
 
           {/* Panel de desabastecimiento */}
-          {desabastecimiento && <DesabastecimientoPanel shortage={desabastecimiento} />}
+          {isLoading ? (
+            <div className="bc-skeleton" style={{ width: '100%', height: '90px', marginBottom: '20px', borderRadius: '8px' }}></div>
+          ) : (
+            desabastecimiento && <DesabastecimientoPanel shortage={desabastecimiento} />
+          )}
 
           {/* Links a documentación */}
           <div className="bc-detalle-docs">
@@ -347,133 +351,184 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
             <h3 className="bc-clas-title">Clasificación BlisterCheck</h3>
           </div>
 
-          <div className="bc-clas-body">
-
-            <TristateToggle
-              label="Requiere Reenvasado"
-              descripcion="El envase original no es apto para dosis unitaria y debe ser reenvasado"
-              value={form.requiere_reenvasado}
-              onChange={v => handleChange('requiere_reenvasado', v)}
-            />
-
-            <TristateToggle
-              label="Requiere Reetiquetado"
-              descripcion="Necesita etiqueta adicional con nombre, lote o caducidad"
-              value={form.requiere_reetiquetado}
-              onChange={v => handleChange('requiere_reetiquetado', v)}
-            />
-
-            <TristateToggle
-              label="Compatible con SDMDU (blíster OK)"
-              descripcion="Blíster fraccionable correctamente identificado: nombre, lote y caducidad visibles"
-              value={form.apto_sdmdu_blister}
-              onChange={v => handleChange('apto_sdmdu_blister', v)}
-            />
-
-            {/* Envase Clínico */}
-            <div className="bc-farmacia-toggle" onClick={() => handleToggle('solo_envase_clinico')}>
-              <div className="bc-farmacia-info">
-                <Package size={16} className="bc-ec-icon" />
+          <div className="bc-clas-body" style={{ position: 'relative' }}>
+            {isLoading ? (
+              <div className="bc-skeleton-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Skeleton para Reenvasado */}
                 <div>
-                  <span className="bc-farmacia-label">
-                    Envase Clínico
-                    {form.solo_envase_clinico && (
-                      <span className="bc-badge bc-badge--ec" style={{ marginLeft: '0.5rem', verticalAlign: 'middle' }}>EC</span>
-                    )}
-                  </span>
-                  <span className="bc-farmacia-desc">La clasificación aplica únicamente al envase clínico (hospitalario)</span>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '40%' }}></div>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '90%', height: '12px' }}></div>
+                  <div className="bc-skeleton-row">
+                    <div className="bc-skeleton"></div>
+                    <div className="bc-skeleton"></div>
+                    <div className="bc-skeleton"></div>
+                  </div>
                 </div>
-              </div>
-              <div className={`bc-toggle-switch ${form.solo_envase_clinico ? 'on-ec' : ''}`}>
-                <div className="bc-toggle-thumb" />
-              </div>
-            </div>
-
-            {/* Separador */}
-            <hr className="bc-clas-divider" />
-
-            {/* Mi farmacia */}
-            <div className="bc-farmacia-toggle" onClick={() => handleToggle('en_mi_farmacia')}>
-              <div className="bc-farmacia-info">
-                <Home size={16} className="bc-farmacia-icon" />
+                {/* Skeleton para Reetiquetado */}
                 <div>
-                  <span className="bc-farmacia-label">En mi farmacia</span>
-                  <span className="bc-farmacia-desc">Usamos este medicamento en nuestra farmacia</span>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '40%' }}></div>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '85%', height: '12px' }}></div>
+                  <div className="bc-skeleton-row">
+                    <div className="bc-skeleton"></div>
+                    <div className="bc-skeleton"></div>
+                    <div className="bc-skeleton"></div>
+                  </div>
                 </div>
+                {/* Skeleton para Apto */}
+                <div>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '50%' }}></div>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '95%', height: '12px' }}></div>
+                  <div className="bc-skeleton-row">
+                    <div className="bc-skeleton"></div>
+                    <div className="bc-skeleton"></div>
+                    <div className="bc-skeleton"></div>
+                  </div>
+                </div>
+                <hr className="bc-clas-divider" />
+                {/* Skeleton Envase Clinico & Farmacia */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '30%', margin: 0 }}></div>
+                  <div className="bc-skeleton" style={{ width: '40px', height: '24px', borderRadius: '12px' }}></div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+                  <div className="bc-skeleton bc-skeleton-text" style={{ width: '40%', margin: 0 }}></div>
+                  <div className="bc-skeleton" style={{ width: '40px', height: '24px', borderRadius: '12px' }}></div>
+                </div>
+                <hr className="bc-clas-divider" />
+                {/* Skeleton Textarea */}
+                <div className="bc-skeleton" style={{ width: '100%', height: '80px' }}></div>
+                {/* Skeleton Guardar */}
+                <div className="bc-skeleton bc-skeleton-btn"></div>
               </div>
-              <div className={`bc-toggle-switch ${form.en_mi_farmacia ? 'on' : ''}`}>
-                <div className="bc-toggle-thumb" />
-              </div>
-            </div>
+            ) : (
+              <>
+                <TristateToggle
+                  label="Requiere Reenvasado"
+                  descripcion="El envase original no es apto para dosis unitaria y debe ser reenvasado"
+                  value={form.requiere_reenvasado}
+                  onChange={v => handleChange('requiere_reenvasado', v)}
+                />
 
-            {/* Separador */}
-            <hr className="bc-clas-divider" />
+                <TristateToggle
+                  label="Requiere Reetiquetado"
+                  descripcion="Necesita etiqueta adicional con nombre, lote o caducidad"
+                  value={form.requiere_reetiquetado}
+                  onChange={v => handleChange('requiere_reetiquetado', v)}
+                />
 
-            {/* Notas */}
-            <div className="bc-notas-section">
-              <label className="bc-notas-label">Notas</label>
-              <textarea
-                className="bc-notas-input"
-                placeholder="Observaciones internas, condiciones de almacenamiento, notas clínicas de tu centro..."
-                value={form.notas}
-                onChange={e => handleChange('notas', e.target.value)}
-                rows={4}
-              />
-            </div>
+                <TristateToggle
+                  label="Compatible con SDMDU (blíster OK)"
+                  descripcion="Blíster fraccionable correctamente identificado: nombre, lote y caducidad visibles"
+                  value={form.apto_sdmdu_blister}
+                  onChange={v => handleChange('apto_sdmdu_blister', v)}
+                />
 
-            {/* Botón guardar */}
-            <button
-              className={`bc-guardar-btn ${savedOk ? 'saved' : ''}`}
-              onClick={handleGuardar}
-              disabled={saving}
-            >
-              {saving ? (
-                <><div className="bc-mini-spinner" /> Guardando...</>
-              ) : savedOk ? (
-                <><CheckCircle size={16} /> ¡Guardado!</>
-              ) : (
-                <><Save size={16} /> Guardar clasificación</>
-              )}
-            </button>
+                {/* Envase Clínico */}
+                <div className="bc-farmacia-toggle" onClick={() => handleToggle('solo_envase_clinico')}>
+                  <div className="bc-farmacia-info">
+                    <Package size={16} className="bc-ec-icon" />
+                    <div>
+                      <span className="bc-farmacia-label">
+                        Envase Clínico
+                        {form.solo_envase_clinico && (
+                          <span className="bc-badge bc-badge--ec" style={{ marginLeft: '0.5rem', verticalAlign: 'middle' }}>EC</span>
+                        )}
+                      </span>
+                      <span className="bc-farmacia-desc">La clasificación aplica únicamente al envase clínico (hospitalario)</span>
+                    </div>
+                  </div>
+                  <div className={`bc-toggle-switch ${form.solo_envase_clinico ? 'on-ec' : ''}`}>
+                    <div className="bc-toggle-thumb" />
+                  </div>
+                </div>
 
-            {/* Timestamp de última actualización + hospital clasificador */}
-            <div className={`bc-last-update ${ultimaActualizacion ? 'bc-last-update--has-date' : 'bc-last-update--empty'}`}>
-              <Clock size={13} className="bc-last-update-icon" />
-              {ultimaActualizacion ? (
-                <span>
-                  Última actualización:{' '}
-                  <strong>
-                    {new Intl.DateTimeFormat('es-ES', {
-                      day: '2-digit', month: 'short', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit'
-                    }).format(new Date(ultimaActualizacion))}
-                  </strong>
-                  {/* Badge con el hospital o nombre del clasificador */}
-                  {clasificadoPor && (clasificadoPor.hospital || clasificadoPor.nombre) && (
-                    <span
-                      title={`Clasificado por: ${clasificadoPor.nombre || ''}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        marginLeft: '8px',
-                        padding: '2px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        background: 'var(--color-primary-light, #e0f2fe)',
-                        color: 'var(--color-primary-dark, #0369a1)',
-                        verticalAlign: 'middle',
-                      }}
-                    >
-                      🏥 {clasificadoPor.hospital || clasificadoPor.nombre}
-                    </span>
+                {/* Separador */}
+                <hr className="bc-clas-divider" />
+
+                {/* Mi farmacia */}
+                <div className="bc-farmacia-toggle" onClick={() => handleToggle('en_mi_farmacia')}>
+                  <div className="bc-farmacia-info">
+                    <Home size={16} className="bc-farmacia-icon" />
+                    <div>
+                      <span className="bc-farmacia-label">En mi farmacia</span>
+                      <span className="bc-farmacia-desc">Usamos este medicamento en nuestra farmacia</span>
+                    </div>
+                  </div>
+                  <div className={`bc-toggle-switch ${form.en_mi_farmacia ? 'on' : ''}`}>
+                    <div className="bc-toggle-thumb" />
+                  </div>
+                </div>
+
+                {/* Separador */}
+                <hr className="bc-clas-divider" />
+
+                {/* Notas */}
+                <div className="bc-notas-section">
+                  <label className="bc-notas-label">Notas</label>
+                  <textarea
+                    className="bc-notas-input"
+                    placeholder="Observaciones internas, condiciones de almacenamiento, notas clínicas de tu centro..."
+                    value={form.notas}
+                    onChange={e => handleChange('notas', e.target.value)}
+                    rows={4}
+                  />
+                </div>
+
+                {/* Botón guardar */}
+                <button
+                  className={`bc-guardar-btn ${savedOk ? 'saved' : ''}`}
+                  onClick={handleGuardar}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <><div className="bc-mini-spinner" /> Guardando...</>
+                  ) : savedOk ? (
+                    <><CheckCircle size={16} /> ¡Guardado!</>
+                  ) : (
+                    <><Save size={16} /> Guardar clasificación</>
                   )}
-                </span>
-              ) : (
-                <span>Sin clasificar aún</span>
-              )}
-            </div>
+                </button>
+
+                {/* Timestamp de última actualización + hospital clasificador */}
+                <div className={`bc-last-update ${ultimaActualizacion ? 'bc-last-update--has-date' : 'bc-last-update--empty'}`}>
+                  <Clock size={13} className="bc-last-update-icon" />
+                  {ultimaActualizacion ? (
+                    <span>
+                      Última actualización:{' '}
+                      <strong>
+                        {new Intl.DateTimeFormat('es-ES', {
+                          day: '2-digit', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        }).format(new Date(ultimaActualizacion))}
+                      </strong>
+                      {/* Badge con el hospital o nombre del clasificador */}
+                      {clasificadoPor && (clasificadoPor.hospital || clasificadoPor.nombre) && (
+                        <span
+                          title={`Clasificado por: ${clasificadoPor.nombre || ''}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            marginLeft: '8px',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            background: 'var(--color-primary-light, #e0f2fe)',
+                            color: 'var(--color-primary-dark, #0369a1)',
+                            verticalAlign: 'middle',
+                          }}
+                        >
+                          🏥 {clasificadoPor.hospital || clasificadoPor.nombre}
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span>Sin clasificar aún</span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
