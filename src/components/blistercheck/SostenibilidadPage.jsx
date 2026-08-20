@@ -158,12 +158,12 @@ const REFERENCIAS = [
     hallazgo: 'Factor de emisión mix eléctrico nacional España 2025: 0,258 kg CO₂e/kWh. (El dato exacto se publica en el interior del archivo Excel de la Calculadora descargable).',
   },
   {
-    autores: 'SEFH (Grupo TECNO / DIGIFHAR)',
-    titulo: 'Proyecto "No reenvases sin necesidad" — Evaluación de impacto',
-    anio: '2026',
-    tipo: 'Iniciativa',
-    url: 'https://www.sefh.es',
-    hallazgo: '1,27 M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales (datos internos del grupo TECNO-SEFH, 2026).',
+    autores: 'García Marco, D. (Hospital Nacional de Parapléjicos, SESCAM)',
+    titulo: 'Proyecto "Dale color a tu dosis unitaria" / Reetiquetado vs Reenvasado',
+    anio: '2023-2026',
+    tipo: 'Premio SEFH / Publicación',
+    url: 'https://scmfh.es/',
+    hallazgo: 'La sustitución del reenvasado por el reetiquetado de envases comerciales originales en dosis unitarias ha evitado el reenvasado de más de 1,27 millones de comprimidos anuales, ahorrando 17 km de material (plástico/aluminio), 866 kg de peso y más de 113.000 minutos de trabajo, mejorando a su vez la seguridad frente a la isoapariencia.',
   },
   {
     autores: 'SIGRE Medicamento y Medio Ambiente',
@@ -273,27 +273,27 @@ export default function SostenibilidadPage() {
                   <Leaf size={20} />
                 </div>
                 <div>
-                  <strong>Proyecto "No reenvases sin necesidad" (SEFH, 2026)</strong>
+                  <strong>Proyecto "Dale color a tu dosis unitaria" (Hospital Nacional de Parapléjicos, SESCAM)</strong>
                   <p>
-                    Un estudio con <strong>{SEFH_DATA.hospitales} hospitales españoles</strong> demostró
-                    que aplicando criterios de selección de blísteres aptos para SDMDU, fue posible
-                    evitar:
+                    El análisis de este galardonado proyecto de Farmacia Hospitalaria demostró que,
+                    al sustituir los medicamentos reenvasados por el reetiquetado de las dosis unitarias originales,
+                    fue posible evitar anualmente:
                   </p>
                   <div className="eco-stats-row">
                     <div className="eco-stat-pill">
-                      <span className="eco-stat-pill__value">{SEFH_DATA.comprimidosNoRenvasados}</span>
+                      <span className="eco-stat-pill__value">1,27 millones</span>
                       <span className="eco-stat-pill__label">comprimidos no reenvasados</span>
                     </div>
                     <div className="eco-stat-pill">
-                      <span className="eco-stat-pill__value">{SEFH_DATA.materialEvitado}</span>
-                      <span className="eco-stat-pill__label">de material de reenvasado</span>
+                      <span className="eco-stat-pill__value">17 km</span>
+                      <span className="eco-stat-pill__label">de material de reenvasado ahorrado</span>
                     </div>
                     <div className="eco-stat-pill">
-                      <span className="eco-stat-pill__value">{SEFH_DATA.residuosEvitados}</span>
-                      <span className="eco-stat-pill__label">de residuos evitados</span>
+                      <span className="eco-stat-pill__value">866 kg</span>
+                      <span className="eco-stat-pill__label">de residuos plásticos/aluminio evitados</span>
                     </div>
                   </div>
-                  <p className="eco-ref-small">Fuente: {SEFH_DATA.fuente}</p>
+                  <p className="eco-ref-small">Fuente: Premio SEFH / D. García Marco (2023-2026)</p>
                 </div>
               </div>
 
