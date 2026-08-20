@@ -159,10 +159,10 @@ const REFERENCIAS = [
   },
   {
     autores: 'García Marco, D. et al. (SESCAM)',
-    titulo: 'Proyecto "No reenvases por desconocimiento" / Sostenibilidad en Farmacia Hospitalaria',
+    titulo: 'Reducción del reenvasado innecesario como medida de sostenibilidad ambiental',
     anio: '2023-2026',
-    tipo: 'Premio SEFH / Publicación',
-    url: 'https://www.google.com/search?q=%22No+reenvases+por+desconocimiento%22',
+    tipo: 'Publicación (Farmacia Hospitalaria)',
+    url: 'https://www.google.com/search?q=%22Reducci%C3%B3n+del+reenvasado+innecesario+como+medida+de+sostenibilidad+ambiental%22',
     hallazgo: 'La sustitución de medicamentos reenvasados por presentaciones en dosis unitarias de origen comercial en 15 hospitales públicos de Castilla-La Mancha evitó el reenvasado de más de 1,27 millones de comprimidos anuales, ahorrando 17 km de material de embalaje, 866 kg de peso y más de 113.000 minutos de trabajo, mejorando así la eficiencia y sostenibilidad del servicio.',
   },
   {
@@ -273,9 +273,9 @@ export default function SostenibilidadPage() {
                   <Leaf size={20} />
                 </div>
                 <div>
-                  <strong>Proyecto "No reenvases por desconocimiento" (García Marco, D. et al., SESCAM)</strong>
+                  <strong>Estudio: "Reducción del reenvasado innecesario..." (García Marco, D. et al.)</strong>
                   <p>
-                    El análisis de este galardonado proyecto de Farmacia Hospitalaria, que evaluó la gestión en 15 hospitales públicos de Castilla-La Mancha, demostró que al priorizar medicamentos comerciales que ya vienen preparados en dosis unitarias aptas para SDMDU, fue posible evitar anualmente:
+                    El análisis de esta publicación en Farmacia Hospitalaria, que evaluó la gestión en 15 hospitales públicos, demostró que al priorizar medicamentos comerciales en dosis unitarias aptas, fue posible evitar anualmente:
                   </p>
                   <div className="eco-stats-row">
                     <div className="eco-stat-pill">
