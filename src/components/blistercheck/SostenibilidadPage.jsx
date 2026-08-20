@@ -167,11 +167,11 @@ const REFERENCIAS = [
   },
   {
     autores: 'SIGRE Medicamento y Medio Ambiente',
-    titulo: 'Informe anual de ecodiseño de envases farmacéuticos',
+    titulo: 'Memoria de Sostenibilidad y Ecodiseño de envases farmacéuticos',
     anio: '2024',
     tipo: 'Sectorial oficial',
-    url: 'https://www.sigre.es/ecodiseno/',
-    hallazgo: 'Más de 3.900 medidas de ecodiseño, peso medio de envase reducido más de un 25 % desde 2000, más de 100.000 t CO₂e acumuladas evitadas (Farmaindustria / SIGRE, 2026).',
+    url: 'https://www.memoriasigre.es',
+    hallazgo: 'Más de 3.900 medidas de ecodiseño integradas mediante los Planes Empresariales de Prevención (PEPE), con una reducción del peso medio de envase de más de un 25 % desde 2000, y más de 100.000 t CO₂e acumuladas evitadas.',
   },
 ];
 
