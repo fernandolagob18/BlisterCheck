@@ -211,7 +211,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
       setTimeout(() => setSavedOk(false), 2000);
     } catch (err) {
       console.error('Error guardando clasificación:', err);
-      alert('Hubo un problema al guardar los datos: ' + (err.message || JSON.stringify(err)));
+      alert('Hubo un problema al guardar los datos. Por favor, revisa tu conexión e inténtalo de nuevo.');
     } finally {
       setSaving(false);
     }
