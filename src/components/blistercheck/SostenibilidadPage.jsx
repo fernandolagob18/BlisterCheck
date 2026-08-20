@@ -158,11 +158,11 @@ const REFERENCIAS = [
     hallazgo: 'Factor de emisión mix eléctrico nacional España 2025: 0,258 kg CO₂e/kWh. (El dato exacto se publica en el interior del archivo Excel de la Calculadora descargable).',
   },
   {
-    autores: 'SEFH (Grupo TECNO)',
+    autores: 'SEFH (Grupo TECNO / DIGIFHAR)',
     titulo: 'Proyecto "No reenvases sin necesidad" — Evaluación de impacto',
     anio: '2026',
     tipo: 'Iniciativa',
-    url: 'https://www.sefh.es/grupos-de-trabajo/tecno',
+    url: 'https://www.sefh.es',
     hallazgo: '1,27 M comprimidos no reenvasados, 17 km de material evitado, 866 kg de residuos reducidos en 15 hospitales (datos internos del grupo TECNO-SEFH, 2026).',
   },
   {
