@@ -23,3 +23,7 @@ CREATE POLICY "Users can insert their own laboratory data"
 CREATE POLICY "Users can update their own laboratory data" 
   ON blistercheck_user_laboratorios FOR UPDATE 
   USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own laboratory data" 
+  ON blistercheck_user_laboratorios FOR DELETE 
+  USING (auth.uid() = user_id);

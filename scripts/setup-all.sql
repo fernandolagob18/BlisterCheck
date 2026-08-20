@@ -21,11 +21,11 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de RLS para perfiles
--- Los usuarios pueden leer su propio perfil
+-- Los usuarios autenticados pueden ver los perfiles (necesario para ver quién clasificó)
 DROP POLICY IF EXISTS "Los usuarios pueden ver su propio perfil" ON public.profiles;
-CREATE POLICY "Los usuarios pueden ver su propio perfil" 
-ON public.profiles FOR SELECT 
-USING (auth.uid() = id);
+CREATE POLICY "Los usuarios pueden ver perfiles" 
+ON public.profiles FOR SELECT TO authenticated
+USING (true);
 
 -- Los usuarios pueden actualizar su propio perfil
 DROP POLICY IF EXISTS "Los usuarios pueden actualizar su propio perfil" ON public.profiles;
@@ -126,9 +126,19 @@ CREATE POLICY "Global read clasificacion" ON blistercheck_clasificacion_global
   FOR SELECT TO authenticated USING (true);
 
 DROP POLICY IF EXISTS "Global write clasificacion" ON blistercheck_clasificacion_global;
-CREATE POLICY "Global write clasificacion" ON blistercheck_clasificacion_global
-  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- Permite insertar si el usuario se marca a sí mismo como autor
+CREATE POLICY "Global insert clasificacion" ON blistercheck_clasificacion_global
+  FOR INSERT TO authenticated 
+  WITH CHECK (auth.uid() = updated_by);
+
+-- Permite actualizar si el usuario se marca a sí mismo como autor del cambio
+CREATE POLICY "Global update clasificacion" ON blistercheck_clasificacion_global
+  FOR UPDATE TO authenticated 
+  USING (true)
+  WITH CHECK (auth.uid() = updated_by);
+
+-- (Nota: No se crea política para DELETE, lo que impide que un usuario borre filas)
 
 -- 3. Tabla: Datos Privados del Hospital / Usuario (ESTRICTAMENTE PRIVADO POR USUARIO)
 -- Registra si el hospital tiene el fármaco en su stock (en_mi_farmacia) y sus notas internas.
@@ -152,6 +162,27 @@ CREATE POLICY "Private user farmacia policy" ON blistercheck_user_farmacia
   FOR ALL TO authenticated 
   USING (auth.uid() = user_id) 
   WITH CHECK (auth.uid() = user_id);
+
+-- Función para actualizar updated_at automáticamente desde la base de datos
+CREATE OR REPLACE FUNCTION public.set_updated_at_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para la tabla global
+DROP TRIGGER IF EXISTS trigger_set_updated_at_global ON blistercheck_clasificacion_global;
+CREATE TRIGGER trigger_set_updated_at_global
+  BEFORE UPDATE ON blistercheck_clasificacion_global
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at_timestamp();
+
+-- Trigger para la tabla privada
+DROP TRIGGER IF EXISTS trigger_set_updated_at_privada ON blistercheck_user_farmacia;
+CREATE TRIGGER trigger_set_updated_at_privada
+  BEFORE UPDATE ON blistercheck_user_farmacia
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at_timestamp();
 
 -- Migración automática si existe la tabla previa de modelo unificado (blistercheck_clasificacion)
 DO $$

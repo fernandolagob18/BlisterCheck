@@ -255,25 +255,36 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
 
   const cnStr = String(cn);
 
-  // Determinar si algún campo SDMDU (global) ha cambiado respecto al valor anterior
-  const sdmduCambiado = clasificacionAnterior === null || (
-    clasificacion.requiere_reenvasado   !== (clasificacionAnterior.requiere_reenvasado   ?? null) ||
-    clasificacion.requiere_reetiquetado !== (clasificacionAnterior.requiere_reetiquetado ?? null) ||
-    clasificacion.apto_sdmdu_blister    !== (clasificacionAnterior.apto_sdmdu_blister    ?? null) ||
-    clasificacion.solo_envase_clinico   !== (clasificacionAnterior.solo_envase_clinico   ?? false)
-  );
+  // 1. Guardar en la base de datos GLOBAL COMPARTIDA (SDMDU) mediante Delta Upsert
+  const globalPayload = { cn: cnStr, updated_by: user.id };
+  let globalHasChanges = false;
 
-  // 1. Guardar en la base de datos GLOBAL COMPARTIDA (SDMDU)
-  //    Sólo se actualiza `updated_at` si realmente han cambiado los campos clínicos.
-  const globalPayload = {
-    cn:                     cnStr,
-    requiere_reenvasado:   clasificacion.requiere_reenvasado   ?? null,
-    requiere_reetiquetado: clasificacion.requiere_reetiquetado ?? null,
-    apto_sdmdu_blister:    clasificacion.apto_sdmdu_blister    ?? null,
-    solo_envase_clinico:   clasificacion.solo_envase_clinico   ?? false,
-    updated_by:            user.id,
-    ...(sdmduCambiado && { updated_at: new Date().toISOString() }),
-  };
+  if (clasificacionAnterior === null) {
+    // Es la primera vez que se clasifica, enviamos todo
+    globalPayload.requiere_reenvasado = clasificacion.requiere_reenvasado ?? null;
+    globalPayload.requiere_reetiquetado = clasificacion.requiere_reetiquetado ?? null;
+    globalPayload.apto_sdmdu_blister = clasificacion.apto_sdmdu_blister ?? null;
+    globalPayload.solo_envase_clinico = clasificacion.solo_envase_clinico ?? false;
+    globalHasChanges = true;
+  } else {
+    // Comparamos para enviar solo lo que realmente cambió
+    if (clasificacion.requiere_reenvasado !== (clasificacionAnterior.requiere_reenvasado ?? null)) {
+      globalPayload.requiere_reenvasado = clasificacion.requiere_reenvasado;
+      globalHasChanges = true;
+    }
+    if (clasificacion.requiere_reetiquetado !== (clasificacionAnterior.requiere_reetiquetado ?? null)) {
+      globalPayload.requiere_reetiquetado = clasificacion.requiere_reetiquetado;
+      globalHasChanges = true;
+    }
+    if (clasificacion.apto_sdmdu_blister !== (clasificacionAnterior.apto_sdmdu_blister ?? null)) {
+      globalPayload.apto_sdmdu_blister = clasificacion.apto_sdmdu_blister;
+      globalHasChanges = true;
+    }
+    if (clasificacion.solo_envase_clinico !== (clasificacionAnterior.solo_envase_clinico ?? false)) {
+      globalPayload.solo_envase_clinico = clasificacion.solo_envase_clinico;
+      globalHasChanges = true;
+    }
+  }
 
   // 2. Guardar en los datos PRIVADOS DEL HOSPITAL
   const userPayload = {
@@ -281,29 +292,43 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
     user_id:               user.id,
     en_mi_farmacia:        clasificacion.en_mi_farmacia        ?? false,
     notas:                 clasificacion.notas                 ?? null,
-    updated_at:            new Date().toISOString(),
   };
 
-  const [globalRes, userRes] = await Promise.all([
-    supabase.from(GLOBAL_CLASIFICACION_TABLE).upsert(globalPayload, { onConflict: 'cn' }).select('*').single(),
+  const promises = [];
+  
+  if (globalHasChanges) {
+    promises.push(
+      supabase.from(GLOBAL_CLASIFICACION_TABLE).upsert(globalPayload, { onConflict: 'cn' }).select('*').maybeSingle()
+    );
+  } else {
+    // Si no hay cambios globales, recuperamos el estado actual para devolverlo
+    promises.push(
+      supabase.from(GLOBAL_CLASIFICACION_TABLE).select('*').eq('cn', cnStr).maybeSingle()
+    );
+  }
+  
+  promises.push(
     supabase.from(USER_FARMACIA_TABLE).upsert(userPayload, { onConflict: 'cn,user_id' }).select('*').single()
-  ]);
+  );
+
+  const [globalRes, userRes] = await Promise.all(promises);
 
   if (globalRes.error) throw globalRes.error;
   if (userRes.error) throw userRes.error;
 
   // Obtener el perfil del usuario actual para devolverlo junto con la clasificación guardada
   const clasificadoPor = await fetchClasificadorProfile(user.id);
+  const gData = globalRes.data || {};
 
   return {
     cn: cnStr,
-    requiere_reenvasado:   globalRes.data.requiere_reenvasado,
-    requiere_reetiquetado: globalRes.data.requiere_reetiquetado,
-    apto_sdmdu_blister:    globalRes.data.apto_sdmdu_blister,
-    solo_envase_clinico:   globalRes.data.solo_envase_clinico,
+    requiere_reenvasado:   gData.requiere_reenvasado ?? null,
+    requiere_reetiquetado: gData.requiere_reetiquetado ?? null,
+    apto_sdmdu_blister:    gData.apto_sdmdu_blister ?? null,
+    solo_envase_clinico:   gData.solo_envase_clinico ?? false,
     en_mi_farmacia:        userRes.data.en_mi_farmacia,
     notas:                 userRes.data.notas,
-    updated_at:            globalRes.data.updated_at,
+    updated_at:            gData.updated_at ?? null,
     clasificado_por:       clasificadoPor, // { nombre, hospital } | null
   };
 }
@@ -654,7 +679,7 @@ export async function bulkMarkEnMiFarmacia(cns) {
   // Como solo tocamos 'en_mi_farmacia', las 'notas' introducidas previamente SE CONSERVAN intactas.
   const { error: resetError } = await supabase
     .from(USER_FARMACIA_TABLE)
-    .update({ en_mi_farmacia: false, updated_at: new Date().toISOString() })
+    .update({ en_mi_farmacia: false })
     .eq('user_id', user.id)
     .eq('en_mi_farmacia', true);
 
@@ -672,8 +697,7 @@ export async function bulkMarkEnMiFarmacia(cns) {
     const payload = chunk.map(cn => ({
       cn: cn,
       user_id: user.id,
-      en_mi_farmacia: true,
-      updated_at: new Date().toISOString()
+      en_mi_farmacia: true
     }));
 
     const { data, error } = await supabase

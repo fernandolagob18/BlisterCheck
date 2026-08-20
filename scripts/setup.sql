@@ -39,7 +39,8 @@ ALTER TABLE blistercheck_clasificacion_global ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Global read clasificacion" ON blistercheck_clasificacion_global;
 CREATE POLICY "Global read clasificacion" ON blistercheck_clasificacion_global FOR SELECT TO authenticated USING (true);
 DROP POLICY IF EXISTS "Global write clasificacion" ON blistercheck_clasificacion_global;
-CREATE POLICY "Global write clasificacion" ON blistercheck_clasificacion_global FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Global insert clasificacion" ON blistercheck_clasificacion_global FOR INSERT TO authenticated WITH CHECK (auth.uid() = updated_by);
+CREATE POLICY "Global update clasificacion" ON blistercheck_clasificacion_global FOR UPDATE TO authenticated USING (true) WITH CHECK (auth.uid() = updated_by);
 
 -- Tabla 3: Datos Privados del Hospital / Usuario (ESTRICTAMENTE PRIVADO POR USUARIO)
 CREATE TABLE IF NOT EXISTS blistercheck_user_farmacia (

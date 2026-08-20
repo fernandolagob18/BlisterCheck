@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de RLS para perfiles
--- Los usuarios pueden leer su propio perfil
-CREATE POLICY "Los usuarios pueden ver su propio perfil" 
-ON public.profiles FOR SELECT 
-USING (auth.uid() = id);
+-- Los usuarios autenticados pueden ver los perfiles (necesario para ver quién clasificó)
+CREATE POLICY "Los usuarios pueden ver perfiles" 
+ON public.profiles FOR SELECT TO authenticated
+USING (true);
 
 -- Los usuarios pueden actualizar su propio perfil
 CREATE POLICY "Los usuarios pueden actualizar su propio perfil" 
