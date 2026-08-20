@@ -360,16 +360,22 @@ function BlisterCheckApp({ onGoToProfile }) {
           )}
 
           {vistaActiva === 'detail' && medicamentoSeleccionado && (
-            <MedicamentoDetalle
-              key={medicamentoSeleccionado.cn}
-              medicamento={medicamentoSeleccionado}
-              clasificacion={clasificacionActual}
-              desabastecimiento={desabastecimientoActual}
-              isLoading={loadingDetalle}
-              onClasificacionGuardada={handleClasificacionGuardada}
-              onVolver={handleVolverABusqueda}
-              onSelectAlternativa={handleSelectMedicamento}
-            />
+            loadingDetalle ? (
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', color: 'var(--color-text-muted)' }}>
+                <div className="bc-mini-spinner" style={{ width: '40px', height: '40px', borderWidth: '3px', borderTopColor: 'var(--color-primary-dark)', marginBottom: '16px' }}></div>
+                <p>Cargando ficha del medicamento...</p>
+              </div>
+            ) : (
+              <MedicamentoDetalle
+                key={medicamentoSeleccionado.cn}
+                medicamento={medicamentoSeleccionado}
+                clasificacion={clasificacionActual}
+                desabastecimiento={desabastecimientoActual}
+                onClasificacionGuardada={handleClasificacionGuardada}
+                onVolver={handleVolverABusqueda}
+                onSelectAlternativa={handleSelectMedicamento}
+              />
+            )
           )}
 
           {vistaActiva === 'stats' && (
