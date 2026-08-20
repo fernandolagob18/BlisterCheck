@@ -162,7 +162,7 @@ const REFERENCIAS = [
     titulo: 'Proyecto "No reenvases por desconocimiento" / Sostenibilidad en Farmacia Hospitalaria',
     anio: '2023-2026',
     tipo: 'Premio SEFH / Publicación',
-    url: 'https://scmfh.es/',
+    url: 'https://www.google.com/search?q=%22No+reenvases+por+desconocimiento%22',
     hallazgo: 'La sustitución de medicamentos reenvasados por presentaciones en dosis unitarias de origen comercial en 15 hospitales públicos de Castilla-La Mancha evitó el reenvasado de más de 1,27 millones de comprimidos anuales, ahorrando 17 km de material de embalaje, 866 kg de peso y más de 113.000 minutos de trabajo, mejorando así la eficiencia y sostenibilidad del servicio.',
   },
   {
