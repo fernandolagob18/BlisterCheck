@@ -1,5 +1,22 @@
 import { supabase } from '../lib/supabase';
 
+const translateAuthError = (error) => {
+  if (!error) return "Error desconocido";
+  const msg = error.message || error.error_description || "";
+  
+  const translations = {
+    "Invalid login credentials": "Usuario o contraseña incorrectos.",
+    "User already registered": "Este correo electrónico ya está registrado.",
+    "Email not confirmed": "Debes confirmar tu correo electrónico antes de iniciar sesión.",
+    "Password should be at least 6 characters": "La contraseña debe tener al menos 6 caracteres.",
+    "To help protect your account, please sign in again.": "Por seguridad, por favor inicia sesión de nuevo.",
+    "Email link is invalid or has expired": "El enlace de confirmación es inválido o ha caducado.",
+    "User not found": "No existe una cuenta con ese correo electrónico."
+  };
+
+  return translations[msg] || "Error en la autenticación. Por favor, inténtalo de nuevo.";
+};
+
 export const authService = {
   // Login with email and password
   async login(email, password) {
@@ -7,7 +24,10 @@ export const authService = {
       email,
       password,
     });
-    if (error) throw error;
+    if (error) {
+      error.message = translateAuthError(error);
+      throw error;
+    }
     return data;
   },
 
@@ -25,7 +45,10 @@ export const authService = {
         }
       }
     });
-    if (error) throw error;
+    if (error) {
+      error.message = translateAuthError(error);
+      throw error;
+    }
     return data;
   },
 
