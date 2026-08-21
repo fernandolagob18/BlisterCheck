@@ -92,8 +92,8 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
 
   // Cargar opciones de filtros al montar
   useEffect(() => {
-    getFormasFarmaceuticas().then(setFormas).catch(() => {});
-    getViasAdministracion().then(setVias).catch(() => {});
+    getFormasFarmaceuticas().then(setFormas).catch(err => console.error('Error cargando formas farmacéuticas:', err));
+    getViasAdministracion().then(setVias).catch(err => console.error('Error cargando vías de administración:', err));
   }, []);
 
   // Búsqueda simple con debounce

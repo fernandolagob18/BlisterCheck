@@ -49,7 +49,8 @@ export default function Profile({ onVolver }) {
       setSuccess('Perfil actualizado correctamente');
       setIsEditing(false);
     } catch (err) {
-      setError('Error al actualizar el perfil: ' + err.message);
+      console.error('Error al actualizar el perfil:', err);
+      setError('Error al actualizar el perfil. Por favor, inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -60,7 +61,8 @@ export default function Profile({ onVolver }) {
     try {
       await authService.deleteAccount();
     } catch (err) {
-      setError('Error al borrar la cuenta: ' + err.message);
+      console.error('Error al borrar la cuenta:', err);
+      setError('Error al borrar la cuenta. Por favor, inténtalo de nuevo.');
       setLoading(false);
     }
   };

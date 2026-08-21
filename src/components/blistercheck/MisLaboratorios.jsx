@@ -116,16 +116,23 @@ function MisLaboratorios({ onSelectMedicamento }) {
   };
 
   const handleCreatePlatform = async () => {
-    if (!newPlatformName.trim()) return;
+    const name = newPlatformName.trim();
+    if (!name) return;
+    if (name.length > 100) {
+      setError('El nombre de la plataforma es demasiado largo (máximo 100 caracteres).');
+      return;
+    }
+    
     try {
-      await createCustomPlatform(newPlatformName, newPlatformPedido);
+      await createCustomPlatform(name, newPlatformPedido);
       setShowCreateModal(false);
       setNewPlatformName('');
       setNewPlatformPedido('');
       await cargarDatos();
     } catch (err) {
-      console.error(err);
-      alert('Error al crear la plataforma.');
+      console.error('Error al crear la plataforma:', err);
+      setError('Error al crear la plataforma. Por favor, inténtalo de nuevo.');
+      setShowCreateModal(false);
     }
   };
 
@@ -137,8 +144,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
       setLabSeleccionado(null);
       await cargarDatos();
     } catch (err) {
-      console.error(err);
-      alert('Error al eliminar la plataforma.');
+      console.error('Error al borrar la plataforma:', err);
+      setError('Error al borrar la plataforma. Por favor, inténtalo de nuevo.');
     }
   };
 

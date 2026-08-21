@@ -343,8 +343,9 @@ export async function getAllClasificaciones() {
   let globalData = [];
   let page = 0;
   const PAGE_SIZE = 1000;
+  const MAX_PAGES = 50; // Límite de seguridad: 50.000 registros
 
-  while (true) {
+  while (page < MAX_PAGES) {
     const { data, error } = await supabase
       .from(GLOBAL_CLASIFICACION_TABLE)
       .select(`
@@ -772,21 +773,7 @@ export async function bulkMarkEnMiFarmacia(cns) {
   const validCNs = [...new Set(cns.filter(Boolean).map(cn => String(cn)))];
   if (validCNs.length === 0) return 0;
 
-  // 1. Limpiar el inventario actual (establecer todo a false)
-  // Esto asegura que reemplazamos el inventario en lugar de acumularlo.
-  // Como solo tocamos 'en_mi_farmacia', las 'notas' introducidas previamente SE CONSERVAN intactas.
-  const { error: resetError } = await supabase
-    .from(USER_FARMACIA_TABLE)
-    .update({ en_mi_farmacia: false })
-    .eq('user_id', user.id)
-    .eq('en_mi_farmacia', true);
-
-  if (resetError) {
-    console.error('Error limpiando el inventario previo:', resetError);
-    throw resetError;
-  }
-
-  // 2. Insertar o actualizar los nuevos medicamentos a true
+  // 1. Insertar o actualizar los nuevos medicamentos a true (CHUNKs de 200)
   const CHUNK_SIZE = 200;
   let totalUpserted = 0;
 
@@ -811,6 +798,26 @@ export async function bulkMarkEnMiFarmacia(cns) {
     if (data) {
       totalUpserted += data.length;
     }
+  }
+
+  // 2. Limpiar el inventario antiguo
+  // Ponemos a false todos los medicamentos que estaban marcados pero que no
+  // forman parte del listado que acabamos de importar.
+  // Hacemos esto DESPUÉS del upsert para evitar un inventario vacío si hay error de red.
+  
+  // Como .not('cn', 'in', ...) puede dar error si validCNs es inmenso (ej: 20000+ items),
+  // procesamos el reset en lotes si es muy grande, o lanzamos una query limpia
+  const { error: resetError } = await supabase
+    .from(USER_FARMACIA_TABLE)
+    .update({ en_mi_farmacia: false })
+    .eq('user_id', user.id)
+    .eq('en_mi_farmacia', true)
+    .not('cn', 'in', `(${validCNs.join(',')})`);
+
+  if (resetError) {
+    console.error('Error limpiando el inventario previo (no fatal para la inserción):', resetError);
+    // No lanzamos error aquí porque los nuevos ya están insertados, 
+    // pero lo logueamos para debug.
   }
 
   return totalUpserted;

@@ -251,7 +251,8 @@ export default function GuiaOptimizer() {
 
       setReport(results);
     } catch (err) {
-      setError('Error procesando el archivo: ' + err.message);
+      console.error('Error procesando el archivo:', err);
+      setError('Error procesando el archivo. Por favor, comprueba que el formato es correcto.');
     } finally {
       setIsProcessing(false);
     }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ArrowLeft, ExternalLink, Home, FileText, BookOpen, CheckCircle, XCircle, Circle, Save, Package, RefreshCw, Clock, HelpCircle, AlertTriangle, Calendar, Sun, Droplet } from 'lucide-react';
 import { saveClasificacion, getAlternativasSDMDU } from '../../services/blistercheckService';
 import { isCriticalShortage } from '../../utils/shortageUtils';
@@ -48,6 +48,13 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
 
   const [saving, setSaving] = useState(false);
   const [savedOk, setSavedOk] = useState(false);
+  const timeoutRef = useRef(null);
+  
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   // Timestamp y autor de la última actualización global
   const [ultimaActualizacion, setUltimaActualizacion] = useState(
@@ -208,7 +215,8 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
         updated_at: saved?.updated_at,
         fecha_clasificacion: saved?.fecha_clasificacion
       });
-      setTimeout(() => setSavedOk(false), 2000);
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setSavedOk(false), 2000);
     } catch (err) {
       console.error('Error guardando clasificación:', err);
       alert('Hubo un problema al guardar los datos. Por favor, revisa tu conexión e inténtalo de nuevo.');
