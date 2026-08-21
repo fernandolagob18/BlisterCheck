@@ -280,6 +280,11 @@ export async function saveClasificacion(cn, clasificacion, clasificacionAnterior
     globalPayload.solo_envase_clinico = clasificacion.solo_envase_clinico;
     globalHasChanges = true;
   }
+  // Si el medicamento viene del CSV y no tiene autor, forzamos que se actualice 
+  // para que el usuario que le ha dado a "Guardar" se lo apropie.
+  if (!clasificacionAnterior?.updated_by) {
+    globalHasChanges = true;
+  }
 
   // 2. Guardar en los datos PRIVADOS DEL HOSPITAL
   const userPayload = {
