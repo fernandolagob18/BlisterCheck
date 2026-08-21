@@ -447,31 +447,6 @@ export async function getCatalogInfo() {
   };
 }
 
-// ─── EXPORTACIÓN CSV ─────────────────────────────────────────────────────────
-
-/**
- * Obtiene datos para exportar (JOIN entre clasificación global, datos del hospital y catálogo)
- * @param {string} modo 'todos' | 'clasificados' | 'mi_farmacia'
- */
-export async function getExportData(modo = 'clasificados') {
-  const { data: authData } = await supabase.auth.getUser();
-  const user = authData?.user ?? null;
-
-  try {
-    const { data, error } = await supabase.rpc('bc_get_export_data', {
-      p_modo: modo,
-      p_user_id: user?.id || null
-    });
-
-    if (error) throw error;
-    
-    return data || [];
-  } catch (err) {
-    console.error('Error exportando datos:', err);
-    throw err;
-  }
-}
-
 export async function getAlternativasSDMDU(medicamento) {
   const { cn, principio_activo, dosis, forma_farmaceutica, via_administracion } = medicamento;
   
@@ -479,7 +454,10 @@ export async function getAlternativasSDMDU(medicamento) {
     return { compatibles: [], pendientes: [] };
   }
 
-  const { data, error } = await supabase
+  const basePrincipio = principio_activo.trim().split(' ')[0];
+  const normDosis = normalizeDosis(dosis);
+
+  let query = supabase
     .from(CATALOG_TABLE)
     .select(`
       *,
@@ -490,11 +468,17 @@ export async function getAlternativasSDMDU(medicamento) {
         solo_envase_clinico
       )
     `)
-    .eq('principio_activo', principio_activo)
-    .eq('dosis', dosis)
+    .ilike('principio_activo', `%${basePrincipio}%`)
     .eq('forma_farmaceutica', forma_farmaceutica)
     .eq('via_administracion', via_administracion)
     .neq('cn', cn);
+
+  // Filtrar por dosis normalizada solo si existe y fue reconocible
+  if (normDosis) {
+    query = query.eq('dosis_normalizada', normDosis);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
 
@@ -597,45 +581,82 @@ export async function getMedicationStatusByCNs(cnList) {
 }
 
 /**
- * Normaliza las cadenas de dosis de CIMA para extraer solo los valores numéricos y las unidades,
- * ignorando texto extra (ej. "16 mg betahistina" -> "16 mg") y unificando sinónimos 
- * (ej. "100 microgramos" -> "100 mcg").
+ * Normaliza una cadena de dosis de CIMA eliminando texto libre extra
+ * (ej. nombre del principio activo) y estandarizando las unidades.
+ *
+ * NO convierte entre unidades — "1 g" y "1000 mg" siguen siendo distintas.
+ *
+ * Casos cubiertos:
+ *   "16 MG betahistina"   → "16 mg"
+ *   "500/125 mg"          → "500/125 mg"    (combinaciones)
+ *   "500 mg/5 ml"         → "500 mg/5 ml"   (concentraciones)
+ *   "0,5 mg"              → "0.5 mg"        (decimal con coma)
+ *   "100 microgramos"     → "100 mcg"
+ *   "texto sin número"    → ""
+ *
+ * IMPORTANTE: mantener esta lógica sincronizada con scripts/normalizeUtils.cjs
  */
 export function normalizeDosis(dosisStr) {
-  if (!dosisStr) return "";
+  if (!dosisStr) return '';
   const d = String(dosisStr).toLowerCase().trim();
-  
-  // Mapa de sinónimos para unificar variantes a una abreviatura estándar
+
+  // Mapa de sinónimos de unidades → abreviatura estándar
   const unitMap = {
     'microgramos': 'mcg', 'microgramo': 'mcg', 'ug': 'mcg', 'µg': 'mcg', 'mcg': 'mcg',
-    'miligramos': 'mg', 'miligramo': 'mg', 'mg': 'mg',
-    'gramos': 'g', 'gramo': 'g', 'g': 'g',
-    'mililitros': 'ml', 'mililitro': 'ml', 'ml': 'ml',
-    'litros': 'l', 'litro': 'l', 'l': 'l',
-    'unidades': 'ui', 'unidad': 'ui', 'u.i.': 'ui', 'ui': 'ui', 'u': 'ui',
-    'mui': 'mui', 'meq': 'meq', 'mmol': 'mmol', '%': '%'
+    'miligramos':  'mg',  'miligramo':  'mg',  'mg':  'mg',
+    'gramos':      'g',   'gramo':      'g',   'g':   'g',
+    'mililitros':  'ml',  'mililitro':  'ml',  'ml':  'ml',
+    'litros':      'l',   'litro':      'l',   'l':   'l',
+    'unidades':    'ui',  'unidad':     'ui',  'u.i.': 'ui', 'ui': 'ui', 'u': 'ui',
+    'mui': 'mui', 'meq': 'meq', 'mmol': 'mmol', '%': '%',
   };
 
-  // Regex ordenado de más largo a más corto para no truncar palabras
-  const regex = /([\d,\.]+)\s*(microgramos|microgramo|mcg|µg|ug|miligramos|miligramo|mg|gramos|gramo|g|mililitros|mililitro|ml|litros|litro|l|unidades|unidad|u\.i\.|ui|mui|u|meq|mmol|%)/gi;
-  
-  let parts = [];
-  let match;
-  
-  // Extraemos todos los pares "Número Unidad" que encuentre
-  while ((match = regex.exec(d)) !== null) {
-    let num = match[1].replace(',', '.'); // Unificamos comas a puntos decimales
-    let unit = match[2].toLowerCase();
-    let stdUnit = unitMap[unit] || unit;  // Convertimos a su abreviatura oficial
-    
-    parts.push(`${num} ${stdUnit}`);
+  // Patrón de unidades (más largo primero para evitar matches parciales)
+  const unitsPattern = 'microgramos|microgramo|mcg|µg|ug|miligramos|miligramo|mg|gramos|gramo|mililitros|mililitro|ml|litros|litro|unidades|unidad|u\\.i\\.|mui|meq|mmol|ui|u|g|l|%';
+
+  // ── Patrón 1: concentración  →  "500 mg/5 ml"
+  const reConcentracion = new RegExp(
+    `([\\d,\\.]+)\\s*(${unitsPattern})\\s*/\\s*([\\d,\\.]+)\\s*(${unitsPattern})`,
+    'i'
+  );
+  const mConc = reConcentracion.exec(d);
+  if (mConc) {
+    const num1  = mConc[1].replace(',', '.');
+    const unit1 = unitMap[mConc[2].toLowerCase()] || mConc[2].toLowerCase();
+    const num2  = mConc[3].replace(',', '.');
+    const unit2 = unitMap[mConc[4].toLowerCase()] || mConc[4].toLowerCase();
+    return `${num1} ${unit1}/${num2} ${unit2}`;
   }
 
-  if (parts.length > 0) {
-      return parts.join(' / ');
+  // ── Patrón 2: combinación    →  "500/125 mg"
+  const reCombinado = new RegExp(
+    `([\\d,\\.]+)\\/([\\d,\\.]+)\\s*(${unitsPattern})`,
+    'i'
+  );
+  const mComb = reCombinado.exec(d);
+  if (mComb) {
+    const num1 = mComb[1].replace(',', '.');
+    const num2 = mComb[2].replace(',', '.');
+    const unit = unitMap[mComb[3].toLowerCase()] || mComb[3].toLowerCase();
+    return `${num1}/${num2} ${unit}`;
   }
-  return d;
+
+  // ── Patrón 3: múltiples pares número+unidad  →  "16 mg" o "10 mg / 5 mg"
+  const reSimple = new RegExp(`([\\d,\\.]+)\\s*(${unitsPattern})`, 'gi');
+  const parts = [];
+  let match;
+  while ((match = reSimple.exec(d)) !== null) {
+    const num  = match[1].replace(',', '.');
+    const unit = unitMap[match[2].toLowerCase()] || match[2].toLowerCase();
+    parts.push(`${num} ${unit}`);
+  }
+
+  if (parts.length > 0) return parts.join(' / ');
+
+  // Sin ningún patrón reconocible
+  return '';
 }
+
 
 export async function findAlternatives(principioActivo, dosis, formaSimplificada) {
   console.log("--- INICIANDO BUSQUEDA DE ALTERNATIVAS ---");
@@ -644,12 +665,18 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
   if (!principioActivo) return [];
   
   const basePrincipio = principioActivo.trim().split(' ')[0];
-  console.log("2. Buscando en DB por basePrincipio:", basePrincipio);
+  const normDosisTarget = normalizeDosis(dosis);
+  console.log("2. Buscando en DB por basePrincipio:", basePrincipio, "| dosis_normalizada:", normDosisTarget);
 
   let query = supabase
     .from(CATALOG_TABLE)
     .select('*, blistercheck_clasificacion_global!inner (*)')
     .ilike('principio_activo', `%${basePrincipio}%`);
+
+  // Filtro de dosis en BD: solo si hay dosis y se pudo normalizar
+  if (dosis && normDosisTarget) {
+    query = query.eq('dosis_normalizada', normDosisTarget);
+  }
     
   if (formaSimplificada) {
     query = query.eq('forma_simplificada', formaSimplificada);
@@ -663,23 +690,11 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
     console.error('Error finding alternatives:', error);
     return [];
   }
-  
-  console.log("3. Supabase ha devuelto:", data?.length, "candidatos aptos");
-  
-  const normDosisTarget = normalizeDosis(dosis);
-  console.log("4. La dosis a igualar es (tras normalizar):", normDosisTarget);
-  
-  const compatibles = (data || []).filter(med => {
-    if (!dosis) return true;
-    const normDosisMed = normalizeDosis(med.dosis);
-    const matches = normDosisMed === normDosisTarget;
-    console.log(` -> Evaluando CN ${med.cn} | Dosis CIMA: '${med.dosis}' | Normalizada: '${normDosisMed}' | Forma: ${med.forma_simplificada} | ¿Coincide?: ${matches}`);
-    return matches;
-  });
-  
-  console.log("5. Alternativas FINALES devueltas a la pantalla:", compatibles.length);
-  return compatibles;
+
+  console.log("3. Alternativas FINALES devueltas a la pantalla:", data?.length ?? 0);
+  return data || [];
 }
+
 
 /**
  * ─── IMPORTACIÓN MASIVA ───────────────────────────────────────────────────

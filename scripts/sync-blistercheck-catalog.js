@@ -10,7 +10,10 @@
  * - Usa UPSERT (no DELETE+INSERT) para actualizar el catálogo de forma segura
  */
 
+
 const { createClient } = require('@supabase/supabase-js');
+const { normalizeDosis } = require('./normalizeUtils.cjs');
+
 
 let SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 if (SUPABASE_URL) {
@@ -209,6 +212,7 @@ function transformPresentacion(item, medPadre) {
     nombre:             item.nombre || '',      // nombre completo del envase (incluye tamaño)
     laboratorio,
     dosis,
+    dosis_normalizada:  normalizeDosis(dosis),  // dosis estandarizada para búsqueda de equivalentes
     principio_activo:   principioActivo,
     forma_farmaceutica: formaFarmaceutica,
     forma_simplificada: formaSimplificada,

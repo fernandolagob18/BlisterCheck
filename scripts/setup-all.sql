@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
   nombre                 TEXT NOT NULL,
   laboratorio            TEXT,
   dosis                  TEXT,
+  dosis_normalizada      TEXT,
   principio_activo       TEXT,
   forma_farmaceutica     TEXT,
   forma_simplificada     TEXT,
@@ -92,8 +93,9 @@ CREATE TABLE IF NOT EXISTS blistercheck_catalogo (
   last_sync              TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Asegurarse de que el índice en nregistro existe
+-- Asegurarse de que los índices existen
 CREATE INDEX IF NOT EXISTS idx_bc_catalogo_nregistro ON blistercheck_catalogo(nregistro);
+CREATE INDEX IF NOT EXISTS idx_bc_catalogo_dosis_norm ON blistercheck_catalogo(dosis_normalizada);
 
 -- RLS para Catálogo de Medicamentos: Lectura y Escritura permitidas
 ALTER TABLE blistercheck_catalogo ENABLE ROW LEVEL SECURITY;
