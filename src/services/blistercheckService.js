@@ -447,6 +447,25 @@ export async function getCatalogInfo() {
   };
 }
 
+export async function getExportData(modo = 'clasificados') {
+  const { data: authData } = await supabase.auth.getUser();
+  const user = authData?.user ?? null;
+
+  try {
+    const { data, error } = await supabase.rpc('bc_get_export_data', {
+      p_modo: modo,
+      p_user_id: user?.id || null
+    });
+
+    if (error) throw error;
+    
+    return data || [];
+  } catch (err) {
+    console.error('Error exportando datos:', err);
+    throw err;
+  }
+}
+
 export async function getAlternativasSDMDU(medicamento) {
   const { cn, principio_activo, dosis, forma_farmaceutica, via_administracion } = medicamento;
   
