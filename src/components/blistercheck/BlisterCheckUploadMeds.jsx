@@ -1,58 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, FileSpreadsheet } from 'lucide-react';
-import ExcelJS from 'exceljs';
 import { getExistingCatalogCNs, bulkMarkEnMiFarmacia } from '../../services/blistercheckService';
-
-/**
- * Extrae el valor primitivo de una celda ExcelJS.
- * Las celdas pueden ser: string, number, Date, { text } (hyperlink), { richText } (rich text).
- */
-function getCellValue(val) {
-  if (val === null || val === undefined) return null;
-  if (typeof val === 'object') {
-    if (Array.isArray(val.richText)) return val.richText.map(r => r.text).join('');
-    if (typeof val.text === 'string') return val.text;
-    if (val instanceof Date) return val;
-  }
-  return val;
-}
-
-/**
- * Lee un archivo .xlsx o .csv y devuelve un array de arrays (equivalente a
- * sheet_to_json con { header: 1 }).
- * - xlsx: parsea con ExcelJS (sin vulnerabilidades conocidas)
- * - csv:  parsea con texto nativo (sin dependencia adicional)
- */
-async function parseSpreadsheet(file) {
-  const ext = file.name.split('.').pop().toLowerCase();
-
-  if (ext === 'csv') {
-    const text = await file.text();
-    // Detectar separador dominante: ';' (europeo) o ',' (inglés)
-    const firstLine = text.split('\n')[0] || '';
-    const sep = (firstLine.split(';').length >= firstLine.split(',').length) ? ';' : ',';
-    return text
-      .split('\n')
-      .filter(line => line.trim())
-      .map(line =>
-        line.split(sep).map(cell =>
-          cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"')
-        )
-      );
-  }
-
-  // .xlsx
-  const data = await file.arrayBuffer();
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(data);
-  const worksheet = workbook.worksheets[0];
-  const json = [];
-  worksheet.eachRow(row => {
-    // row.values es 1-indexed (índice 0 = null), slice(1) lo normaliza a 0-indexed
-    json.push(row.values.slice(1).map(getCellValue));
-  });
-  return json;
-}
+import { parseSpreadsheet } from '../../utils/excelUtils';
 
 export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
   const [loading, setLoading] = useState(false);
