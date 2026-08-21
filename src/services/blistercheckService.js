@@ -593,20 +593,41 @@ export async function getMedicationStatusByCNs(cnList) {
 
 /**
  * Normaliza las cadenas de dosis de CIMA para extraer solo los valores numéricos y las unidades,
- * ignorando texto extra (ej. "16 mg betahistina" -> "16 mg").
+ * ignorando texto extra (ej. "16 mg betahistina" -> "16 mg") y unificando sinónimos 
+ * (ej. "100 microgramos" -> "100 mcg").
  */
 export function normalizeDosis(dosisStr) {
   if (!dosisStr) return "";
   const d = String(dosisStr).toLowerCase().trim();
-  // Captura números y unidades comunes
-  const parts = d.match(/[\d,\.]+\s*(mg|g|ml|mcg|µg|ui|u\.i\.|meq|mmol|unidades|%)/gi);
-  if (parts && parts.length > 0) {
-      return parts.map(p => 
-        p.toLowerCase()
-         .replace(/\s+/g, '') // quita todos los espacios "50 mg" -> "50mg"
-         .replace(/([a-z%]+)$/i, ' $1') // añade un espacio antes de la unidad "50mg" -> "50 mg"
-         .replace(',', '.') // unifica comas a puntos decimales
-      ).join(' / ');
+  
+  // Mapa de sinónimos para unificar variantes a una abreviatura estándar
+  const unitMap = {
+    'microgramos': 'mcg', 'microgramo': 'mcg', 'ug': 'mcg', 'µg': 'mcg', 'mcg': 'mcg',
+    'miligramos': 'mg', 'miligramo': 'mg', 'mg': 'mg',
+    'gramos': 'g', 'gramo': 'g', 'g': 'g',
+    'mililitros': 'ml', 'mililitro': 'ml', 'ml': 'ml',
+    'litros': 'l', 'litro': 'l', 'l': 'l',
+    'unidades': 'ui', 'unidad': 'ui', 'u.i.': 'ui', 'ui': 'ui', 'u': 'ui',
+    'mui': 'mui', 'meq': 'meq', 'mmol': 'mmol', '%': '%'
+  };
+
+  // Regex ordenado de más largo a más corto para no truncar palabras
+  const regex = /([\d,\.]+)\s*(microgramos|microgramo|mcg|µg|ug|miligramos|miligramo|mg|gramos|gramo|g|mililitros|mililitro|ml|litros|litro|l|unidades|unidad|u\.i\.|ui|mui|u|meq|mmol|%)/gi;
+  
+  let parts = [];
+  let match;
+  
+  // Extraemos todos los pares "Número Unidad" que encuentre
+  while ((match = regex.exec(d)) !== null) {
+    let num = match[1].replace(',', '.'); // Unificamos comas a puntos decimales
+    let unit = match[2].toLowerCase();
+    let stdUnit = unitMap[unit] || unit;  // Convertimos a su abreviatura oficial
+    
+    parts.push(`${num} ${stdUnit}`);
+  }
+
+  if (parts.length > 0) {
+      return parts.join(' / ');
   }
   return d;
 }
