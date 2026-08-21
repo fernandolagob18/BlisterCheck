@@ -635,10 +635,14 @@ export function normalizeDosis(dosisStr) {
 export async function findAlternatives(principioActivo, dosis, formaSimplificada) {
   if (!principioActivo) return [];
   
+  // Extraemos la primera palabra clave del principio activo (ej. "BETAHISTINA DIHIDROCLORURO" -> "BETAHISTINA")
+  // Esto permite agrupar todas las sales clínicas de la misma familia.
+  const basePrincipio = principioActivo.trim().split(' ')[0];
+
   let query = supabase
     .from(CATALOG_TABLE)
     .select('*, blistercheck_clasificacion_global!inner (*)')
-    .eq('principio_activo', principioActivo);
+    .ilike('principio_activo', `%${basePrincipio}%`);
     
   if (formaSimplificada) {
     query = query.eq('forma_simplificada', formaSimplificada);
