@@ -592,8 +592,25 @@ export async function getMedicationStatusByCNs(cnList) {
 }
 
 /**
- * Busca alternativas viables que no requieran reenvasado/reetiquetado
+ * Normaliza las cadenas de dosis de CIMA para extraer solo los valores numéricos y las unidades,
+ * ignorando texto extra (ej. "16 mg betahistina" -> "16 mg").
  */
+export function normalizeDosis(dosisStr) {
+  if (!dosisStr) return "";
+  const d = String(dosisStr).toLowerCase().trim();
+  // Captura números y unidades comunes
+  const parts = d.match(/[\d,\.]+\s*(mg|g|ml|mcg|µg|ui|u\.i\.|meq|mmol|unidades|%)/gi);
+  if (parts && parts.length > 0) {
+      return parts.map(p => 
+        p.toLowerCase()
+         .replace(/\s+/g, '') // quita todos los espacios "50 mg" -> "50mg"
+         .replace(/([a-z%]+)$/i, ' $1') // añade un espacio antes de la unidad "50mg" -> "50 mg"
+         .replace(',', '.') // unifica comas a puntos decimales
+      ).join(' / ');
+  }
+  return d;
+}
+
 export async function findAlternatives(principioActivo, dosis, formaSimplificada) {
   if (!principioActivo) return [];
   
@@ -602,13 +619,11 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
     .select('*, blistercheck_clasificacion_global!inner (*)')
     .eq('principio_activo', principioActivo);
     
-  if (dosis) {
-    query = query.eq('dosis', dosis);
-  }
   if (formaSimplificada) {
     query = query.eq('forma_simplificada', formaSimplificada);
   }
   
+  // Filtramos a nivel de base de datos los que son aptos (no necesitan manipulación)
   query = query.eq('blistercheck_clasificacion_global.requiere_reenvasado', false)
                .eq('blistercheck_clasificacion_global.requiere_reetiquetado', false);
                
@@ -618,7 +633,16 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
     return [];
   }
   
-  return data || [];
+  // Filtrado de dosis "inteligente" en cliente para saltarnos las erratas de CIMA
+  const normDosisTarget = normalizeDosis(dosis);
+  
+  const compatibles = (data || []).filter(med => {
+    if (!dosis) return true; // Si la búsqueda no exigía dosis, pasan todos
+    const normDosisMed = normalizeDosis(med.dosis);
+    return normDosisMed === normDosisTarget;
+  });
+  
+  return compatibles;
 }
 
 /**
