@@ -208,7 +208,8 @@ function MisLaboratorios({ onSelectMedicamento }) {
     }
   };
 
-  const handleRemoveMedFromPlatform = async (cn) => {
+  const handleRemoveMedFromPlatform = async (cn, nombre) => {
+    if (!window.confirm(`¿Seguro que deseas eliminar el medicamento ${nombre || cn} de la plataforma ${labSeleccionado.laboratorio}?`)) return;
     try {
       await removeMedicationFromPlatform(labSeleccionado.laboratorio, cn);
       
@@ -367,7 +368,7 @@ function MisLaboratorios({ onSelectMedicamento }) {
                       />
                       {med.is_manual_link && (
                         <button 
-                          onClick={(e) => { e.stopPropagation(); handleRemoveMedFromPlatform(med.cn); }}
+                          onClick={(e) => { e.stopPropagation(); handleRemoveMedFromPlatform(med.cn, med.nombre); }}
                           style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
                           title="Quitar de esta plataforma"
                         >

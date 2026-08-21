@@ -123,7 +123,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
       userChannel = supabase.channel(`detail-user-${medicamento.cn}`)
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'blistercheck_user_farmacia', filter: `cn=eq.${medicamento.cn}` },
+          { event: '*', schema: 'public', table: 'blistercheck_user_farmacia', filter: `cn=eq.${medicamento.cn},user_id=eq.${user.id}` },
           (payload) => {
             const newData = payload.new;
             if (newData && newData.user_id === user.id) {

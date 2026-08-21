@@ -48,7 +48,10 @@ export function AuthProvider({ children }) {
             setUser(session?.user ?? null);
             
             if (session?.user) {
-              await loadProfile(session.user.id);
+              // INITIAL_SESSION ya se manejó arriba con getSession(), evitamos carga doble
+              if (event !== 'INITIAL_SESSION') {
+                await loadProfile(session.user.id);
+              }
               if (event === 'SIGNED_IN') {
                 setAuthNotification({ type: 'success', message: '¡Sesión iniciada correctamente!' });
                 if (typeof window !== 'undefined' && window.location.hash) {

@@ -39,6 +39,19 @@ export function useRealtimeClasificaciones(cns, clasificacionMap, setClasificaci
           table: 'blistercheck_clasificacion_global'
         },
         (payload) => {
+          if (payload.eventType === 'DELETE') {
+            const oldData = payload.old;
+            if (!oldData || !oldData.cn) return;
+            if (cns.includes(oldData.cn)) {
+              setClasificacionMap(prevMap => {
+                const newMap = new Map(prevMap);
+                newMap.delete(oldData.cn);
+                return newMap;
+              });
+            }
+            return;
+          }
+
           const changedData = payload.new;
           if (!changedData || !changedData.cn) return;
 

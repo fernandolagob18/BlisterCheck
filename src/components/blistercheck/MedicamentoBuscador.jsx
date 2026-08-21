@@ -141,6 +141,8 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
   }, [query, showAvanzado]);
 
   // Ejecutar búsqueda avanzada
+  const advancedSearchIdRef = useRef(0);
+  
   const handleBuscarAvanzado = useCallback(async (filtrosOverride) => {
     // Evitar que el evento onClick se pase como filtrosOverride
     const f = (filtrosOverride && !filtrosOverride.nativeEvent && !filtrosOverride.type) ? filtrosOverride : filtros;
@@ -154,18 +156,27 @@ function MedicamentoBuscador({ onSelectMedicamento }) {
     setLoading(true);
     setError(null);
     setBuscadoAlgunaVez(true);
+    
+    advancedSearchIdRef.current += 1;
+    const currentSearchId = advancedSearchIdRef.current;
+
     try {
       const data = await searchAvanzado(f);
+      if (currentSearchId !== advancedSearchIdRef.current) return;
+      
       setResultados(data);
       setCurrentPage(1);
       fetchShortages(data);
       fetchClasificaciones(data);
     } catch (err) {
+      if (currentSearchId !== advancedSearchIdRef.current) return;
       setError('Error al buscar. Comprueba tu conexión.');
       setResultados([]);
       setShortageMap(new Map());
     } finally {
-      setLoading(false);
+      if (currentSearchId === advancedSearchIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [filtros, fetchShortages]);
 
