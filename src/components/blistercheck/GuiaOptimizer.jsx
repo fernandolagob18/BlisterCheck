@@ -142,6 +142,11 @@ export default function GuiaOptimizer() {
     setError(null);
 
     try {
+      // 0. Validación de tamaño (máximo 10 MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+      }
+
       // 1. Validación de seguridad (Magic Bytes)
       const isXlsx = file.name.toLowerCase().endsWith('.xlsx');
       if (isXlsx) {

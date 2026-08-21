@@ -49,9 +49,14 @@ export const authService = {
 
   // Update profile
   async updateProfile(userId, updates) {
+    if (!userId) throw new Error("No se ha proporcionado un ID de usuario válido para actualizar el perfil.");
+
+    const { nombre, hospital } = updates;
+    const safeUpdates = { nombre, hospital };
+
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(safeUpdates)
       .eq('id', userId)
       .select()
       .single();

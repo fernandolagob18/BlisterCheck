@@ -23,8 +23,8 @@ function escapeCsvField(val) {
   if (val === null || val === undefined) return '';
   let str = String(val);
   
-  // Prevención de CSV Injection (añade comilla simple si empieza con caracteres de fórmula)
-  if (/^[=\-@+]/.test(str)) {
+  // Prevención de CSV Injection (añade comilla simple si empieza con caracteres de fórmula o tabulador)
+  if (/^[=\-@+\t]/.test(str)) {
     str = "'" + str;
   }
 

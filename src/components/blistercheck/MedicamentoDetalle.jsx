@@ -418,6 +418,7 @@ function MedicamentoDetalle({ medicamento, clasificacion, onClasificacionGuardad
                 value={form.notas}
                 onChange={e => handleChange('notas', e.target.value)}
                 rows={4}
+                maxLength={2000}
               />
             </div>
 

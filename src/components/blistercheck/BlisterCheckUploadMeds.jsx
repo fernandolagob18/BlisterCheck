@@ -69,6 +69,11 @@ export default function BlisterCheckUploadMeds({ onClose, onUploadComplete }) {
     setMatchDetails(null);
 
     try {
+        // 0. Validación de tamaño (máximo 10 MB)
+        if (file.size > 10 * 1024 * 1024) {
+          throw new Error('El archivo es demasiado grande. El tamaño máximo permitido es 10 MB.');
+        }
+
         // 1. Validación de seguridad (Magic Bytes)
         // Evita que un ejecutable renombrado a .xlsx engañe al parser
         const isXlsx = file.name.toLowerCase().endsWith('.xlsx');

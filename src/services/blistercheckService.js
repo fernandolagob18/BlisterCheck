@@ -497,6 +497,8 @@ export async function getAlternativasSDMDU(medicamento) {
     query = query.eq('dosis_normalizada', normDosis);
   }
 
+  query = query.limit(100);
+
   const { data, error } = await query;
 
   if (error) throw error;
@@ -678,14 +680,18 @@ export function normalizeDosis(dosisStr) {
 
 
 export async function findAlternatives(principioActivo, dosis, formaSimplificada) {
-  console.log("--- INICIANDO BUSQUEDA DE ALTERNATIVAS ---");
-  console.log("1. Original - Principio:", principioActivo, "Dosis:", dosis, "Forma:", formaSimplificada);
-  
+  if (import.meta.env.DEV) {
+    console.log("--- INICIANDO BUSQUEDA DE ALTERNATIVAS ---");
+    console.log("1. Original - Principio:", principioActivo, "Dosis:", dosis, "Forma:", formaSimplificada);
+  }
+
   if (!principioActivo) return [];
-  
+
   const basePrincipio = principioActivo.trim().split(' ')[0];
   const normDosisTarget = normalizeDosis(dosis);
-  console.log("2. Buscando en DB por basePrincipio:", basePrincipio, "| dosis_normalizada:", normDosisTarget);
+  if (import.meta.env.DEV) {
+    console.log("2. Buscando en DB por basePrincipio:", basePrincipio, "| dosis_normalizada:", normDosisTarget);
+  }
 
   let query = supabase
     .from(CATALOG_TABLE)
@@ -696,21 +702,24 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
   if (dosis && normDosisTarget) {
     query = query.eq('dosis_normalizada', normDosisTarget);
   }
-    
+
   if (formaSimplificada) {
     query = query.eq('forma_simplificada', formaSimplificada);
   }
-  
+
   query = query.eq('blistercheck_clasificacion_global.requiere_reenvasado', false)
-               .eq('blistercheck_clasificacion_global.requiere_reetiquetado', false);
-               
+               .eq('blistercheck_clasificacion_global.requiere_reetiquetado', false)
+               .limit(100);
+
   const { data, error } = await query;
   if (error) {
     console.error('Error finding alternatives:', error);
     return [];
   }
 
-  console.log("3. Alternativas FINALES devueltas a la pantalla:", data?.length ?? 0);
+  if (import.meta.env.DEV) {
+    console.log("3. Alternativas FINALES devueltas a la pantalla:", data?.length ?? 0);
+  }
   return data || [];
 }
 
