@@ -638,11 +638,13 @@ export function normalizeDosis(dosisStr) {
 }
 
 export async function findAlternatives(principioActivo, dosis, formaSimplificada) {
+  console.log("--- INICIANDO BUSQUEDA DE ALTERNATIVAS ---");
+  console.log("1. Original - Principio:", principioActivo, "Dosis:", dosis, "Forma:", formaSimplificada);
+  
   if (!principioActivo) return [];
   
-  // Extraemos la primera palabra clave del principio activo (ej. "BETAHISTINA DIHIDROCLORURO" -> "BETAHISTINA")
-  // Esto permite agrupar todas las sales clínicas de la misma familia.
   const basePrincipio = principioActivo.trim().split(' ')[0];
+  console.log("2. Buscando en DB por basePrincipio:", basePrincipio);
 
   let query = supabase
     .from(CATALOG_TABLE)
@@ -653,7 +655,6 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
     query = query.eq('forma_simplificada', formaSimplificada);
   }
   
-  // Filtramos a nivel de base de datos los que son aptos (no necesitan manipulación)
   query = query.eq('blistercheck_clasificacion_global.requiere_reenvasado', false)
                .eq('blistercheck_clasificacion_global.requiere_reetiquetado', false);
                
@@ -663,15 +664,20 @@ export async function findAlternatives(principioActivo, dosis, formaSimplificada
     return [];
   }
   
-  // Filtrado de dosis "inteligente" en cliente para saltarnos las erratas de CIMA
+  console.log("3. Supabase ha devuelto:", data?.length, "candidatos aptos");
+  
   const normDosisTarget = normalizeDosis(dosis);
+  console.log("4. La dosis a igualar es (tras normalizar):", normDosisTarget);
   
   const compatibles = (data || []).filter(med => {
-    if (!dosis) return true; // Si la búsqueda no exigía dosis, pasan todos
+    if (!dosis) return true;
     const normDosisMed = normalizeDosis(med.dosis);
-    return normDosisMed === normDosisTarget;
+    const matches = normDosisMed === normDosisTarget;
+    console.log(` -> Evaluando CN ${med.cn} | Dosis CIMA: '${med.dosis}' | Normalizada: '${normDosisMed}' | Forma: ${med.forma_simplificada} | ¿Coincide?: ${matches}`);
+    return matches;
   });
   
+  console.log("5. Alternativas FINALES devueltas a la pantalla:", compatibles.length);
   return compatibles;
 }
 
